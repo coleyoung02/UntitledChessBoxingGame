@@ -18,9 +18,6 @@ public class ChessUI : MonoBehaviour
         board = chess.getBoard();
         buttons = this.GetComponentsInChildren<Button>();
         Array.Sort(buttons, new ButtonCompare());
-        for (int i = 0; i < buttons.Length; ++i) {
-            Debug.Log(buttons[i].name);
-        }
         //i think its fine to hard code 8 unless chess drops an update to the board size
         //this hasnt been updated in a few centuries so it should be fine
         for (int i = 0; i < 8; ++i) {
@@ -30,6 +27,9 @@ public class ChessUI : MonoBehaviour
         }
     }
 
+    public void pieceClicked(String name) {
+        Debug.Log("print");
+    }
     // Update is called once per frame
     void Update()
     {
