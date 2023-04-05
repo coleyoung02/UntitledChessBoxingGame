@@ -7,6 +7,11 @@ public struct Move {
     public int endRow;
     public int endCol;
 
+    //if start row is negative, white is castling
+    //if start col is negative, black is castling
+    //if end row is negative, it is queenside
+    //if end col is negative, it is kingside
+    
     public Move(int startRow, int startCol, int endRow, int endCol)
     {
         this.startRow = startRow;
@@ -19,8 +24,13 @@ public struct Move {
 public class ChessState
 {
     public ChessState() {
-        this.board = new int[8][];
         this.init_new_board();
+    }
+
+    //whoever gets this array should really not touch it
+    //maybe i should make a copy
+    public int[][] getBoard() {
+        return this.board;
     }
 
     public void playMove() {
@@ -56,8 +66,9 @@ public class ChessState
     private const int wK = 10;
     private const int bK = 11;
     private static readonly int[][] knightPossiblities = {new int[] {1, 2}, new int[] {2, 1}, new int[] {-1,-2}, new int[] {-2,-1}, 
-                                new int[] {-1,2}, new int[] {-2,1}, new int[] {1, -2}, new int[] {2, -1}};
+                                new int[] {-1,2}, new int[] {-2,1}, new int[] {1,-2}, new int[] {2,-1}};
     private static readonly int[][] bishopDirs = {new int[] {1,1}, new int[] {1,-1}, new int[] {-1,1}, new int[] {-1,-1}};
+    private static readonly int[][] rookDirs = {new int[] {0,1}, new int[] {0,-1}, new int[] {-1,0}, new int[] {-1,0}};
     // board[row][col]
     private bool whiteCanCastleQS;
     private bool blackCanCastleQS;
@@ -66,13 +77,18 @@ public class ChessState
 
     private int[][] board;
     //may be more efficient as a linked list
-    private List<Move> legalMoves;
+    private List<Move> potentialMoves;
+    private List<Move> realMoves;
     //relevant for en passant worry about this later
     //row is not relevant as it should always be 5 for white moving and 2 for black moving
     private int epCol;
     
 
     private void init_new_board() {
+        board = new int[8][];
+        for (int i = 0; i < 8; i++) {
+            board[i] = new int[8];
+        }
         //empty squares
         for (int i = 2; i < 6; ++i) {
             for (int j = 0; j < 8; ++j) {
@@ -111,23 +127,55 @@ public class ChessState
         board[7][4] = wK;
     }
 
-    private bool moveIsLegal() {
-        return false;
+    private void onMove(int color) {
+        potentialMoves = possibleMoves(color);
+        realMoves = legalMoves(color);
+        color = (color + 1) % 2;
     }
 
-    // 3d array :(
-    // array of moves where each move is an array of the form
-    // [[starting square] [ending square1, ending square2, ...]]
-    // not checking if it is legal, just if the piece would be allowed to move there
-    // with no respect to checks
-    private List<Move> possibleMoves(int color) {
+    private List<Move> legalMoves(int color) {
         return null;
+    }
+
+    private List<Move> possibleMoves(int color) {
+        List<Move> moves = new List<Move>();
+        for (int i = 0; i < 8; ++i) {
+            for (int j = 0; j < 8; ++j) {
+                moves.AddRange(squareMoves(i, j, color));
+            }
+        }
+        return moves;
     }
 
     // for moves: color coded as 0 for white, 1 for black
     // pass in starting row, starting col, and color
     // should be the job of whoever called it to handle getting back null
 
+    private List<Move> squareMoves(int row, int col, int color) {
+        int square = board[row][col];
+        if (square < 0 || square % 2 != color) {
+            return new List<Move>();
+        }
+        if (square == bp || square == wp) {
+            return pawnMoves(row, col, color);
+        }
+        else if (square == bk || square == wk) {
+            return knightMoves(row, col, color);
+        }
+        else if (square == br || square == wr) {
+            return rookMoves(row, col, color);
+        }
+        else if (square == bb || square == wb) {
+            return bishopMoves(row, col, color);
+        }
+        else if (square == bQ || square == wQ) {
+            return queenMoves(row, col, color);
+        }
+        else if (square == bK || square == wK) {
+            return kingMoves(row, col, color);
+        }
+        return new List<Move>();
+    }
 
     private List<Move> pawnMoves(int row, int col, int color) {
         List<Move> moves = new List<Move>();
@@ -207,22 +255,118 @@ public class ChessState
 
     private List<Move> bishopMoves(int row, int col, int color) {
         List<Move> moves = new List<Move>();
-        
-        int steps;
         int newRow;
         int newCol;
         //for each direction we can go, keep adding moves until 
         //1. we hit one of our pieces,  don't add that square
         //2. we hit an enemy piece,     do add that square
         foreach (int[] dir in bishopDirs) {
-            steps = 1;
             newRow = row + dir[0];
             newCol = col + dir[1];
             while (newRow < 8 && newRow >= 0 && newCol < 8 && newCol >= 0) {
-
+                if (board[newRow][newCol] < 0) {
+                    moves.Add(new Move(row, col, newRow, newCol));
+                    newRow = newRow + dir[0];
+                    newCol = newCol + dir[1];
+                }
+                else if (board[newRow][newCol] % 2 != color) {
+                    moves.Add(new Move(row, col, newRow, newCol));
+                    break;
+                }
+                else {
+                    break;
+                }
             }
         }
-        return null;
+        return moves;
     }
 
+    //castling is technically a king move so not needed here
+    private List<Move> rookMoves(int row, int col, int color) {
+        List<Move> moves = new List<Move>();
+        int newRow;
+        int newCol;
+        //for each direction we can go, keep adding moves until 
+        //1. we hit one of our pieces,  don't add that square
+        //2. we hit an enemy piece,     do add that square
+
+        foreach (int[] dir in rookDirs) {
+            newRow = row + dir[0];
+            newCol = col + dir[1];
+            while (newRow < 8 && newRow >= 0 && newCol < 8 && newCol >= 0) {
+                if (board[newRow][newCol] < 0) {
+                    moves.Add(new Move(row, col, newRow, newCol));
+                    newRow = newRow + dir[0];
+                    newCol = newCol + dir[1];
+                }
+                else if (board[newRow][newCol] % 2 != color) {
+                    moves.Add(new Move(row, col, newRow, newCol));
+                    break;
+                }
+                else {
+                    break;
+                }
+            }
+        }
+        return moves;
+    }
+
+    private List<Move> queenMoves(int row, int col, int color) {
+        List<Move> moves = new List<Move>();
+        moves.AddRange(bishopMoves(row, col, color));
+        moves.AddRange(rookMoves(row, col, color));
+        return moves;
+    }
+
+    //possibly a terrible idea
+    private List<Move> kingMoves(int row, int col, int color) {
+        List<Move> moves = new List<Move>();
+        int newRow;
+        int newCol;
+        foreach (int[] dir in bishopDirs) {
+            newRow = row + dir[0];
+            newCol = col + dir[1];
+            if (newRow < 8 && newRow >= 0 && newCol < 8 && newCol >= 0) {
+                if (board[newRow][newCol] < 0 || board[newRow][newCol] % 2 != color) {
+                    moves.Add(new Move(row, col, newRow, newCol));
+                }
+            }
+        }
+        foreach (int[] dir in rookDirs) {
+            newRow = row + dir[0];
+            newCol = col + dir[1];
+            if (newRow < 8 && newRow >= 0 && newCol < 8 && newCol >= 0) {
+                if (board[newRow][newCol] < 0 || board[newRow][newCol] % 2 != color) {
+                    moves.Add(new Move(row, col, newRow, newCol));
+                }
+            }
+        }
+        //if start row is negative, white is castling
+        //if start col is negative, black is castling
+        //if end row is negative, it is queenside
+        //if end col is negative, it is kingside
+        //white
+        if (color == 0) {
+            if (whiteCanCastleKS) {
+                moves.Add(new Move(-1, 0, 0, -1));
+            }
+            if (whiteCanCastleQS) {
+                moves.Add(new Move(-1, 0, -1, 0));
+            }
+        }
+        //black
+        if (color == 1) {
+            if (blackCanCastleKS) {
+                moves.Add(new Move(0, -1, 0, -1));
+            }
+            if (blackCanCastleQS) {
+                moves.Add(new Move(0, -1, -1, 0));
+            }
+        }
+        return moves;
+    }
+
+    private bool isLegal(Move m) {
+        return false;
+    }
 }
