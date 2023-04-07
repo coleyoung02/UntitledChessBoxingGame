@@ -33,8 +33,9 @@ public class ChessState
         return this.board;
     }
 
-    public void playMove() {
-
+    public void playMove(int row, int col, int newRow, int newCol) {
+        board[newRow][newCol] = board[row][col];
+        board[row][col] = ee;
     }
 
     public List<Move> getLegalMoves() {
