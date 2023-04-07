@@ -52,12 +52,14 @@ public class ChessUI : MonoBehaviour
         }
         else
         {
-            chess.playMove(selectedRow, selectedCol, row, col);
+            if (chess.playMove(selectedRow, selectedCol, row, col))
+            {
+                refreshUI();
+            }
             selectedCol = -1;
             selectedRow = -1;
             Debug.Log(selectedRow + " " + selectedCol);
             Debug.Log(row + " " + col);
-            refreshUI();
         }
     }
 

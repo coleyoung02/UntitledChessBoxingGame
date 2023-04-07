@@ -19,6 +19,7 @@ public struct Move {
         this.endRow = endRow;
         this.endCol = endCol;
     }
+
 }
 
 public class ChessState
@@ -33,16 +34,31 @@ public class ChessState
         return this.board;
     }
 
-    public void playMove(int row, int col, int newRow, int newCol) {
-        board[newRow][newCol] = board[row][col];
-        board[row][col] = ee;
+    public bool playMove(int row, int col, int newRow, int newCol) {
+        List<Move> possible = squareMoves(row, col, black);
+        bool canMove = false;
+        for (int i = 0; i < possible.Count; i++)
+        {
+            if (possible[i].startCol == col && possible[i].startRow == row
+                && possible[i].endCol == newCol && possible[i].endRow == newRow)
+            {
+                canMove = true;
+            }
+        }
+        if (canMove)
+        {
+            board[newRow][newCol] = board[row][col];
+            board[row][col] = ee;
+            return true;
+        }
+        return false;
     }
 
     public List<Move> getLegalMoves() {
         return null;
     }
 
-    
+
     // piece format:
     // even  : white
     // odd   : black
@@ -53,6 +69,8 @@ public class ChessState
     // 6/7   : rook
     // 8/9   : queen
     // 10/11 : king
+    private const int white = 0;
+    private const int black = 1;
     private const int ee = -1;
     private const int wp = 0;
     private const int bp = 1;
@@ -69,7 +87,7 @@ public class ChessState
     private static readonly int[][] knightPossiblities = {new int[] {1, 2}, new int[] {2, 1}, new int[] {-1,-2}, new int[] {-2,-1}, 
                                 new int[] {-1,2}, new int[] {-2,1}, new int[] {1,-2}, new int[] {2,-1}};
     private static readonly int[][] bishopDirs = {new int[] {1,1}, new int[] {1,-1}, new int[] {-1,1}, new int[] {-1,-1}};
-    private static readonly int[][] rookDirs = {new int[] {0,1}, new int[] {0,-1}, new int[] {-1,0}, new int[] {-1,0}};
+    private static readonly int[][] rookDirs = {new int[] {0,1}, new int[] {0,-1}, new int[] {1,0}, new int[] {-1,0}};
     // board[row][col]
     private bool whiteCanCastleQS;
     private bool blackCanCastleQS;
@@ -181,23 +199,23 @@ public class ChessState
     private List<Move> pawnMoves(int row, int col, int color) {
         List<Move> moves = new List<Move>();
         if (color == 0) {
-            if (board[row+1][col] < 0) {
-                moves.Add(new Move(row, col, row+1, col));
-                //checks on pawns first move only
-                if (row == 1) {
-                    if (board[row+2][col] < 0) {
-                        moves.Add(new Move(row, col, row+2, col));
-                    }
-                }
-            }
-        }
-        else {
             if (board[row-1][col] < 0) {
                 moves.Add(new Move(row, col, row-1, col));
                 //checks on pawns first move only
                 if (row == 6) {
                     if (board[row-2][col] < 0) {
                         moves.Add(new Move(row, col, row-2, col));
+                    }
+                }
+            }
+        }
+        else {
+            if (board[row+1][col] < 0) {
+                moves.Add(new Move(row, col, row+1, col));
+                //checks on pawns first move only
+                if (row == 1) {
+                    if (board[row+2][col] < 0) {
+                        moves.Add(new Move(row, col, row+2, col));
                     }
                 }
             }
@@ -212,10 +230,10 @@ public class ChessState
         List<Move> moves = new List<Move>();
         int delta;
         if (color == 0) {
-            delta = 1;
+            delta = -1;
         }
         else {
-            delta = -1;
+            delta = 1;
         }
         if (col == 0) {
             if (board[row+delta][col+1] >= 0 && board[row+delta][col+1] % 2 != color) {
@@ -223,12 +241,12 @@ public class ChessState
             }
         }
         else if (col == 7) {
-            if (board[row+delta][col-1] >= 0 && board[row+delta][col+1] % 2 != color) {
+            if (board[row+delta][col-1] >= 0 && board[row+delta][col-1] % 2 != color) {
                 moves.Add(new Move(row, col, row+delta, col+1));
             }
         }
         else {
-            if (board[row+delta][col-1] >= 0 && board[row+delta][col+1] % 2 != color) {
+            if (board[row+delta][col-1] >= 0 && board[row+delta][col-1] % 2 != color) {
                 moves.Add(new Move(row, col, row+delta, col+1));
             }
             if (board[row+delta][col+1] >= 0 && board[row+delta][col+1] % 2 != color) {
