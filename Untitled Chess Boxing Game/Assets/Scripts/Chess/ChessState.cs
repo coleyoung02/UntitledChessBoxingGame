@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 public struct Move {
     public int startRow;
@@ -34,8 +36,8 @@ public class ChessState
         return this.board;
     }
 
-    public bool playMove(int row, int col, int newRow, int newCol) {
-        List<Move> possible = squareMoves(row, col, black);
+    public bool playMove(int row, int col, int newRow, int newCol, int color) {
+        List<Move> possible = squareMoves(row, col, color);
         bool canMove = false;
         for (int i = 0; i < possible.Count; i++)
         {
@@ -50,6 +52,11 @@ public class ChessState
             board[newRow][newCol] = board[row][col];
             board[row][col] = ee;
             return true;
+        }
+        else if (isCastling(row, col, newRow, newCol, color))
+        {
+            Debug.Log(castleType.startRow + " " + castleType.startCol + " " + castleType.endRow + " " + castleType.endCol);
+            return tryCastling(castleType);
         }
         return false;
     }
@@ -101,6 +108,13 @@ public class ChessState
     //relevant for en passant worry about this later
     //row is not relevant as it should always be 5 for white moving and 2 for black moving
     private int epCol;
+
+    private int wkRow;
+    private int wkCol;
+    private int bkRow;
+    private int bkCol;
+
+    private Move castleType;
     
 
     private void init_new_board() {
@@ -143,7 +157,15 @@ public class ChessState
         board[7][3] = wQ;
         //kings
         board[0][4] = bK;
+        bkRow = 0;
+        bkCol = 4;
         board[7][4] = wK;
+        wkRow = 7;
+        wkCol = 4;
+        whiteCanCastleKS = true;
+        whiteCanCastleQS = true;
+        blackCanCastleKS = true;
+        blackCanCastleQS = true;
     }
 
     private void onMove(int color) {
@@ -198,7 +220,7 @@ public class ChessState
 
     private List<Move> pawnMoves(int row, int col, int color) {
         List<Move> moves = new List<Move>();
-        if (color == 0) {
+        if (color == white) {
             if (board[row-1][col] < 0) {
                 moves.Add(new Move(row, col, row-1, col));
                 //checks on pawns first move only
@@ -229,7 +251,7 @@ public class ChessState
         //if it's on the edge, dont go out of bounds
         List<Move> moves = new List<Move>();
         int delta;
-        if (color == 0) {
+        if (color == white) {
             delta = -1;
         }
         else {
@@ -242,12 +264,12 @@ public class ChessState
         }
         else if (col == 7) {
             if (board[row+delta][col-1] >= 0 && board[row+delta][col-1] % 2 != color) {
-                moves.Add(new Move(row, col, row+delta, col+1));
+                moves.Add(new Move(row, col, row+delta, col-1));
             }
         }
         else {
             if (board[row+delta][col-1] >= 0 && board[row+delta][col-1] % 2 != color) {
-                moves.Add(new Move(row, col, row+delta, col+1));
+                moves.Add(new Move(row, col, row+delta, col-1));
             }
             if (board[row+delta][col+1] >= 0 && board[row+delta][col+1] % 2 != color) {
                 moves.Add(new Move(row, col, row+delta, col+1));
@@ -366,19 +388,19 @@ public class ChessState
         //if end col is negative, it is kingside
         //white
         if (color == 0) {
-            if (whiteCanCastleKS) {
+            if (whiteCanCastleKS && board[7][6] < 0 && board[7][5] < 0) {
                 moves.Add(new Move(-1, 0, 0, -1));
             }
-            if (whiteCanCastleQS) {
+            if (whiteCanCastleQS && board[7][1] < 0 && board[7][2] < 0 && board[7][3] < 0) {
                 moves.Add(new Move(-1, 0, -1, 0));
             }
         }
         //black
         if (color == 1) {
-            if (blackCanCastleKS) {
+            if (blackCanCastleKS && board[0][6] < 0 && board[0][5] < 0) {
                 moves.Add(new Move(0, -1, 0, -1));
             }
-            if (blackCanCastleQS) {
+            if (blackCanCastleQS && board[0][1] < 0 && board[0][2] < 0 && board[0][3] < 0) {
                 moves.Add(new Move(0, -1, -1, 0));
             }
         }
@@ -388,4 +410,79 @@ public class ChessState
     private bool isLegal(Move m) {
         return false;
     }
-}
+
+    private bool isCastling(int row, int col, int newRow, int newCol, int color)
+    {
+        if (color == white)
+        {
+            if (row == 7 && col == 4 && newRow == 7 && newCol == 6 && wkRow == 7 && wkCol == 4)
+            {
+                castleType = new Move(-1, 0, 0, -1);
+                return true;
+            }
+            if (row == 7 && col == 4 && newRow == 7 && newCol == 2 && wkRow == 7 && wkCol == 4)
+            {
+                castleType = new Move(-1, 0, -1, 0);
+                return true;
+            }
+        }
+        else
+        {
+            if (row == 0 && col == 4 && newRow == 0 && newCol == 6 && bkRow == 0 && bkCol == 4)
+            {
+                castleType = new Move(0, -1, 0, -1);
+                return true;
+            }
+            if (row == 0 && col == 4 && newRow == 0 && newCol == 2 && bkRow == 0 && bkCol == 4)
+            {
+                castleType = new Move(0, -1, -1, 0);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private bool tryCastling(Move m)
+    {
+        if (m.startRow == -1)
+        {
+            if (m.endCol == -1 && whiteCanCastleKS)
+            {
+                board[7][4] = -1;
+                board[7][7] = -1;
+                board[7][6] = wK;
+                board[7][5] = wr;
+                return true;
+            }
+            if (m.endRow == -1 && whiteCanCastleQS)
+            {
+                board[7][4] = -1;
+                board[7][0] = -1;
+                board[7][2] = wK;
+                board[7][3] = wr;
+                return true;
+            }
+        }
+        if (m.startCol == -1)
+        {
+            if (m.endCol == -1 && blackCanCastleKS)
+            {
+                board[0][4] = -1;
+                board[0][7] = -1;
+                board[0][6] = bK;
+                board[0][5] = br;
+                return true;
+            }
+            if (m.endRow == -1 && blackCanCastleQS)
+            {
+                board[0][4] = -1;
+                board[0][0] = -1;
+                board[0][2] = bK;
+                board[0][3] = br;
+                return true;
+            }
+        }
+        return false;
+    }
+
+ }

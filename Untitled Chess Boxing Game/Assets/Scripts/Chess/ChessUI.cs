@@ -22,9 +22,14 @@ public class ChessUI : MonoBehaviour
     private int selectedRow;
     private int selectedCol;
 
+
+    //for testing only, can (and should) be deleted once ai is implemented
+    private int color;
+
     // Start is called before the first frame update
     void Start()
     {
+        color = 0;
         selectedRow = -1;
         selectedCol = -1;
         chess = new ChessState();
@@ -43,7 +48,6 @@ public class ChessUI : MonoBehaviour
         if (selectedRow < 0)
         {
             int piece = board[row][col];
-            Debug.Log(board[row][col]);
             if (piece >= 0)
             {
                 selectedRow = row;
@@ -52,14 +56,13 @@ public class ChessUI : MonoBehaviour
         }
         else
         {
-            if (chess.playMove(selectedRow, selectedCol, row, col))
+            if (chess.playMove(selectedRow, selectedCol, row, col, color))
             {
+                color = (color + 1) % 2;
                 refreshUI();
             }
             selectedCol = -1;
             selectedRow = -1;
-            Debug.Log(selectedRow + " " + selectedCol);
-            Debug.Log(row + " " + col);
         }
     }
 
