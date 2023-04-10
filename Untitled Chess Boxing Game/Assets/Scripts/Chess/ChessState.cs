@@ -59,13 +59,17 @@ public class ChessState
             {
                 doKingMoveUpdates(newRow, newCol, black);
             }
+            else
+            {
+                doCornerUpdates(row, col);
+            }
             board[newRow][newCol] = board[row][col];
             board[row][col] = ee;
             return true;
         }
         else if (isCastling(row, col, newRow, newCol, color))
         {
-            Debug.Log(castleType.startRow + " " + castleType.startCol + " " + castleType.endRow + " " + castleType.endCol);
+            
             return tryCastling(castleType);
         }
         return false;
@@ -488,6 +492,32 @@ public class ChessState
             blackCanCastleQS = false;
         }
         return true;
+    }
+
+    private void doCornerUpdates(int row, int col)
+    {
+        if (row == 7)
+        {
+            if (col == 0)
+            {
+                whiteCanCastleKS = false;
+            }
+            else if (col == 7)
+            {
+                whiteCanCastleQS = false;
+            }
+        }
+        else if (row == 0)
+        {
+            if (col == 0)
+            {
+                blackCanCastleKS = false;
+            }
+            else if (col == 7)
+            {
+                blackCanCastleQS = false;
+            }
+        }
     }
 
     private bool tryCastling(Move m)
