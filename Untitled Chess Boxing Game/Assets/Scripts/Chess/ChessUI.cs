@@ -19,6 +19,7 @@ public class ChessUI : MonoBehaviour
     private int[][] board;
     private Button[] buttons;
     [SerializeField] private Sprite[] sprites;
+    [SerializeField] private Sprite[] highlighted;
     private int selectedRow;
     private int selectedCol;
 
@@ -48,22 +49,31 @@ public class ChessUI : MonoBehaviour
         if (selectedRow < 0)
         {
             int piece = board[row][col];
-            if (piece >= 0)
+            if (piece >= 0 && piece % 2 == color)
             {
                 selectedRow = row;
                 selectedCol = col;
+                //refreshUI();
             }
         }
         else
         {
-            if (chess.playMove(selectedRow, selectedCol, row, col, color))
+            if (board[row][col] % 2 == color)
             {
-                color = (color + 1) % 2;
-                refreshUI();
+                selectedRow = row;
+                selectedCol = col;
             }
-            selectedCol = -1;
-            selectedRow = -1;
+            else
+            {
+                if (chess.playMove(selectedRow, selectedCol, row, col, color))
+                {
+                    color = (color + 1) % 2;
+                }
+                selectedCol = -1;
+                selectedRow = -1;
+            }
         }
+        refreshUI();
     }
 
     // Update is called once per frame
@@ -78,7 +88,14 @@ public class ChessUI : MonoBehaviour
         {
             for (int j = 0; j < 8; ++j)
             {
-                buttons[i * 8 + j].GetComponent<Image>().sprite = sprites[board[i][j] + 1];
+                if (selectedRow >= 0 && selectedRow == i && selectedCol == j)
+                {
+                    buttons[i * 8 + j].GetComponent<Image>().sprite = highlighted[board[i][j] + 1];
+                }
+                else
+                {
+                    buttons[i * 8 + j].GetComponent<Image>().sprite = sprites[board[i][j] + 1];
+                }
             }
         }
     }

@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//replacing lists with arrays will make it more time and space efficient if needed
+//switching ints to sbytes will make it more space efficient (up to 4 times) if needed but less stable (not CLS compliant)
 public struct Move {
     public int startRow;
     public int startCol;
@@ -49,6 +51,14 @@ public class ChessState
         }
         if (canMove)
         {
+            if (board[row][col] == wK)
+            {
+                doKingMoveUpdates(newRow, newCol, white);
+            }
+            else if (board[row][col] == bK)
+            {
+                doKingMoveUpdates(newRow, newCol, black);
+            }
             board[newRow][newCol] = board[row][col];
             board[row][col] = ee;
             return true;
@@ -61,7 +71,26 @@ public class ChessState
         return false;
     }
 
+    public bool inCheck(int color)
+    {
+        if (color == white)
+        {
+            return squareAttacked(wkRow, wkCol, white) > 0;
+        }
+        else
+        {
+            return squareAttacked(bkRow, bkCol, black) > 0;
+        }
+    }
+
     public List<Move> getLegalMoves() {
+        for (int i = potentialMoves.Count; i >= 0; --i)
+        {
+            if (false)
+            {
+
+            }
+        }
         return null;
     }
 
@@ -153,15 +182,15 @@ public class ChessState
         board[7][2] = wb;
         board[7][5] = wb;
         //queens
-        board[0][3] = bQ;
-        board[7][3] = wQ;
+        board[0][4] = bQ;
+        board[7][4] = wQ;
         //kings
-        board[0][4] = bK;
+        board[0][3] = bK;
         bkRow = 0;
-        bkCol = 4;
-        board[7][4] = wK;
+        bkCol = 3;
+        board[7][3] = wK;
         wkRow = 7;
-        wkCol = 4;
+        wkCol = 3;
         whiteCanCastleKS = true;
         whiteCanCastleQS = true;
         blackCanCastleKS = true;
@@ -388,19 +417,19 @@ public class ChessState
         //if end col is negative, it is kingside
         //white
         if (color == 0) {
-            if (whiteCanCastleKS && board[7][6] < 0 && board[7][5] < 0) {
+            if (whiteCanCastleKS && board[7][1] < 0 && board[7][2] < 0) {
                 moves.Add(new Move(-1, 0, 0, -1));
             }
-            if (whiteCanCastleQS && board[7][1] < 0 && board[7][2] < 0 && board[7][3] < 0) {
+            if (whiteCanCastleQS && board[7][4] < 0 && board[7][5] < 0 && board[7][6] < 0) {
                 moves.Add(new Move(-1, 0, -1, 0));
             }
         }
         //black
         if (color == 1) {
-            if (blackCanCastleKS && board[0][6] < 0 && board[0][5] < 0) {
+            if (blackCanCastleKS && board[7][1] < 0 && board[7][2] < 0) {
                 moves.Add(new Move(0, -1, 0, -1));
             }
-            if (blackCanCastleQS && board[0][1] < 0 && board[0][2] < 0 && board[0][3] < 0) {
+            if (blackCanCastleQS && board[7][4] < 0 && board[7][5] < 0 && board[7][6] < 0) {
                 moves.Add(new Move(0, -1, -1, 0));
             }
         }
@@ -415,12 +444,12 @@ public class ChessState
     {
         if (color == white)
         {
-            if (row == 7 && col == 4 && newRow == 7 && newCol == 6 && wkRow == 7 && wkCol == 4)
+            if (row == 7 && col == 3 && newRow == 7 && newCol == 1 && wkRow == 7 && wkCol == 3)
             {
                 castleType = new Move(-1, 0, 0, -1);
                 return true;
             }
-            if (row == 7 && col == 4 && newRow == 7 && newCol == 2 && wkRow == 7 && wkCol == 4)
+            if (row == 7 && col == 3 && newRow == 7 && newCol == 5 && wkRow == 7 && wkCol == 3)
             {
                 castleType = new Move(-1, 0, -1, 0);
                 return true;
@@ -428,12 +457,12 @@ public class ChessState
         }
         else
         {
-            if (row == 0 && col == 4 && newRow == 0 && newCol == 6 && bkRow == 0 && bkCol == 4)
+            if (row == 0 && col == 3 && newRow == 0 && newCol == 1 && bkRow == 0 && bkCol == 3)
             {
                 castleType = new Move(0, -1, 0, -1);
                 return true;
             }
-            if (row == 0 && col == 4 && newRow == 0 && newCol == 2 && bkRow == 0 && bkCol == 4)
+            if (row == 0 && col == 3 && newRow == 0 && newCol == 5 && bkRow == 0 && bkCol == 3)
             {
                 castleType = new Move(0, -1, -1, 0);
                 return true;
@@ -442,24 +471,49 @@ public class ChessState
         return false;
     }
 
+    private bool doKingMoveUpdates(int newRow, int newCol, int color)
+    {
+        if (color == white)
+        {
+            wkRow = newRow;
+            wkCol = newCol;
+            whiteCanCastleKS = false;
+            whiteCanCastleQS = false;
+        }
+        else
+        {
+            bkRow = newRow;
+            bkCol = newCol;
+            blackCanCastleKS = false;
+            blackCanCastleQS = false;
+        }
+        return true;
+    }
+
     private bool tryCastling(Move m)
     {
         if (m.startRow == -1)
         {
             if (m.endCol == -1 && whiteCanCastleKS)
             {
-                board[7][4] = -1;
-                board[7][7] = -1;
-                board[7][6] = wK;
-                board[7][5] = wr;
+                board[7][3] = -1;
+                board[7][0] = -1;
+                board[7][1] = wK;
+                board[7][2] = wr;
+                wkCol = 1;
+                whiteCanCastleKS = false;
+                whiteCanCastleQS = false;
                 return true;
             }
             if (m.endRow == -1 && whiteCanCastleQS)
             {
-                board[7][4] = -1;
-                board[7][0] = -1;
-                board[7][2] = wK;
-                board[7][3] = wr;
+                board[7][3] = -1;
+                board[7][7] = -1;
+                board[7][5] = wK;
+                board[7][4] = wr;
+                wkCol = 5;
+                whiteCanCastleKS = false;
+                whiteCanCastleQS = false;
                 return true;
             }
         }
@@ -467,22 +521,53 @@ public class ChessState
         {
             if (m.endCol == -1 && blackCanCastleKS)
             {
-                board[0][4] = -1;
-                board[0][7] = -1;
-                board[0][6] = bK;
-                board[0][5] = br;
+                board[0][3] = -1;
+                board[0][0] = -1;
+                board[0][1] = bK;
+                board[0][2] = br;
+                bkCol = 1;
+                blackCanCastleKS = false;
+                blackCanCastleQS = false;
                 return true;
             }
             if (m.endRow == -1 && blackCanCastleQS)
             {
-                board[0][4] = -1;
-                board[0][0] = -1;
-                board[0][2] = bK;
-                board[0][3] = br;
+                board[0][3] = -1;
+                board[0][7] = -1;
+                board[0][5] = bK;
+                board[0][4] = br;
+                bkCol = 5;
+                blackCanCastleKS = false;
+                blackCanCastleQS = false;
                 return true;
             }
         }
         return false;
+    }
+
+    //determine if square can be attacked by opposite color of what is passed in
+    //return num of attackers
+    private int squareAttacked(int row, int col, int color)
+    {
+        int count = 0;
+        for (int i = 0; i < 8; ++i)
+        {
+            for (int j = 0; j < 8; ++j)
+            {
+                if (board[i][j] >= 0 && board[i][j] % 2 != color)
+                {
+                    List<Move> attackerMoves = squareMoves(row, col, (color + 1) % 2);
+                    for (int k = 0; k < attackerMoves.Count; ++k)
+                    {
+                        if (attackerMoves[k].endRow == row && attackerMoves[k].endCol == col)
+                        {
+                            ++count;
+                        }
+                    }
+                }
+            }
+        }
+        return count;
     }
 
  }
