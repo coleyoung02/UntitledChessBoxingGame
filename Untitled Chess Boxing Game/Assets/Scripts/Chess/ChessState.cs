@@ -51,7 +51,7 @@ public class ChessState
         bool canMove = false;
         for (int i = 0; i < possible.Count; i++)
         {
-            Debug.Log(moveStr(possible[i]));
+            //Debug.Log("possible move: " + moveStr(possible[i]));
             if (possible[i].startCol == col && possible[i].startRow == row
                 && possible[i].endCol == newCol && possible[i].endRow == newRow)
             {
@@ -81,6 +81,20 @@ public class ChessState
             return tryCastling(castleType);
         }
         return false;
+    }
+
+    public void promote(int col, int piece)
+    {
+        int row = -1;
+        if (piece % 2 == white)
+        {
+            row = 0;
+        }
+        else
+        {
+            row = 7;
+        }
+        board[row][col] = piece;
     }
 
     public bool inCheck(int color)
@@ -125,6 +139,9 @@ public class ChessState
     private const int bQ = 9;
     private const int wK = 10;
     private const int bK = 11;
+    //this shouldn't ever be on the board outside of the 
+    //square attacker count function being called with true for the default arg
+    private const int placeHolderPiece = 12;
     private static readonly int[][] knightPossiblities = {new int[] {1, 2}, new int[] {2, 1}, new int[] {-1,-2}, new int[] {-2,-1}, 
                                 new int[] {-1,2}, new int[] {-2,1}, new int[] {1,-2}, new int[] {2,-1}};
     private static readonly int[][] bishopDirs = {new int[] {1,1}, new int[] {1,-1}, new int[] {-1,1}, new int[] {-1,-1}};
@@ -221,7 +238,6 @@ public class ChessState
             //ex. at -1 or 9
             if (m.startRow < 0 || m.startCol < 0)
             {
-                Debug.Log("Checking castling move " + moveStr(m));
                 if(!isCastlingSafe(m))
                 {
                     potentialMoves.RemoveAt(i);
@@ -230,8 +246,7 @@ public class ChessState
             //using negative indicies here may kill everything
             else if (board[m.startRow][m.startCol] - color == wK)
             {
-                //need to deal with castling
-                if (squareAttacked(m.endRow, m.endCol, color) > 0)
+                if (squareAttacked(m.endRow, m.endCol, color, true, m.startRow, m.startCol) > 0)
                 {
                     potentialMoves.RemoveAt(i);
                 }
@@ -560,7 +575,6 @@ public class ChessState
 
     private bool tryCastling(Move m)
     {
-        Debug.Log("Doing castling: " + moveStr(m));
         if (m.startRow == -1 && isCastlingSafe(m))
         {
             if (m.endCol == -1 && whiteCanCastleKS)
@@ -620,22 +634,22 @@ public class ChessState
         {
             if (m.endRow < 0)
             {
-                return squareAttacked(7, 3, white) + squareAttacked(7, 4, white) + squareAttacked(7, 5, white) <= 0;
+                return squareAttacked(7, 3, white) + squareAttacked(7, 4, white, true, 7, 3) + squareAttacked(7, 5, white, true, 7, 3) <= 0;
             }
             else if (m.endCol < 0)
             {
-                return squareAttacked(7, 1, white) + squareAttacked(7, 2, white) + squareAttacked(7, 3, white) <= 0;
+                return squareAttacked(7, 1, white, true, 7, 3) + squareAttacked(7, 2, white, true, 7, 3) + squareAttacked(7, 3, white) <= 0;
             }
         }
         else if (m.startCol < 0)
         {
             if (m.endRow < 0)
             {
-                return squareAttacked(0, 3, black) + squareAttacked(0, 4, black) + squareAttacked(0, 5, black) <= 0;
+                return squareAttacked(0, 3, black) + squareAttacked(0, 4, black, true, 0, 3) + squareAttacked(0, 5, black, true, 0, 3) <= 0;
             }
             else if (m.endCol < 0)
             {
-                return squareAttacked(0, 1, black) + squareAttacked(0, 2, black) + squareAttacked(0, 3, black) <= 0;
+                return squareAttacked(0, 1, black, true, 0, 3) + squareAttacked(0, 2, black, true, 0, 3) + squareAttacked(0, 3, black) <= 0;
             }
         }
         //should never get here as this function should only be called
@@ -645,8 +659,17 @@ public class ChessState
 
     //determine if square can be attacked by opposite color of what is passed in
     //return num of attackers
-    private int squareAttacked(int row, int col, int color)
+    private int squareAttacked(int row, int col, int color, bool testForNextMoveSafety=false, int oldRow=-1, int oldCol=-1)
     {
+        int revertPiece1 = -1;
+        int revertPiece2 = -1;
+        if (testForNextMoveSafety)
+        {
+            revertPiece1 = board[row][col];
+            revertPiece2 = board[oldRow][oldCol];
+            board[row][col] = placeHolderPiece + color;
+            board[oldRow][oldCol] = ee;
+        }
         int count = 0;
         for (int i = 0; i < 8; ++i)
         {
@@ -655,6 +678,7 @@ public class ChessState
                 if (board[i][j] >= 0 && board[i][j] % 2 != color)
                 {
                     List<Move> attackerMoves = squareMoves(i, j, (color + 1) % 2);
+
                     for (int k = 0; k < attackerMoves.Count; ++k)
                     {
                         if (attackerMoves[k].endRow == row && attackerMoves[k].endCol == col)
@@ -664,6 +688,11 @@ public class ChessState
                     }
                 }
             }
+        }
+        if (testForNextMoveSafety)
+        {
+            board[row][col] = revertPiece1;
+            board[oldRow][oldCol] = revertPiece2;
         }
         return count;
     }
@@ -686,7 +715,6 @@ public class ChessState
     //should NOT be used for king moves (that means dont use it for castling either)
     private bool isSafe(Move m, int color)
     {
-        //Debug.Log("Checking validity of " + moveStr(m));
         int[][] boardCopy = getBoardCopy();
         board[m.endRow][m.endCol] = boardCopy[m.startRow][m.startCol];
         board[m.startRow][m.startCol] = -1;
@@ -701,14 +729,6 @@ public class ChessState
 
         }
         board = boardCopy;
-        //if (validity)
-        //{
-        //    Debug.Log(moveStr(m) + " is valid");
-        //}
-        //else
-        //{
-        //    Debug.Log(moveStr(m) + " is NOT valid");
-        //}
         return validity;
     }
 

@@ -4,15 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public struct intHolder
-{
-    public int value;
 
-    public intHolder(int i)
-    {
-        value = i;
-    }
-}
 public class ChessUI : MonoBehaviour
 {
     private ChessState chess;
@@ -21,8 +13,11 @@ public class ChessUI : MonoBehaviour
     [SerializeField] private Sprite[] sprites;
     [SerializeField] private Sprite[] highlighted;
     [SerializeField] private GameObject promotionMenu;
+    [SerializeField] private GameObject whitePiecesSelect;
+    [SerializeField] private GameObject blackPiecesSelect;
     private int selectedRow;
     private int selectedCol;
+    private int promotionCol;
 
 
     //for testing only, can (and should) be deleted once ai is implemented
@@ -31,6 +26,7 @@ public class ChessUI : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        promotionCol = -1;
         color = 0;
         selectedRow = -1;
         selectedCol = -1;
@@ -69,9 +65,21 @@ public class ChessUI : MonoBehaviour
                 if (chess.playMove(selectedRow, selectedCol, row, col, color))
                 {
                     color = (color + 1) % 2;
+                    board = chess.getBoard();
                 }
                 if (row == 0 && board[row][col] == 0)
                 {
+                    Debug.Log("hey");
+                    promotionCol = col;
+                    whitePiecesSelect.SetActive(true);
+                    promotionMenu.SetActive(true);
+                }
+                else if (row == 7 && board[row][col] == 1)
+                {
+                    Debug.Log("hey");
+
+                    promotionCol = col;
+                    blackPiecesSelect.SetActive(true);
                     promotionMenu.SetActive(true);
                 }
                 selectedCol = -1;
@@ -85,6 +93,16 @@ public class ChessUI : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public void replace(int piece)
+    {
+        //color gets flipped after moving pawn to end so this passes the correct color
+        chess.promote(promotionCol, piece + (color + 1) % 2);
+        refreshUI();
+        promotionMenu.SetActive(false);
+        whitePiecesSelect.SetActive(false);
+        whitePiecesSelect.SetActive(false);
     }
 
     private void refreshUI()
