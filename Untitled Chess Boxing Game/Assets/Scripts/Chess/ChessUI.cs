@@ -20,6 +20,7 @@ public class ChessUI : MonoBehaviour
     private Button[] buttons;
     [SerializeField] private Sprite[] sprites;
     [SerializeField] private Sprite[] highlighted;
+    [SerializeField] private GameObject promotionMenu;
     private int selectedRow;
     private int selectedCol;
 
@@ -69,6 +70,10 @@ public class ChessUI : MonoBehaviour
                 {
                     color = (color + 1) % 2;
                 }
+                if (row == 0 && board[row][col] == 0)
+                {
+                    promotionMenu.SetActive(true);
+                }
                 selectedCol = -1;
                 selectedRow = -1;
             }
@@ -84,6 +89,7 @@ public class ChessUI : MonoBehaviour
 
     private void refreshUI()
     {
+        board = chess.getBoard();
         for (int i = 0; i < 8; ++i)
         {
             for (int j = 0; j < 8; ++j)

@@ -16,6 +16,12 @@ public struct Move {
     //if end row is negative, it is queenside
     //if end col is negative, it is kingside
     
+    //if neither start value is negative, but one of the end ones is, it is en passant
+    //in this case
+    //negative end row means ep left
+    //negative end col means ep right
+    //end row will always be determined by start +/- 1 depending on color
+    //end col will be determined by start col +/- 1 depending on ep left or right
     public Move(int startRow, int startCol, int endRow, int endCol)
     {
         this.startRow = startRow;
@@ -39,10 +45,13 @@ public class ChessState
     }
 
     public bool playMove(int row, int col, int newRow, int newCol, int color) {
-        List<Move> possible = squareMoves(row, col, color);
+        //List<Move> possible = squareMoves(row, col, color);
+        potentialMoves = squareMoves(row, col, color);
+        List<Move> possible = legalMoves(color);
         bool canMove = false;
         for (int i = 0; i < possible.Count; i++)
         {
+            Debug.Log(moveStr(possible[i]));
             if (possible[i].startCol == col && possible[i].startRow == row
                 && possible[i].endCol == newCol && possible[i].endRow == newRow)
             {
@@ -69,7 +78,6 @@ public class ChessState
         }
         else if (isCastling(row, col, newRow, newCol, color))
         {
-            
             return tryCastling(castleType);
         }
         return false;
@@ -87,14 +95,7 @@ public class ChessState
         }
     }
 
-    public List<Move> getLegalMoves() {
-        for (int i = potentialMoves.Count; i >= 0; --i)
-        {
-            if (false)
-            {
-
-            }
-        }
+    public List<Move> getLegalMoves(int color) {
         return null;
     }
 
@@ -208,7 +209,45 @@ public class ChessState
     }
 
     private List<Move> legalMoves(int color) {
-        return null;
+        for (int i = potentialMoves.Count - 1; i >=0; --i)
+        {
+            Move m = potentialMoves[i];
+            //on castling
+            //not in check
+            //not moving through check
+            //not moving into check
+            //do not have to worry about movement of the rook putting us into check as the
+            //only way this would happen is if a rook/queen was off the board on the back rank 
+            //ex. at -1 or 9
+            if (m.startRow < 0 || m.startCol < 0)
+            {
+                Debug.Log("Checking castling move " + moveStr(m));
+                if(!isCastlingSafe(m))
+                {
+                    potentialMoves.RemoveAt(i);
+                }
+            }
+            //using negative indicies here may kill everything
+            else if (board[m.startRow][m.startCol] - color == wK)
+            {
+                //need to deal with castling
+                if (squareAttacked(m.endRow, m.endCol, color) > 0)
+                {
+                    potentialMoves.RemoveAt(i);
+                }
+            }
+            else if (!isSafe(potentialMoves[i], color))
+            {
+                int k = board[m.startRow][m.startCol] - color;
+                potentialMoves.RemoveAt(i);
+            }
+            else
+            {
+                int k = board[m.startRow][m.startCol] - color;
+            }
+        }
+        realMoves = potentialMoves;
+        return realMoves;
     }
 
     private List<Move> possibleMoves(int color) {
@@ -440,10 +479,7 @@ public class ChessState
         return moves;
     }
 
-    private bool isLegal(Move m) {
-        return false;
-    }
-
+    //mostly to parse moves that would come in from ChessUI
     private bool isCastling(int row, int col, int newRow, int newCol, int color)
     {
         if (color == white)
@@ -475,6 +511,7 @@ public class ChessState
         return false;
     }
 
+    //make castling illegal if king is moved
     private bool doKingMoveUpdates(int newRow, int newCol, int color)
     {
         if (color == white)
@@ -494,6 +531,7 @@ public class ChessState
         return true;
     }
 
+    //if a corener piece is moved, set a possible castling to be invalid
     private void doCornerUpdates(int row, int col)
     {
         if (row == 7)
@@ -522,7 +560,8 @@ public class ChessState
 
     private bool tryCastling(Move m)
     {
-        if (m.startRow == -1)
+        Debug.Log("Doing castling: " + moveStr(m));
+        if (m.startRow == -1 && isCastlingSafe(m))
         {
             if (m.endCol == -1 && whiteCanCastleKS)
             {
@@ -547,7 +586,7 @@ public class ChessState
                 return true;
             }
         }
-        if (m.startCol == -1)
+        if (m.startCol == -1 && isCastlingSafe(m))
         {
             if (m.endCol == -1 && blackCanCastleKS)
             {
@@ -575,6 +614,35 @@ public class ChessState
         return false;
     }
 
+    private bool isCastlingSafe(Move m)
+    {
+        if (m.startRow < 0)
+        {
+            if (m.endRow < 0)
+            {
+                return squareAttacked(7, 3, white) + squareAttacked(7, 4, white) + squareAttacked(7, 5, white) <= 0;
+            }
+            else if (m.endCol < 0)
+            {
+                return squareAttacked(7, 1, white) + squareAttacked(7, 2, white) + squareAttacked(7, 3, white) <= 0;
+            }
+        }
+        else if (m.startCol < 0)
+        {
+            if (m.endRow < 0)
+            {
+                return squareAttacked(0, 3, black) + squareAttacked(0, 4, black) + squareAttacked(0, 5, black) <= 0;
+            }
+            else if (m.endCol < 0)
+            {
+                return squareAttacked(0, 1, black) + squareAttacked(0, 2, black) + squareAttacked(0, 3, black) <= 0;
+            }
+        }
+        //should never get here as this function should only be called
+        //with an attempted castle
+        return false;
+    }
+
     //determine if square can be attacked by opposite color of what is passed in
     //return num of attackers
     private int squareAttacked(int row, int col, int color)
@@ -586,7 +654,7 @@ public class ChessState
             {
                 if (board[i][j] >= 0 && board[i][j] % 2 != color)
                 {
-                    List<Move> attackerMoves = squareMoves(row, col, (color + 1) % 2);
+                    List<Move> attackerMoves = squareMoves(i, j, (color + 1) % 2);
                     for (int k = 0; k < attackerMoves.Count; ++k)
                     {
                         if (attackerMoves[k].endRow == row && attackerMoves[k].endCol == col)
@@ -598,6 +666,56 @@ public class ChessState
             }
         }
         return count;
+    }
+
+    //return a copy of the current board array
+    private int[][] getBoardCopy()
+    {
+        int[][] boardCopy = new int[8][];
+        for (int i = 0; i < 8; ++i)
+        {
+            boardCopy[i] = new int[8];
+            for (int j = 0; j < 8; ++j)
+            {
+                boardCopy[i][j] = board[i][j];
+            }
+        }
+        return boardCopy;
+    }
+
+    //should NOT be used for king moves (that means dont use it for castling either)
+    private bool isSafe(Move m, int color)
+    {
+        //Debug.Log("Checking validity of " + moveStr(m));
+        int[][] boardCopy = getBoardCopy();
+        board[m.endRow][m.endCol] = boardCopy[m.startRow][m.startCol];
+        board[m.startRow][m.startCol] = -1;
+        bool validity;
+        if (color == white)
+        {
+            validity = squareAttacked(wkRow, wkCol, white) <= 0;
+        }
+        else
+        {
+            validity = squareAttacked(bkRow, bkCol, black) <= 0;
+
+        }
+        board = boardCopy;
+        //if (validity)
+        //{
+        //    Debug.Log(moveStr(m) + " is valid");
+        //}
+        //else
+        //{
+        //    Debug.Log(moveStr(m) + " is NOT valid");
+        //}
+        return validity;
+    }
+
+    //only here for debugging
+    private string moveStr(Move m)
+    {
+        return "" + m.startRow + " " + m.startCol + "->" + m.endRow + " " + m.endCol;
     }
 
  }
