@@ -10,24 +10,22 @@ public struct Move {
     public int startCol;
     public int endRow;
     public int endCol;
+    public bool isEP;
 
     //if start row is negative, white is castling
     //if start col is negative, black is castling
     //if end row is negative, it is queenside
     //if end col is negative, it is kingside
     
-    //if neither start value is negative, but one of the end ones is, it is en passant
-    //in this case
-    //negative end row means ep left
-    //negative end col means ep right
-    //end row will always be determined by start +/- 1 depending on color
-    //end col will be determined by start col +/- 1 depending on ep left or right
-    public Move(int startRow, int startCol, int endRow, int endCol)
+    //if neither start value is negative, but end col is, it is en passant
+    //in this case everything else is still accurate, but the end col should be replaced by ep col
+    public Move(int startRow, int startCol, int endRow, int endCol, bool isEP=false)
     {
         this.startRow = startRow;
         this.startCol = startCol;
         this.endRow = endRow;
         this.endCol = endCol;
+        this.isEP = isEP;
     }
 
 }
@@ -49,13 +47,16 @@ public class ChessState
         potentialMoves = squareMoves(row, col, color);
         List<Move> possible = legalMoves(color);
         bool canMove = false;
+        bool isEP = false;
         for (int i = 0; i < possible.Count; i++)
         {
             //Debug.Log("possible move: " + moveStr(possible[i]));
             if (possible[i].startCol == col && possible[i].startRow == row
                 && possible[i].endCol == newCol && possible[i].endRow == newRow)
             {
+                isEP = possible[i].isEP;
                 canMove = true;
+                break;
             }
         }
         if (canMove)
@@ -68,9 +69,31 @@ public class ChessState
             {
                 doKingMoveUpdates(newRow, newCol, black);
             }
+            else if (isEP)
+            {
+                if (color == black)
+                {
+                    board[4][epCol] = ee;
+                }
+                else
+                {
+                    board[3][epCol] = ee;
+                }
+            }
+            else {
+                doCornerUpdates(row, col);
+            }
+            if (board[row][col] == wp && newRow == row - 2)
+            {
+                epCol = col;
+            }
+            else if (board[row][col] == bp && newRow == row + 2)
+            {
+                epCol = col;
+            } 
             else
             {
-                doCornerUpdates(row, col);
+                epCol = -1;
             }
             board[newRow][newCol] = board[row][col];
             board[row][col] = ee;
@@ -78,7 +101,12 @@ public class ChessState
         }
         else if (isCastling(row, col, newRow, newCol, color))
         {
-            return tryCastling(castleType);
+            if (tryCastling(castleType))
+            {
+                epCol = -1;
+                return true;
+            }
+            return false;
         }
         return false;
     }
@@ -345,21 +373,57 @@ public class ChessState
             delta = 1;
         }
         if (col == 0) {
-            if (board[row+delta][col+1] >= 0 && board[row+delta][col+1] % 2 != color) {
+            if (board[row+delta][col+1] >= 0 && board[row+delta][col+1] % 2 != color) 
+            {
                 moves.Add(new Move(row, col, row+delta, col+1));
+            }
+            if (color == white && row == 3 && epCol == 1)
+            {
+                moves.Add(new Move(row, col, row + delta, 1, true));
+            }
+            if (color == black && row == 4 && epCol == 1)
+            {
+                moves.Add(new Move(row, col, row + delta, 1, true));
             }
         }
         else if (col == 7) {
-            if (board[row+delta][col-1] >= 0 && board[row+delta][col-1] % 2 != color) {
+            if (board[row+delta][col-1] >= 0 && board[row+delta][col-1] % 2 != color) 
+            {
                 moves.Add(new Move(row, col, row+delta, col-1));
+            }
+            if (color == white && row == 3 && epCol == 6)
+            {
+                moves.Add(new Move(row, col, row + delta, 6, true));
+            }
+            if (color == black && row == 4 && epCol == 6)
+            {
+                moves.Add(new Move(row, col, row + delta, 6, true));
             }
         }
         else {
-            if (board[row+delta][col-1] >= 0 && board[row+delta][col-1] % 2 != color) {
+            if (board[row+delta][col-1] >= 0 && board[row+delta][col-1] % 2 != color) 
+            {
                 moves.Add(new Move(row, col, row+delta, col-1));
             }
-            if (board[row+delta][col+1] >= 0 && board[row+delta][col+1] % 2 != color) {
+            if (board[row+delta][col+1] >= 0 && board[row+delta][col+1] % 2 != color) 
+            {
                 moves.Add(new Move(row, col, row+delta, col+1));
+            }
+            if (color == white && row == 3 && epCol == col + 1)
+            {
+                moves.Add(new Move(row, col, row + delta, col + 1, true));
+            }
+            if (color == white && row == 3 && epCol == col - 1)
+            {
+                moves.Add(new Move(row, col, row + delta, col - 1, true));
+            }
+            if (color == black && row == 4 && epCol == col + 1)
+            {
+                moves.Add(new Move(row, col, row + delta, col + 1, true));
+            }
+            if (color == black && row == 4 && epCol == col - 1)
+            {
+                moves.Add(new Move(row, col, row + delta, col - 1, true));
             }
         }
         return moves;
