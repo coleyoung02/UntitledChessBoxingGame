@@ -539,19 +539,19 @@ public class ChessState
         //if end col is negative, it is kingside
         //white
         if (color == 0) {
-            if (whiteCanCastleKS && board[7][1] < 0 && board[7][2] < 0) {
+            if (whiteCanCastleKS && board[7][1] < 0 && board[7][2] < 0 && board[7][0] == wr) {
                 moves.Add(new Move(-1, 0, 0, -1));
             }
-            if (whiteCanCastleQS && board[7][4] < 0 && board[7][5] < 0 && board[7][6] < 0) {
+            if (whiteCanCastleQS && board[7][4] < 0 && board[7][5] < 0 && board[7][6] < 0 && board[7][7] == wr) {
                 moves.Add(new Move(-1, 0, -1, 0));
             }
         }
         //black
         if (color == 1) {
-            if (blackCanCastleKS && board[7][1] < 0 && board[7][2] < 0) {
+            if (blackCanCastleKS && board[7][1] < 0 && board[7][2] < 0 && board[0][0] == br) {
                 moves.Add(new Move(0, -1, 0, -1));
             }
-            if (blackCanCastleQS && board[7][4] < 0 && board[7][5] < 0 && board[7][6] < 0) {
+            if (blackCanCastleQS && board[7][4] < 0 && board[7][5] < 0 && board[7][6] < 0 && board[0][7] == br) {
                 moves.Add(new Move(0, -1, -1, 0));
             }
         }
