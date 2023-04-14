@@ -58,6 +58,7 @@ public class ChessState
                 canMove = true;
                 break;
             }
+            Debug.Log(moveStr(possible[i]));
         }
         if (canMove)
         {
@@ -101,10 +102,16 @@ public class ChessState
         }
         else if (isCastling(row, col, newRow, newCol, color))
         {
-            if (tryCastling(castleType))
+            for (int i = 0; i < realMoves.Count; ++i)
             {
-                epCol = -1;
-                return true;
+                if (moveMatch(realMoves[i], castleType))
+                {
+                    if (tryCastling(castleType))
+                    {
+                        epCol = -1;
+                        return true;
+                    }
+                }
             }
             return false;
         }
@@ -548,10 +555,10 @@ public class ChessState
         }
         //black
         if (color == 1) {
-            if (blackCanCastleKS && board[7][1] < 0 && board[7][2] < 0 && board[0][0] == br) {
+            if (blackCanCastleKS && board[0][1] < 0 && board[0][2] < 0 && board[0][0] == br) {
                 moves.Add(new Move(0, -1, 0, -1));
             }
-            if (blackCanCastleQS && board[7][4] < 0 && board[7][5] < 0 && board[7][6] < 0 && board[0][7] == br) {
+            if (blackCanCastleQS && board[0][4] < 0 && board[0][5] < 0 && board[0][6] < 0 && board[0][7] == br) {
                 moves.Add(new Move(0, -1, -1, 0));
             }
         }
@@ -794,6 +801,12 @@ public class ChessState
         }
         board = boardCopy;
         return validity;
+    }
+
+    private static bool moveMatch(Move m1, Move m2)
+    {
+        return m1.startRow == m2.startRow && m1.endRow == m2.endRow && 
+            m1.startCol == m2.startCol && m1.endCol == m2.endCol && m1.isEP == m2.isEP;
     }
 
     //only here for debugging
