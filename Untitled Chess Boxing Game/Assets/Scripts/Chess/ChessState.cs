@@ -83,6 +83,7 @@ public class ChessState
             }
             else {
                 doCornerUpdates(row, col);
+                doCornerUpdates(newRow, newCol);
             }
             if (board[row][col] == wp && newRow == row - 2)
             {
