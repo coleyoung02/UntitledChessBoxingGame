@@ -24,6 +24,7 @@ public abstract class Fighter : MonoBehaviour
     private Attack lightPunch;
     [SerializeField] private Fighter opponent;
     [SerializeField] private bool isBlocking;
+    protected bool isDodging;
     [SerializeField] private float blockingReduction; // if blockingReduction is 0.1, the fighter takes only 90% damage when blocking.
 
     #region getters and setters
