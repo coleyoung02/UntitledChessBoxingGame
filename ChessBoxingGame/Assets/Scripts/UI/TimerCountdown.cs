@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class TimerCountdown : MonoBehaviour
 {
-    public float timeValue = 90;
-    public Text timerText;
+    [SerializeField] private float timeValue = 90f;
+    [SerializeField] private TextMeshProUGUI timerText;
 
     //Update is called once per frame
     void Update()
