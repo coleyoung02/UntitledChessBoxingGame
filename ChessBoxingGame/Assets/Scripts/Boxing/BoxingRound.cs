@@ -9,7 +9,7 @@ public class BoxingRound : MonoBehaviour
     private EnemyFighter enemy;
     private int roundNumber;
 
-    void endRound()
+    public void endRound()
     {
         
     }
