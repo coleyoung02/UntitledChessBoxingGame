@@ -23,6 +23,21 @@ public class EnemyFighter : Fighter
     void Update()
     {
         stateName = currentState.name.ToString(); // Debug only
+        // random possbility
+        
+        // Comment it out to use buttons instead
+        float rand = UnityEngine.Random.Range(0.0f, 1.0f);
+        if (rand < Constants.Enemy.POSS_BLOCKING)
+        {
+            hitBlocking();
+        }else if (rand < Constants.Enemy.POSS_BLOCKING + Constants.Enemy.POSS_LIGHT_PUNCH)
+        {
+            hitLightPunch();
+        }else if (rand < Constants.Enemy.POSS_BLOCKING + Constants.Enemy.POSS_LIGHT_PUNCH + Constants.Enemy.POSS_HEAVY_PUNCH)
+        {
+            hitHeavyPunch();
+        }
+
         currentState = currentState.process();
     }
 
