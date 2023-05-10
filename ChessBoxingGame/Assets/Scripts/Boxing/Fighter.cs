@@ -18,14 +18,16 @@ public struct Attack
 
 public abstract class Fighter : MonoBehaviour
 {
-    [SerializeField] private float healthMax;
-    [SerializeField] private float currentHealth;
-    private Attack heavyPunch;
-    private Attack lightPunch;
-    [SerializeField] private Fighter opponent;
-    [SerializeField] private bool isBlocking;
-    protected bool isDodging;
-    [SerializeField] private float blockingReduction; // if blockingReduction is 0.1, the fighter takes only 90% damage when blocking.
+    [SerializeField] protected float healthMax;
+    [SerializeField] protected float currentHealth;
+    protected Attack heavyPunch;
+    protected Attack lightPunch;
+    [SerializeField] protected Fighter opponent;
+    public bool isBlocking;
+    public bool isDodging;
+    [SerializeField] protected float blockingReduction; // if blockingReduction is 0.1, the fighter takes only 90% damage when blocking.
+    public State currentState;
+
 
     #region getters and setters
 
@@ -39,13 +41,12 @@ public abstract class Fighter : MonoBehaviour
 
     public Fighter Opponent => opponent;
 
-    public bool IsBlocking => isBlocking;
-
     public float BlockingReduction => blockingReduction;
 
     #endregion
 
-    public bool doAttack(Attack attack)
+    // depreciated and should be overwritten
+    public virtual bool doAttack(Attack attack)
     {
         //TODO: How to determine whether attack is successful?
         //Currently, as long as the fighter is not blocking, the attack is successful.
@@ -60,24 +61,14 @@ public abstract class Fighter : MonoBehaviour
         }
     }
 
+    // depreciated
     private IEnumerator doAttackAfterTelegraph(Attack attack)
     {
         yield return new WaitForSeconds(attack.telegraphTime);
         opponent.takeAttack(attack);
     }
 
-    public void takeAttack(Attack attack)
-    {
-        // No dodging considered. Player should override this method.
-        if (isBlocking && attack.isBlockable)
-        {
-            currentHealth -= attack.damage * (1 - blockingReduction);
-        }
-        else
-        {
-            currentHealth -= attack.damage;
-        }
-    }
+    public abstract void takeAttack(Attack attack);
 
     public void blockUp()
     {
