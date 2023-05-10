@@ -9,6 +9,12 @@ public class TimerCountdown : MonoBehaviour
     [SerializeField] private float timeValue = 90f;
     [SerializeField] private TextMeshProUGUI timerText;
 
+    [Header("ClockUI References")]
+    [SerializeField] private Transform pos1;
+    [SerializeField] private Transform pos2;
+    [SerializeField] private Transform pos3;
+    [SerializeField] private Transform pos4;
+
     //Update is called once per frame
     void Update()
     {
@@ -36,5 +42,45 @@ public class TimerCountdown : MonoBehaviour
 
         timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
 
+
+        changeClockUI(timerText.text);
+    }
+
+    void changeClockUI(string timer)
+    {
+        //prob a better way to do this but leaving for now
+
+        if (pos1.GetChild(int.Parse(timerText.text[0].ToString())).gameObject.activeSelf == false)
+        {
+            //If not, call changeValue
+            changeValue(int.Parse(timerText.text[0].ToString()), pos1);
+        }
+
+        if (pos2.GetChild(int.Parse(timerText.text[1].ToString())).gameObject.activeSelf == false)
+        {
+            changeValue(int.Parse(timerText.text[1].ToString()), pos2);
+        }
+
+        if (pos3.GetChild(int.Parse(timerText.text[3].ToString())).gameObject.activeSelf == false)
+        {
+            changeValue(int.Parse(timerText.text[3].ToString()), pos3);
+        }
+
+        if (pos4.GetChild(int.Parse(timerText.text[4].ToString())).gameObject.activeSelf == false)
+        {
+            changeValue(int.Parse(timerText.text[4].ToString()), pos4);
+        }
+    }
+
+    void changeValue(int val, Transform pos)
+    {
+        //Disable everything
+        foreach (Transform child in pos)
+        {
+            child.gameObject.SetActive(false);
+        }
+
+        //Turn on desired value
+        pos.GetChild(val).gameObject.SetActive(true);
     }
 }
