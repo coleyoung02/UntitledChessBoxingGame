@@ -4,18 +4,31 @@ using UnityEngine;
 
 public class PlayerFighter : MonoBehaviour
 {
-   void Punch()
+    void Punch()
     {
         Debug.Log("punch");
     }
-
     void Block()
     {
         Debug.Log("block");
     }
-
     void Dodge()
     {
-        Debug.Log("Dodge");
+        Debug.Log("dodge");
+    }
+    void Update()
+    {
+        if(Input.GetKeyDown("f"))
+        {
+            Punch();
+        }
+        if(Input.GetKeyDown("space"))
+        {
+            Block();
+        }
+        if(Input.GetKeyDown("j"))
+        {
+            Dodge();
+        }
     }
 }
