@@ -16,21 +16,6 @@ public class PlayerFighter : Fighter
     {
         Debug.Log("dodge");
     }
-    void Update()
-    {
-        if(Input.GetKeyDown("f"))
-        {
-            Punch();
-        }
-        if(Input.GetKeyDown("space"))
-        {
-            Block();
-        }
-        if(Input.GetKeyDown("j"))
-        {
-            Dodge();
-        }
-    }
 
     private void Update()
     {
