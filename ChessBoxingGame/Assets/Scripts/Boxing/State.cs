@@ -17,7 +17,12 @@ public abstract class State {
         E_HEAVYPUNCHINGSND,
         E_LIGHTPUNCHING,
         E_STUNNED,
-        E_KO
+        E_KO,
+        P_IDLE,
+        P_PUNCHING,
+        P_DODGING1,
+        P_DODGING2,
+        P_BLOCKING
     };
 
     public enum EVENT {

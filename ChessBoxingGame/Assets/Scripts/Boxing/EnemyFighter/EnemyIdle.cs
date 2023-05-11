@@ -10,13 +10,13 @@ public class EnemyIdle : State
 
     public override void enter()
     {
-        Debug.Log("EnemyIdle.enter()");
+        //Debug.Log("EnemyIdle.enter()");
         base.enter();
     }
 
     public override void exit()
     {
-        Debug.Log("EnemyIdle.exit()");
+        //Debug.Log("EnemyIdle.exit()");
         base.exit();
     }
 

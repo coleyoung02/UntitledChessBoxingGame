@@ -30,10 +30,12 @@ public class EnemyFighter : Fighter
         if (rand < Constants.Enemy.POSS_BLOCKING)
         {
             hitBlocking();
-        }else if (rand < Constants.Enemy.POSS_BLOCKING + Constants.Enemy.POSS_LIGHT_PUNCH)
+        }
+        else if (rand < Constants.Enemy.POSS_BLOCKING + Constants.Enemy.POSS_LIGHT_PUNCH)
         {
             hitLightPunch();
-        }else if (rand < Constants.Enemy.POSS_BLOCKING + Constants.Enemy.POSS_LIGHT_PUNCH + Constants.Enemy.POSS_HEAVY_PUNCH)
+        }
+        else if (rand < Constants.Enemy.POSS_BLOCKING + Constants.Enemy.POSS_LIGHT_PUNCH + Constants.Enemy.POSS_HEAVY_PUNCH)
         {
             hitHeavyPunch();
         }
@@ -42,12 +44,14 @@ public class EnemyFighter : Fighter
     }
 
 
-    public override void takeAttack(Attack attack)
+    public override bool takeAttack(Attack attack)
     {
         float damage = attack.damage;
+        bool unblocked = true;
         if (currentState.name == State.STATE.E_BLOCKING)
         {
             damage *= (1-blockingReduction);
+            unblocked = false;
         }
         Debug.Log("EnemyFighter took attack of " + damage);
         
@@ -62,17 +66,19 @@ public class EnemyFighter : Fighter
             if (currentState.name == State.STATE.E_IDLE)
             {
                 ((EnemyIdle)currentState).goStunned();
-            }else if (currentState.name == State.STATE.E_HEAVYPUNCHINGFST)
+            }
+            else if (currentState.name == State.STATE.E_HEAVYPUNCHINGFST)
             {
                 ((EnemyHeavyPunchingFst)currentState).goStunned();
             }
         }
+        return unblocked;
     }
 
     public override bool doAttack(Attack attack)
     {
         Debug.Log("EnemyFighter made attack of " + attack.damage);
-        return true;
+        return opponent.takeAttack(attack);
     }
 
     public void hitBlocking()

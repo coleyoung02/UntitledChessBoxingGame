@@ -26,12 +26,35 @@ public class PlayerFighter : Fighter
 
     public override bool doAttack(Attack attack)
     {
-        return base.doAttack(attack);
+        return opponent.takeAttack(attack);
     }
 
-    public override void takeAttack(Attack attack)
+    public override bool takeAttack(Attack attack)
     {
-        return;
+        if (currentState.name == State.STATE.P_DODGING1)
+        {
+            return false;
+        }
+
+        float damage = attack.damage;
+        bool unblocked = true;
+        if (currentState.name == State.STATE.P_BLOCKING)
+        {
+            damage *= (1 - blockingReduction);
+            unblocked = false;
+        }
+        if (currentHealth - damage <= 0)
+        {
+            currentHealth = 0;
+            currentState.goKO();
+        }
+        else
+        {
+            currentHealth -= damage;
+        }
+        return unblocked;
+
+
     }
 
     private void Update()

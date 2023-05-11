@@ -12,7 +12,6 @@ public class EnemyBlocking : State
     public override void enter()
     {
         Debug.Log("EnemyBlocking.enter()");
-        fighter.isBlocking= true;
         fighter.StartCoroutine(startBlocking());
         base.enter();
     }
@@ -25,7 +24,6 @@ public class EnemyBlocking : State
     public override void exit()
     {
         Debug.Log("EnemyBlocking.exit()");
-        fighter.isBlocking = false;
         base.exit();
     }
 
