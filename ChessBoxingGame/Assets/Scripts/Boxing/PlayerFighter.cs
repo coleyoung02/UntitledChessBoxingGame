@@ -4,9 +4,16 @@ using UnityEngine;
 
 public class PlayerFighter : Fighter
 {
+
+    private void Start()
+    {
+        heavyPunch = new Attack(5f, .2f, false);
+        lightPunch = new Attack(5f, .2f, false);
+    }
+
     void Punch()
     {
-        Debug.Log("punch");
+        doAttack(lightPunch);
     }
     void Block()
     {
@@ -15,6 +22,16 @@ public class PlayerFighter : Fighter
     void Dodge()
     {
         Debug.Log("dodge");
+    }
+
+    public override bool doAttack(Attack attack)
+    {
+        return base.doAttack(attack);
+    }
+
+    public override void takeAttack(Attack attack)
+    {
+        return;
     }
 
     private void Update()
