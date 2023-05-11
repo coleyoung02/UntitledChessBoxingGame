@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerFighter : MonoBehaviour
+public class PlayerFighter : Fighter
 {
     void Punch()
     {
@@ -31,4 +31,23 @@ public class PlayerFighter : MonoBehaviour
             Dodge();
         }
     }
+
+    private void Update()
+    {
+        if(Input.GetKeyDown("f"))
+        {
+            Punch();
+        }
+        if (Input.GetKeyDown("space"))
+        {
+            Block();
+        }
+        if (Input.GetKeyDown("j"))
+        {
+            Dodge();
+        }
+
+
+    }
+
 }
