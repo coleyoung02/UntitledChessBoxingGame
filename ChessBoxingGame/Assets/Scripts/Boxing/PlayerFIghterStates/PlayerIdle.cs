@@ -6,7 +6,7 @@ public class PlayerIdle : State
 {
     public PlayerIdle(Animator _anim, Transform _player, PlayerFighter _fighter) : base(_anim, _player, _fighter)
     {
-        name = STATE.P_BLOCKING;
+        name = STATE.P_IDLE;
     }
 
     public void goDodging1()
@@ -18,6 +18,7 @@ public class PlayerIdle : State
     public void goPunching()
     {
         nextState = new PlayerPunching(anim, player, (PlayerFighter)fighter);
+        stage = EVENT.EXIT;
     }
 
     public void goBlocking()

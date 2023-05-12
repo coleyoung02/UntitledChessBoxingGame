@@ -18,12 +18,12 @@ public struct Attack
 
 public abstract class Fighter : MonoBehaviour
 {
-    [SerializeField] protected float healthMax;
-    [SerializeField] protected float currentHealth;
+    protected float healthMax;
+    protected float currentHealth;
     protected Attack heavyPunch;
     protected Attack lightPunch;
     [SerializeField] protected Fighter opponent;
-    [SerializeField] protected float blockingReduction; // if blockingReduction is 0.1, the fighter takes only 90% damage when blocking.
+    protected float blockingReduction; // if blockingReduction is 0.1, the fighter takes only 90% damage when blocking.
     public State currentState;
 
 
@@ -45,6 +45,10 @@ public abstract class Fighter : MonoBehaviour
 
     public abstract bool doAttack(Attack attack);
 
+    public string HealthFormatted()
+    {
+        return currentHealth.ToString("0.0");
+    }
 
     public abstract bool takeAttack(Attack attack);
 

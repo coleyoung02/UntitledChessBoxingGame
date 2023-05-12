@@ -15,6 +15,12 @@ public class PlayerBlocking : State
         stage = EVENT.EXIT;
     }
 
+    public void goPunching()
+    {
+        nextState = new PlayerPunching(anim, player, (PlayerFighter)fighter);
+        stage = EVENT.EXIT;
+    }
+
     public void goIdle()
     {
         nextState = new PlayerIdle(anim, player, (PlayerFighter)fighter);

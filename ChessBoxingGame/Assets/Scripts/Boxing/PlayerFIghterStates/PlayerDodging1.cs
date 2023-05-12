@@ -7,7 +7,7 @@ public class PlayerDodging1 : State
     private Coroutine coroutine;
     public PlayerDodging1(Animator _anim, Transform _player, PlayerFighter _fighter) : base(_anim, _player, _fighter)
     {
-        name = STATE.P_BLOCKING;
+        name = STATE.P_DODGING1;
         coroutine = null;
     }
 
@@ -35,6 +35,7 @@ public class PlayerDodging1 : State
             fighter.StopCoroutine(coroutine);
             coroutine = null;
         }
-        throw new System.NotImplementedException();
+        nextState = new PlayerKO(anim, player, (PlayerFighter)fighter);
+        stage = EVENT.EXIT;
     }
 }

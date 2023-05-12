@@ -6,9 +6,12 @@ public class EnemyFighter : Fighter
 {
     private Animator anim;
     public string stateName; // Debug only
+    [SerializeField] Sprite[] sprites; // Delete after testing
+    private SpriteRenderer spriteRenderer; // Delete after testing
 
     void Start()
     {
+        spriteRenderer = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
         healthMax = Constants.Enemy.HEALTH_MAX;
         currentHealth = healthMax;
@@ -24,9 +27,9 @@ public class EnemyFighter : Fighter
     {
         stateName = currentState.name.ToString(); // Debug only
         // random possbility
-        
+        spriteRenderer.sprite = sprites[(int)currentState.name]; //Delete after testing
         // Comment it out to use buttons instead
-        float rand = UnityEngine.Random.Range(0.0f, 1.0f);
+        float rand = UnityEngine.Random.Range(0.0f, 3.0f);
         if (rand < Constants.Enemy.POSS_BLOCKING)
         {
             hitBlocking();

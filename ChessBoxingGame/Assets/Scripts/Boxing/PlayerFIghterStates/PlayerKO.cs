@@ -6,11 +6,11 @@ public class PlayerKO : State
 {
     public PlayerKO(Animator _anim, Transform _player, PlayerFighter _fighter) : base(_anim, _player, _fighter)
     {
-        name = STATE.P_BLOCKING;
+        name = STATE.P_KO;
     }
 
     public override void goKO()
     {
-        throw new System.NotImplementedException();
+        return;
     }
 }

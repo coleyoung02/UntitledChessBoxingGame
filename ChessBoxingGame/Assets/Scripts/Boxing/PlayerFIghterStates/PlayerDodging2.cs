@@ -7,7 +7,7 @@ public class PlayerDodging2 : State
     private Coroutine coroutine;
     public PlayerDodging2(Animator _anim, Transform _player, PlayerFighter _fighter) : base(_anim, _player, _fighter)
     {
-        name = STATE.P_BLOCKING;
+        name = STATE.P_DODGING2;
         coroutine = null;
     }
 

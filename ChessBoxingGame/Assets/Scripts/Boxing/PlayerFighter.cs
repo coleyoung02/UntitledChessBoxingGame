@@ -4,24 +4,88 @@ using UnityEngine;
 
 public class PlayerFighter : Fighter
 {
+    private Animator anim;
+    public string stateName; // Debug only
+    [SerializeField] Sprite[] sprites;
+    private SpriteRenderer spriteRenderer;
+    private static int stateNumOffset = 7;
 
-    private void Start()
+    void Start()
     {
-        heavyPunch = new Attack(5f, .2f, false);
-        lightPunch = new Attack(5f, .2f, false);
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>();
+        healthMax = Constants.Player.HEALTH_MAX;
+        currentHealth = healthMax;
+        blockingReduction = Constants.Player.BLOCKING_REDUC;
+        currentState = new PlayerIdle(anim, transform, this);
+        lightPunch = new Attack(Constants.Player.LIGHT_PUNCH_DAMAGE, Constants.Player.LIGHT_PUNCH_TELE_TIME, true);
+        heavyPunch = new Attack(Constants.Player.HEAVY_PUNCH_DAMAGE,
+            Constants.Enemy.HEAVY_PUNCH_FST_TELE_TIME + Constants.Enemy.HEAVY_PUNCH_SND_TELE_TIME, false);
+    }
+
+    private void Update()
+    {
+        stateName = currentState.name.ToString();
+        spriteRenderer.sprite = sprites[(int)currentState.name - stateNumOffset];
+        if (Input.GetKeyDown("f"))
+        {
+            Punch();
+        }
+        else if (Input.GetKeyDown("j"))
+        {
+            Dodge();
+        }
+        else if (Input.GetKey("space"))
+        {
+            Block();
+        }
+        else
+        {
+            EndBlock();
+        }
+        currentState = currentState.process();
     }
 
     void Punch()
     {
-        doAttack(lightPunch);
+        Debug.Log("entering punch");
+        if (currentState.name == State.STATE.P_IDLE)
+        {
+            Debug.Log("punch");
+            ((PlayerIdle)currentState).goPunching();
+        }
+        else if (currentState.name == State.STATE.P_BLOCKING)
+        {
+            ((PlayerBlocking)currentState).goPunching();
+        }
     }
+
     void Block()
     {
-        Debug.Log("block");
+        if (currentState.name == State.STATE.P_IDLE)
+        {
+            ((PlayerIdle)currentState).goBlocking();
+        }
     }
+
+    void EndBlock()
+    {
+        if (currentState.name == State.STATE.P_BLOCKING)
+        {
+            ((PlayerBlocking)currentState).goIdle();
+        }
+    }
+
     void Dodge()
     {
-        Debug.Log("dodge");
+        if (currentState.name == State.STATE.P_IDLE)
+        {
+            ((PlayerIdle)currentState).goDodging1();
+        }
+        else if (currentState.name == State.STATE.P_BLOCKING)
+        {
+            ((PlayerBlocking)currentState).goDodging1();
+        }
     }
 
     public override bool doAttack(Attack attack)
@@ -53,26 +117,8 @@ public class PlayerFighter : Fighter
             currentHealth -= damage;
         }
         return unblocked;
-
-
     }
 
-    private void Update()
-    {
-        if(Input.GetKeyDown("f"))
-        {
-            Punch();
-        }
-        if (Input.GetKeyDown("space"))
-        {
-            Block();
-        }
-        if (Input.GetKeyDown("j"))
-        {
-            Dodge();
-        }
-
-
-    }
+    
 
 }
