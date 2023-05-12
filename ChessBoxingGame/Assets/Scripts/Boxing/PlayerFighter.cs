@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerFighter : Fighter
@@ -10,8 +11,19 @@ public class PlayerFighter : Fighter
     private SpriteRenderer spriteRenderer;
     private static int stateNumOffset = 7;
 
+
+    private bool canPunch;
+    private int numPunches;
+    private bool waiting;
+    private Coroutine lastPunch;
+    [SerializeField] SpriteRenderer glove; // defintely delete later
+
     void Start()
     {
+        lastPunch = null;
+        canPunch = true;
+        numPunches = 0;
+        waiting = false;
         spriteRenderer = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
         healthMax = Constants.Player.HEALTH_MAX;
@@ -25,6 +37,7 @@ public class PlayerFighter : Fighter
 
     private void Update()
     {
+        glove.gameObject.SetActive(canPunch); // defintely delete later
         stateName = currentState.name.ToString();
         spriteRenderer.sprite = sprites[(int)currentState.name - stateNumOffset];
         if (Input.GetKeyDown("f"))
@@ -51,13 +64,36 @@ public class PlayerFighter : Fighter
         Debug.Log("entering punch");
         if (currentState.name == State.STATE.P_IDLE)
         {
-            Debug.Log("punch");
-            ((PlayerIdle)currentState).goPunching();
+            Debug.Log("punch " + numPunches);
+            if (canPunch)
+            {
+                ((PlayerIdle)currentState).goPunching();
+            }
+            else if (!waiting)
+            {
+                waiting = true;
+                StartCoroutine(waitBeforePunching());
+            }
         }
         else if (currentState.name == State.STATE.P_BLOCKING)
         {
             ((PlayerBlocking)currentState).goPunching();
         }
+    }
+
+    public IEnumerator waitBeforePunching()
+    {
+        yield return new WaitForSeconds(1.5f); //this should not be hard coded
+        numPunches = 0;
+        canPunch = true;
+        waiting = false;
+    }
+
+    public IEnumerator incompleteCombo()
+    {
+        yield return new WaitForSeconds(1.5f); //this should not be hard coded
+        numPunches = 0;
+        canPunch = true;
     }
 
     void Block()
@@ -90,7 +126,36 @@ public class PlayerFighter : Fighter
 
     public override bool doAttack(Attack attack)
     {
-        return opponent.takeAttack(attack);
+        if (opponent.takeAttack(attack))
+        {
+            numPunches++;
+            if (numPunches >= 3)
+            {
+                if (lastPunch != null)
+                {
+                    StopCoroutine(lastPunch);
+                }
+                canPunch = false;
+                waiting = true;
+                StartCoroutine(waitBeforePunching());
+            }
+            else if (lastPunch != null)
+            {
+                StopCoroutine(lastPunch);
+                lastPunch = StartCoroutine(incompleteCombo());
+            }
+            else
+            {
+                lastPunch = StartCoroutine(incompleteCombo());
+            }
+            return true;
+        }
+        canPunch = false;
+        if (!waiting)
+        {
+            StartCoroutine(waitBeforePunching());
+        }
+        return false;
     }
 
     public override bool takeAttack(Attack attack)

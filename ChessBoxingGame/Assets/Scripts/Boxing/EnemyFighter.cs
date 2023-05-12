@@ -56,8 +56,12 @@ public class EnemyFighter : Fighter
             damage *= (1-blockingReduction);
             unblocked = false;
         }
-        Debug.Log("EnemyFighter took attack of " + damage);
-        
+        if (currentState.name == State.STATE.E_LIGHTPUNCHING)
+        {
+            return false;
+        }
+
+
         if (currentHealth - damage <= 0)
         {
             currentHealth = 0;
@@ -80,7 +84,6 @@ public class EnemyFighter : Fighter
 
     public override bool doAttack(Attack attack)
     {
-        Debug.Log("EnemyFighter made attack of " + attack.damage);
         return opponent.takeAttack(attack);
     }
 

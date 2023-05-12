@@ -13,7 +13,6 @@ public class EnemyLightPunching : State
 
     public override void enter()
     {
-        Debug.Log("EnemyLightPunching.enter()");
         coroutine = fighter.StartCoroutine(startLightPunching());
         base.enter();
     }
@@ -25,7 +24,6 @@ public class EnemyLightPunching : State
 
     public override void exit()
     {
-        Debug.Log("EnemyLightPunching.exit()");
         base.exit();
     }
 

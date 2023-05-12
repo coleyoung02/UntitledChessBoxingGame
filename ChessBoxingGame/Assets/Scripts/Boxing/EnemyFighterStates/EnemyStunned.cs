@@ -13,7 +13,6 @@ public class EnemyStunned : State
 
     public override void enter()
     {
-        Debug.Log("EnemyStunned.enter()");
         fighter.StartCoroutine(startStunned());
         base.enter();
     }
@@ -25,7 +24,6 @@ public class EnemyStunned : State
 
     public override void exit()
     {
-        Debug.Log("EnemyStunned.exit()");
         base.exit();
     }
     

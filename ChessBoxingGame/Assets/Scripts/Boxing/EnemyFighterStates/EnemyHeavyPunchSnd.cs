@@ -14,7 +14,6 @@ public class EnemyHeavyPunchingSnd : State
 
     public override void enter()
     {
-        Debug.Log("EnemyHeavyPunchingSnd.enter()");
         fighter.StartCoroutine(startHeavyPunchingSnd());
         base.enter();
     }
@@ -26,7 +25,6 @@ public class EnemyHeavyPunchingSnd : State
 
     public override void exit()
     {
-        Debug.Log("EnemyHeavyPunchingSnd.exit()");
         base.exit();
     }
 
