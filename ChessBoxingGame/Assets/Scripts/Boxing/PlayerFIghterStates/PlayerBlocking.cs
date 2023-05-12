@@ -9,8 +9,23 @@ public class PlayerBlocking : State
         name = STATE.P_BLOCKING;
     }
 
+    public void goDodging1()
+    {
+        nextState = new PlayerDodging1(anim, player, (PlayerFighter)fighter);
+        stage = EVENT.EXIT;
+    }
+
+    public void goIdle()
+    {
+        nextState = new PlayerIdle(anim, player, (PlayerFighter)fighter);
+        stage = EVENT.EXIT;
+    }
+
     public override void goKO()
     {
-        throw new System.NotImplementedException();
+        nextState = new PlayerKO(anim, player, (PlayerFighter)fighter);
+        stage = EVENT.EXIT;
     }
+
+
 }

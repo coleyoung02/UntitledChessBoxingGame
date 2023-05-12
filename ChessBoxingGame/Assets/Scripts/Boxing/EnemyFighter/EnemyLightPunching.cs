@@ -4,15 +4,17 @@ using UnityEngine;
 
 public class EnemyLightPunching : State
 {
+    private Coroutine coroutine;
     public EnemyLightPunching(Animator _anim, Transform _player, EnemyFighter _fighter) : base(_anim, _player, _fighter)
     {
         name = STATE.E_LIGHTPUNCHING;
+        coroutine = null;
     }
 
     public override void enter()
     {
         Debug.Log("EnemyLightPunching.enter()");
-        fighter.StartCoroutine(startLightPunching());
+        coroutine = fighter.StartCoroutine(startLightPunching());
         base.enter();
     }
 
@@ -40,6 +42,11 @@ public class EnemyLightPunching : State
 
     public override void goKO()
     {
+        if (coroutine != null)
+        {
+            fighter.StopCoroutine(coroutine);
+            coroutine = null;
+        }
         nextState = new EnemyKO(anim, player, (EnemyFighter)fighter);
         stage = EVENT.EXIT;
     }

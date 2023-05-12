@@ -4,15 +4,19 @@ using UnityEngine;
 
 public class EnemyHeavyPunchingFst : State
 {
+
+    private Coroutine coroutine;
+
     public EnemyHeavyPunchingFst(Animator _anim, Transform _player, EnemyFighter _fighter) : base(_anim, _player, _fighter)
     {
         name = STATE.E_HEAVYPUNCHINGFST;
+        coroutine = null;
     }
 
     public override void enter()
     {
         Debug.Log("EnemyHeavyPunchingFst.enter()");
-        fighter.StartCoroutine(startHeavyPunchingFst());
+        coroutine = fighter.StartCoroutine(startHeavyPunchingFst());
         base.enter();
     }
 
@@ -35,16 +39,27 @@ public class EnemyHeavyPunchingFst : State
             nextState = new EnemyHeavyPunchingSnd(anim, player, (EnemyFighter)fighter); 
             stage = EVENT.EXIT;
         }
+        coroutine = null;
     }
     
     public void goStunned()
     {
+        if (coroutine != null)
+        {
+            fighter.StopCoroutine(coroutine);
+            coroutine = null;
+        }
         nextState = new EnemyStunned(anim, player, (EnemyFighter)fighter);
         stage = EVENT.EXIT;
     }
     
     public override void goKO()
     {
+        if (coroutine != null)
+        {
+            fighter.StopCoroutine(coroutine);
+            coroutine = null;
+        }
         nextState = new EnemyKO(anim, player, (EnemyFighter)fighter);
         stage = EVENT.EXIT;
     }

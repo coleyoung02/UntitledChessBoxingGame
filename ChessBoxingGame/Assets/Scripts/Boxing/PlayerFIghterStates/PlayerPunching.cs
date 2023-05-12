@@ -4,13 +4,50 @@ using UnityEngine;
 
 public class PlayerPunching : State
 {
+    private Coroutine coroutine;
     public PlayerPunching(Animator _anim, Transform _player, PlayerFighter _fighter) : base(_anim, _player, _fighter)
     {
         name = STATE.P_BLOCKING;
+        coroutine = null;
+}
+
+    public override void enter()
+    {
+        coroutine = fighter.StartCoroutine(startPunching());
+        base.enter();
+    }
+
+    public IEnumerator startPunching()
+    {
+        yield return new WaitForSeconds(Constants.Player.LIGHT_PUNCH_TELE_TIME);
+        if (fighter.currentState == this)
+        {
+            fighter.doAttack(fighter.LightPunch);
+            nextState = new PlayerIdle(anim, player, (PlayerFighter)fighter);
+            stage = EVENT.EXIT;
+        }
+        coroutine = null;
+    }
+
+    public void goIdle()
+    {
+        if (coroutine != null)
+        {
+            fighter.StopCoroutine(coroutine);
+            coroutine = null;
+        }
+        nextState = new PlayerIdle(anim, player, (PlayerFighter)fighter);
+        stage = EVENT.EXIT;
     }
 
     public override void goKO()
     {
-        throw new System.NotImplementedException();
+        if (coroutine != null)
+        {
+            fighter.StopCoroutine(coroutine);
+            coroutine = null;
+        }
+        nextState = new PlayerKO(anim, player, (PlayerFighter)fighter);
+        stage = EVENT.EXIT;
     }
 }
