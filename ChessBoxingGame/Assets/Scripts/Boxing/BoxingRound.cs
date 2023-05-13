@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class BoxingRound : MonoBehaviour
 {
-    private Timer timer;
-    private PlayerFighter player;
-    private EnemyFighter enemy;
-    private int roundNumber;
+    [SerializeField] private TimerCountdown timer;
+    [SerializeField] private PlayerFighter player;
+    [SerializeField] private EnemyFighter enemy;
+    [SerializeField] private int roundNumber;
 
     public void endRound()
     {
