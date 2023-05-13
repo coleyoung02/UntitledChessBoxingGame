@@ -18,14 +18,12 @@ public struct Attack
 
 public abstract class Fighter : MonoBehaviour
 {
-    [SerializeField] protected float healthMax;
-    [SerializeField] protected float currentHealth;
+    protected float healthMax;
+    protected float currentHealth;
     protected Attack heavyPunch;
     protected Attack lightPunch;
     [SerializeField] protected Fighter opponent;
-    public bool isBlocking;
-    public bool isDodging;
-    [SerializeField] protected float blockingReduction; // if blockingReduction is 0.1, the fighter takes only 90% damage when blocking.
+    protected float blockingReduction; // if blockingReduction is 0.1, the fighter takes only 90% damage when blocking.
     public State currentState;
 
 
@@ -45,38 +43,13 @@ public abstract class Fighter : MonoBehaviour
 
     #endregion
 
-    // depreciated and should be overwritten
-    public virtual bool doAttack(Attack attack)
+    public abstract bool doAttack(Attack attack);
+
+    public string HealthFormatted()
     {
-        //TODO: How to determine whether attack is successful?
-        //Currently, as long as the fighter is not blocking, the attack is successful.
-        if (!isBlocking)
-        {
-            StartCoroutine(doAttackAfterTelegraph(attack));
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return currentHealth.ToString("0.0");
     }
 
-    // depreciated
-    private IEnumerator doAttackAfterTelegraph(Attack attack)
-    {
-        yield return new WaitForSeconds(attack.telegraphTime);
-        opponent.takeAttack(attack);
-    }
+    public abstract bool takeAttack(Attack attack);
 
-    public abstract void takeAttack(Attack attack);
-
-    public void blockUp()
-    {
-        isBlocking = true;
-    }
-
-    public void blockDown()
-    {
-        isBlocking = false;
-    }
 }

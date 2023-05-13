@@ -10,13 +10,11 @@ public class EnemyKO : State
 
     public override void enter()
     {
-        Debug.Log("EnemyKO.enter()");
         base.enter();
     }
 
     public override void exit()
     {
-        Debug.Log("EnemyKO.exit()");
         base.exit();
     }
 

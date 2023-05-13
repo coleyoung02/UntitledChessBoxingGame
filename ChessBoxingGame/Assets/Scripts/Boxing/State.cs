@@ -11,13 +11,19 @@ public abstract class State {
     [Serializable]
     public enum STATE {
         // Enemy states
-        E_IDLE,
-        E_BLOCKING,
-        E_HEAVYPUNCHINGFST,
-        E_HEAVYPUNCHINGSND,
-        E_LIGHTPUNCHING,
-        E_STUNNED,
-        E_KO
+        E_IDLE              = 0,
+        E_BLOCKING          = 1,
+        E_HEAVYPUNCHINGFST  = 2,
+        E_HEAVYPUNCHINGSND  = 3,
+        E_LIGHTPUNCHING     = 4,
+        E_STUNNED           = 5,
+        E_KO                = 6,
+        P_IDLE              = 7,
+        P_PUNCHING          = 8,
+        P_DODGING1          = 9,
+        P_DODGING2          = 10,
+        P_BLOCKING          = 11,
+        P_KO                = 12
     };
 
     public enum EVENT {
