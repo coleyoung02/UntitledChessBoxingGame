@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class TimerCountdown : MonoBehaviour
 {
     [SerializeField] private float timeValue = 90f;
+    BoxingRound round = new BoxingRound();
 
     [Header("ClockUI References")]
     [SerializeField] private Transform pos1;
@@ -24,6 +25,7 @@ public class TimerCountdown : MonoBehaviour
         else
         {
             timeValue = 0;
+            round.endRound();
         }
 
         DisplayTime(timeValue);
