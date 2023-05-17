@@ -6,9 +6,12 @@ public class EnemyFighter : Fighter
 {
     private Animator anim;
     public string stateName; // Debug only
+    [SerializeField] Sprite[] sprites; // Delete after testing
+    private SpriteRenderer spriteRenderer; // Delete after testing
 
     void Start()
     {
+        spriteRenderer = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
         healthMax = Constants.Enemy.HEALTH_MAX;
         currentHealth = healthMax;
@@ -24,16 +27,18 @@ public class EnemyFighter : Fighter
     {
         stateName = currentState.name.ToString(); // Debug only
         // random possbility
-        
+        spriteRenderer.sprite = sprites[(int)currentState.name]; //Delete after testing
         // Comment it out to use buttons instead
-        float rand = UnityEngine.Random.Range(0.0f, 1.0f);
+        float rand = UnityEngine.Random.Range(0.0f, 3.0f);
         if (rand < Constants.Enemy.POSS_BLOCKING)
         {
             hitBlocking();
-        }else if (rand < Constants.Enemy.POSS_BLOCKING + Constants.Enemy.POSS_LIGHT_PUNCH)
+        }
+        else if (rand < Constants.Enemy.POSS_BLOCKING + Constants.Enemy.POSS_LIGHT_PUNCH)
         {
             hitLightPunch();
-        }else if (rand < Constants.Enemy.POSS_BLOCKING + Constants.Enemy.POSS_LIGHT_PUNCH + Constants.Enemy.POSS_HEAVY_PUNCH)
+        }
+        else if (rand < Constants.Enemy.POSS_BLOCKING + Constants.Enemy.POSS_LIGHT_PUNCH + Constants.Enemy.POSS_HEAVY_PUNCH)
         {
             hitHeavyPunch();
         }
@@ -42,15 +47,21 @@ public class EnemyFighter : Fighter
     }
 
 
-    public override void takeAttack(Attack attack)
+    public override bool takeAttack(Attack attack)
     {
         float damage = attack.damage;
+        bool unblocked = true;
         if (currentState.name == State.STATE.E_BLOCKING)
         {
             damage *= (1-blockingReduction);
+            unblocked = false;
         }
-        Debug.Log("EnemyFighter took attack of " + damage);
-        
+        if (currentState.name == State.STATE.E_LIGHTPUNCHING)
+        {
+            return false;
+        }
+
+
         if (currentHealth - damage <= 0)
         {
             currentHealth = 0;
@@ -62,17 +73,18 @@ public class EnemyFighter : Fighter
             if (currentState.name == State.STATE.E_IDLE)
             {
                 ((EnemyIdle)currentState).goStunned();
-            }else if (currentState.name == State.STATE.E_HEAVYPUNCHINGFST)
+            }
+            else if (currentState.name == State.STATE.E_HEAVYPUNCHINGFST)
             {
                 ((EnemyHeavyPunchingFst)currentState).goStunned();
             }
         }
+        return unblocked;
     }
 
     public override bool doAttack(Attack attack)
     {
-        Debug.Log("EnemyFighter made attack of " + attack.damage);
-        return true;
+        return opponent.takeAttack(attack);
     }
 
     public void hitBlocking()

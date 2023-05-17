@@ -1,46 +1,49 @@
+using System;
+using System.Collections;
 using UnityEngine;
 
-
-public class EnemyIdle : State
+public class EnemyBlocking : State
 {
-    public EnemyIdle(Animator _anim, Transform _player, EnemyFighter _fighter) : base(_anim, _player, _fighter)
+    public EnemyBlocking(Animator _anim, Transform _player, EnemyFighter _fighter) : base(_anim, _player, _fighter)
     {
-        name = STATE.E_IDLE;
+        name = STATE.E_BLOCKING;
     }
 
     public override void enter()
     {
-        Debug.Log("EnemyIdle.enter()");
+        fighter.StartCoroutine(startBlocking());
         base.enter();
+    }
+
+    public override void update()
+    {
+        base.update();
     }
 
     public override void exit()
     {
-        Debug.Log("EnemyIdle.exit()");
         base.exit();
     }
 
-    public void goBlocking()
+    public IEnumerator startBlocking()
     {
-        nextState = new EnemyBlocking(anim, player, (EnemyFighter)fighter);
-        stage = EVENT.EXIT;
+        yield return new WaitForSeconds(Constants.Enemy.BLOCKING_TIME);
+        if (fighter.currentState == this)
+        {
+            nextState = new EnemyIdle(anim, player, (EnemyFighter)fighter);
+            stage = EVENT.EXIT;
+        }
     }
-
+    
     public void goLightPunching()
     {
         nextState = new EnemyLightPunching(anim, player, (EnemyFighter)fighter);
         stage = EVENT.EXIT;
     }
-
+    
     public void goHeavyPunching()
     {
         nextState = new EnemyHeavyPunchingFst(anim, player, (EnemyFighter)fighter);
-        stage = EVENT.EXIT;
-    }
-
-    public void goStunned()
-    {
-        nextState = new EnemyStunned(anim, player, (EnemyFighter)fighter);
         stage = EVENT.EXIT;
     }
 
@@ -49,4 +52,5 @@ public class EnemyIdle : State
         nextState = new EnemyKO(anim, player, (EnemyFighter)fighter);
         stage = EVENT.EXIT;
     }
+
 }

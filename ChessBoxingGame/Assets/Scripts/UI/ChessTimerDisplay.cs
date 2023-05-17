@@ -1,10 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class TimerCountdown : MonoBehaviour
+public class ChessTimerDisplay : MonoBehaviour
 {
     [SerializeField] private float timeValue = 90f;
 
@@ -14,18 +12,9 @@ public class TimerCountdown : MonoBehaviour
     [SerializeField] private Transform pos3;
     [SerializeField] private Transform pos4;
 
-    //Update is called once per frame
-    void Update()
+    // Update is called once per frame
+    void Start()
     {
-        if (timeValue > 0)
-        {
-            timeValue -= Time.deltaTime;
-        }
-        else
-        {
-            timeValue = 0;
-        }
-
         DisplayTime(timeValue);
     }
 

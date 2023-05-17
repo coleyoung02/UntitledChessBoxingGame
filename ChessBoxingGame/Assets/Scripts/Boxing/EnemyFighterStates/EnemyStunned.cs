@@ -4,14 +4,15 @@ using UnityEngine;
 
 public class EnemyStunned : State
 {
+    private Coroutine coroutine;
     public EnemyStunned(Animator _anim, Transform _player, EnemyFighter _fighter) : base(_anim, _player, _fighter)
     {
         name = STATE.E_STUNNED;
+        coroutine = null;
     }
 
     public override void enter()
     {
-        Debug.Log("EnemyStunned.enter()");
         fighter.StartCoroutine(startStunned());
         base.enter();
     }
@@ -23,7 +24,6 @@ public class EnemyStunned : State
 
     public override void exit()
     {
-        Debug.Log("EnemyStunned.exit()");
         base.exit();
     }
     
@@ -35,10 +35,16 @@ public class EnemyStunned : State
             nextState = new EnemyIdle(anim, player, (EnemyFighter)fighter);
             stage = EVENT.EXIT;
         }
+        coroutine = null;
     }
     
     public override void goKO()
     {
+        if (coroutine != null)
+        {
+            fighter.StopCoroutine(coroutine);
+            coroutine = null;
+        }
         nextState = new EnemyKO(anim, player, (EnemyFighter)fighter);
         stage = EVENT.EXIT;
     }
