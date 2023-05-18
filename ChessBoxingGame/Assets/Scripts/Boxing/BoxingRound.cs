@@ -4,18 +4,17 @@ using UnityEngine;
 
 public class BoxingRound : MonoBehaviour
 {
-    bool KO;
     [SerializeField] private TimerCountdown timer;
     [SerializeField] private PlayerFighter player;
     [SerializeField] private EnemyFighter enemy;
     [SerializeField] private int roundNumber;
 
-    void Win()
+    public void Win()
     {
 
     }
 
-    void Lose()
+    public void Lose()
     {
 
     }
@@ -26,13 +25,6 @@ public class BoxingRound : MonoBehaviour
 
     private void Update()
     {
-        if(KO)
-        {
-            Win();
-        }
-        else
-        {
-            Lose();
-        }
+        
     }
 }

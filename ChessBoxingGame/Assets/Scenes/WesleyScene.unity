@@ -211,6 +211,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerPrefab
       objectReference: {fileID: 0}
+    - target: {fileID: 7662089822704607864, guid: 0e68a484fd223fe45993ece7ee5419e8, type: 3}
+      propertyPath: opponent
+      value: 
+      objectReference: {fileID: 2078390128}
     - target: {fileID: 7964856094738980253, guid: 0e68a484fd223fe45993ece7ee5419e8, type: 3}
       propertyPath: m_RootOrder
       value: 1
@@ -398,7 +402,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1832593348}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 782.51373, y: 247.91957, z: -7.170376}
+  m_LocalPosition: {x: 0, y: 0, z: -7.170376}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -415,6 +419,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1832593350}
     m_Modifications:
+    - target: {fileID: -8815968452279178414, guid: 0b631f53c58117a49aaf2d0887a0d268, type: 3}
+      propertyPath: opponent
+      value: 
+      objectReference: {fileID: 1211719997}
     - target: {fileID: 474117706807180559, guid: 0b631f53c58117a49aaf2d0887a0d268, type: 3}
       propertyPath: m_Name
       value: PlaytestEnemyFighter

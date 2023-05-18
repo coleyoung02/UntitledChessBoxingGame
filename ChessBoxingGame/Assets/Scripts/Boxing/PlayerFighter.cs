@@ -184,6 +184,9 @@ public class PlayerFighter : Fighter
         return unblocked;
     }
 
-    
+    protected override void onKO()
+    {
+        this.round.Lose();
+    }
 
 }

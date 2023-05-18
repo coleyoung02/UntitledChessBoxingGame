@@ -23,6 +23,7 @@ public abstract class Fighter : MonoBehaviour
     protected Attack heavyPunch;
     protected Attack lightPunch;
     [SerializeField] protected Fighter opponent;
+    [SerializeField] protected BoxingRound round;
     protected float blockingReduction; // if blockingReduction is 0.1, the fighter takes only 90% damage when blocking.
     public State currentState;
 
@@ -51,5 +52,7 @@ public abstract class Fighter : MonoBehaviour
     }
 
     public abstract bool takeAttack(Attack attack);
+
+    protected abstract void onKO();
 
 }
