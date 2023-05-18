@@ -192,11 +192,17 @@ public class PlayerFighter : Fighter
         }
         return unblocked;
     }
+    
+    protected override void onKO()
+    {
+        this.round.Lose();
+    }
 
     private void playAudioClip(AudioClip clip)
     {
         this.audioSource.clip = clip;
         audioSource.Play();
     }
+        
 
 }

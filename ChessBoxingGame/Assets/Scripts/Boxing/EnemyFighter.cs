@@ -124,4 +124,9 @@ public class EnemyFighter : Fighter
     {
         takeAttack(lightPunch); 
     }
+
+    protected override void onKO()
+    {
+        this.round.Win();
+    }
 }

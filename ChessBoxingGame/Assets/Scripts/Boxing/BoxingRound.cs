@@ -9,7 +9,21 @@ public class BoxingRound : MonoBehaviour
     [SerializeField] private EnemyFighter enemy;
     [SerializeField] private int roundNumber;
 
+    public void Win()
+    {
+
+    }
+
+    public void Lose()
+    {
+
+    }
     public void endRound()
+    {
+        
+    }
+
+    private void Update()
     {
         
     }
