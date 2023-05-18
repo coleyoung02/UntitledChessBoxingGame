@@ -1,12 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class TimerCountdown : MonoBehaviour
 {
     [SerializeField] private float timeValue = 90f;
+    [SerializeField] private BoxingRound round;
 
     [Header("ClockUI References")]
     [SerializeField] private Transform pos1;
@@ -24,6 +26,8 @@ public class TimerCountdown : MonoBehaviour
         else
         {
             timeValue = 0;
+            round.endRound();
+            this.enabled = false;
         }
 
         DisplayTime(timeValue);
