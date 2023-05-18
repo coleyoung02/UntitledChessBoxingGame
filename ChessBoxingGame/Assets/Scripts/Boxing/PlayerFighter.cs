@@ -18,9 +18,11 @@ public class PlayerFighter : Fighter
     private Coroutine lastPunch;
     [SerializeField] SpriteRenderer glove; // defintely delete later
 
-    [SerializeField] private AudioSource punchSound;
-    [SerializeField] private AudioSource damageSound;
-    [SerializeField] private AudioSource knockoutSound;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip damageNoise;
+    [SerializeField] private AudioClip hurtNoise;
+    [SerializeField] private AudioClip KONoise;
+
 
     void Start()
     {
@@ -66,7 +68,7 @@ public class PlayerFighter : Fighter
     void Punch()
     {
         Debug.Log("entering punch");
-        punchSound.Play();
+        playAudioClip(damageNoise);
         if (currentState.name == State.STATE.P_IDLE)
         {
             Debug.Log("punch " + numPunches);
@@ -174,24 +176,27 @@ public class PlayerFighter : Fighter
         bool unblocked = true;
         if (currentState.name == State.STATE.P_BLOCKING)
         {
-            damageSound.Play();
             damage *= (1 - blockingReduction);
             unblocked = false;
         }
         if (currentHealth - damage <= 0)
         {
-            knockoutSound.Play();
+            playAudioClip(KONoise);
             currentHealth = 0;
             currentState.goKO();
         }
         else
         {
-            damageSound.Play();
+            playAudioClip(hurtNoise);
             currentHealth -= damage;
         }
         return unblocked;
     }
 
-    
+    private void playAudioClip(AudioClip clip)
+    {
+        this.audioSource.clip = clip;
+        audioSource.Play();
+    }
 
 }
