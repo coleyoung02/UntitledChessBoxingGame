@@ -33,7 +33,7 @@ public class EnemyLightPunching : State
         if (fighter.currentState == this)
         {
             fighter.doAttack(fighter.LightPunch);
-            nextState = new EnemyIdle(anim, player, (EnemyFighter)fighter);
+            nextState = new EnemyFakeIdle(anim, player, (EnemyFighter)fighter);
             stage = EVENT.EXIT;
         }
     }

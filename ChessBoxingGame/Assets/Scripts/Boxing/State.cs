@@ -18,6 +18,7 @@ public abstract class State {
         E_LIGHTPUNCHING     = 4,
         E_STUNNED           = 5,
         E_KO                = 6,
+        E_FAKEIDLE          = 13,
         P_IDLE              = 7,
         P_PUNCHING          = 8,
         P_DODGING1          = 9,
