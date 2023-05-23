@@ -27,7 +27,7 @@ public class EnemyFighter : Fighter
     {
         stateName = currentState.name.ToString(); // Debug only
         // random possbility
-        // spriteRenderer.sprite = sprites[(int)currentState.name]; //Delete after testing
+        spriteRenderer.sprite = sprites[(int)currentState.name]; //Delete after testing
         // Comment it out to use buttons instead
         float rand = UnityEngine.Random.Range(0.0f, 1.0f); 
         if (rand < Constants.Enemy.POSS_LIGHT_PUNCH)

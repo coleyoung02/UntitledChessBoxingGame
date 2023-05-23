@@ -202,10 +202,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: -8815968452279178414, guid: 0b631f53c58117a49aaf2d0887a0d268, type: 3}
-      propertyPath: opponent
-      value: 
-      objectReference: {fileID: 646736255}
     - target: {fileID: 474117706807180559, guid: 0b631f53c58117a49aaf2d0887a0d268, type: 3}
       propertyPath: m_Name
       value: PlaytestEnemyFighter
@@ -220,7 +216,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9205079199008288066, guid: 0b631f53c58117a49aaf2d0887a0d268, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2
+      value: 3.375027
       objectReference: {fileID: 0}
     - target: {fileID: 9205079199008288066, guid: 0b631f53c58117a49aaf2d0887a0d268, type: 3}
       propertyPath: m_LocalPosition.z

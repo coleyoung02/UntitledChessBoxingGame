@@ -9,7 +9,7 @@ public class PlayerFighter : Fighter
     public string stateName; // Debug only
     [SerializeField] Sprite[] sprites;
     private SpriteRenderer spriteRenderer;
-    private static int stateNumOffset = 7;
+    private static int stateNumOffset = 8;
 
 
     private bool canPunch;
