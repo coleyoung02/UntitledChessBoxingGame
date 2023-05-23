@@ -34,7 +34,7 @@ public class EnemyHeavyPunchingSnd : State
         if (fighter.currentState == this)
         {
             fighter.doAttack(fighter.HeavyPunch);
-            nextState = new EnemyIdle(anim, player, (EnemyFighter)fighter);
+            nextState = new EnemyFakeIdle(anim, player, (EnemyFighter)fighter);
             stage = EVENT.EXIT;
         }
         coroutine = null;

@@ -29,16 +29,12 @@ public class EnemyFighter : Fighter
         // random possbility
         spriteRenderer.sprite = sprites[(int)currentState.name]; //Delete after testing
         // Comment it out to use buttons instead
-        float rand = UnityEngine.Random.Range(0.0f, 3.0f);
-        if (rand < Constants.Enemy.POSS_BLOCKING)
-        {
-            hitBlocking();
-        }
-        else if (rand < Constants.Enemy.POSS_BLOCKING + Constants.Enemy.POSS_LIGHT_PUNCH)
+        float rand = UnityEngine.Random.Range(0.0f, 1.0f); 
+        if (rand < Constants.Enemy.POSS_LIGHT_PUNCH)
         {
             hitLightPunch();
         }
-        else if (rand < Constants.Enemy.POSS_BLOCKING + Constants.Enemy.POSS_LIGHT_PUNCH + Constants.Enemy.POSS_HEAVY_PUNCH)
+        else if (rand < Constants.Enemy.POSS_LIGHT_PUNCH + Constants.Enemy.POSS_HEAVY_PUNCH)
         {
             hitHeavyPunch();
         }
@@ -84,26 +80,16 @@ public class EnemyFighter : Fighter
 
     public override bool doAttack(Attack attack)
     {
-        return opponent.takeAttack(attack);
+        // return opponent.takeAttack(attack);
+        return true;
     }
-
-    public void hitBlocking()
-    {
-        if (currentState.name == State.STATE.E_IDLE)
-        {
-            ((EnemyIdle)currentState).goBlocking();
-        }
-    }
+    
 
     public void hitLightPunch()
     {
         if (currentState.name == State.STATE.E_IDLE)
         {
             ((EnemyIdle)currentState).goLightPunching();
-        }
-        else if (currentState.name == State.STATE.E_BLOCKING)
-        {
-            ((EnemyBlocking)currentState).goLightPunching();
         }
     }
 
@@ -112,10 +98,6 @@ public class EnemyFighter : Fighter
         if (currentState.name == State.STATE.E_IDLE)
         {
             ((EnemyIdle)currentState).goHeavyPunching();
-        }
-        else if (currentState.name == State.STATE.E_BLOCKING)
-        {
-            ((EnemyBlocking)currentState).goHeavyPunching();
         }
     }
 
