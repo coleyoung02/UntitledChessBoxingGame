@@ -51,6 +51,16 @@ public abstract class Fighter : MonoBehaviour
         return currentHealth.ToString("0.0");
     }
 
+    public void setHealth(float health)
+    {
+        this.currentHealth = health;
+    }
+
+    public float getHealth()
+    {
+        return this.currentHealth;
+    }
+
     public abstract bool takeAttack(Attack attack);
 
     protected abstract void onKO();
