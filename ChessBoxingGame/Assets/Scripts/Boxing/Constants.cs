@@ -31,4 +31,6 @@ public static class Constants
         public const float DODGE_NO_IMMMUNITY_TIME = 0.2f;
         public const float HEALTH_MAX = 100;
     }
+
+    public const float chessTime = 60 * 5;
 }
