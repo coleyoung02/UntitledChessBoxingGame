@@ -2,12 +2,18 @@ using System;
 using System.Collections;
 using UnityEngine;
 
+using System.Collections.Generic;
+
 public class EnemyFighter : Fighter
 {
     private Animator anim;
     public string stateName; // Debug only
     [SerializeField] Sprite[] sprites; // Delete after testing
     private SpriteRenderer spriteRenderer; // Delete after testing
+
+    //Trash talk things
+    public List<string> trashTalkList = new List<string>() {"test1", "test2", "test3" };
+    private bool trashTalking = false;
 
     void Start()
     {
@@ -40,6 +46,7 @@ public class EnemyFighter : Fighter
         }
 
         currentState = currentState.process();
+        handleTrashTalk();
     }
 
 
@@ -110,5 +117,29 @@ public class EnemyFighter : Fighter
     protected override void onKO()
     {
         this.round.Win();
+    }
+
+    private void handleTrashTalk()
+    {
+        if (trashTalking) return;
+        switch (currentState.name)
+        {
+            case State.STATE.E_LIGHTPUNCHING:
+                Debug.Log(trashTalkList[UnityEngine.Random.Range(0, 2)]);
+                break;
+            case State.STATE.E_HEAVYPUNCHINGFST:
+                Debug.Log(trashTalkList[UnityEngine.Random.Range(0, 2)]);
+                break;
+            default:
+                return;
+        }
+
+        trashTalking = true;
+        Invoke("resetTrashTalk", 3f);
+    }
+
+    private void resetTrashTalk()
+    {
+        trashTalking = false;
     }
 }
