@@ -401,6 +401,7 @@ public class ChessState
     private List<Move> pawnMoves(int row, int col, int color) {
         List<Move> moves = new List<Move>();
         if (color == white) {
+            //buggy on promotion
             if (board[row-1][col] < 0) {
                 moves.Add(new Move(row, col, row-1, col));
                 //checks on pawns first move only
@@ -412,6 +413,7 @@ public class ChessState
             }
         }
         else {
+            //buggy on promotion
             if (board[row+1][col] < 0) {
                 moves.Add(new Move(row, col, row+1, col));
                 //checks on pawns first move only
