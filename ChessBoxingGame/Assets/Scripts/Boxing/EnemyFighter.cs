@@ -80,8 +80,8 @@ public class EnemyFighter : Fighter
 
     public override bool doAttack(Attack attack)
     {
-        // return opponent.takeAttack(attack);
-        return true;
+        return opponent.takeAttack(attack);
+        //return true;
     }
     
 
