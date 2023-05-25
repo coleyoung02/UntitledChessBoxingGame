@@ -60,12 +60,12 @@ public class EnemyFighter : Fighter
 
         if (currentHealth - damage <= 0)
         {
-            currentHealth = 0;
+            setHealth(0);
             currentState.goKO();
         }
         else
         {
-            currentHealth -= damage;
+            setHealth(currentHealth - damage);
             if (currentState.name == State.STATE.E_IDLE)
             {
                 ((EnemyIdle)currentState).goStunned();

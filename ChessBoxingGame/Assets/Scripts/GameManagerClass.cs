@@ -53,7 +53,6 @@ public class GameManagerClass : MonoBehaviour
 
 
 
-    [SerializeField] private string pauseMenuSceneName = "PauseMenu";
     [SerializeField] private AudioSource music;
 
     protected void Awake()
@@ -68,8 +67,8 @@ public class GameManagerClass : MonoBehaviour
             DontDestroyOnLoad(gameObject);
             initFields();
         }
-        Instance.music.volume = .1f;
-        Instance.music.Play();
+        //Instance.music.volume = .1f;
+        //Instance.music.Play();
     }
 
     private void initFields()

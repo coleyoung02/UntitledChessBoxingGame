@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public struct Attack
 {
@@ -18,12 +19,14 @@ public struct Attack
 
 public abstract class Fighter : MonoBehaviour
 {
+    private const int healthBarTicks = 82;
     protected float healthMax;
     protected float currentHealth;
     protected Attack heavyPunch;
     protected Attack lightPunch;
     [SerializeField] protected Fighter opponent;
     [SerializeField] protected BoxingRound round;
+    [SerializeField] private Slider healthBar;
     protected float blockingReduction; // if blockingReduction is 0.1, the fighter takes only 90% damage when blocking.
     public State currentState;
 
@@ -54,6 +57,8 @@ public abstract class Fighter : MonoBehaviour
     public void setHealth(float health)
     {
         this.currentHealth = health;
+        //Debug.Log(healthToInt());
+        healthBar.value = healthToInt();
     }
 
     public float getHealth()
@@ -65,4 +70,13 @@ public abstract class Fighter : MonoBehaviour
 
     protected abstract void onKO();
 
+    private int healthToInt()
+    {
+        float value = (currentHealth / healthMax) * 82;
+        if (value < 1  && value > 0)
+        {
+            return 1;
+        }
+        return (int)Math.Round(value);
+    }
 }

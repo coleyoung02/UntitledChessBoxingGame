@@ -68,12 +68,12 @@ public class PlayerFighter : Fighter
     void Punch()
     {
         Debug.Log("entering punch");
-        playAudioClip(damageNoise);
         if (currentState.name == State.STATE.P_IDLE)
         {
-            Debug.Log("punch " + numPunches);
+            //Debug.Log("punch " + numPunches);
             if (canPunch)
             {
+                playAudioClip(damageNoise);
                 ((PlayerIdle)currentState).goPunching();
             }
             else if (!waiting)
@@ -182,13 +182,13 @@ public class PlayerFighter : Fighter
         if (currentHealth - damage <= 0)
         {
             playAudioClip(KONoise);
-            currentHealth = 0;
+            setHealth(0);
             currentState.goKO();
         }
         else
         {
             playAudioClip(hurtNoise);
-            currentHealth -= damage;
+            setHealth(currentHealth - damage);
         }
         return unblocked;
     }
