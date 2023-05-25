@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using UnityEngine;
 
 //replacing lists with arrays will make it more time and space efficient if needed
@@ -34,6 +35,7 @@ public class ChessState
 {
     public ChessState() {
         this.init_new_board();
+        this.setMoves(white);
     }
 
     //whoever gets this array should really not touch it
@@ -117,6 +119,55 @@ public class ChessState
             return false;
         }
         return false;
+    }
+
+    public bool playWhite()
+    {
+        Move m = getRandomMove(white);
+        if (m.startRow == -1 && m.startCol == -1 && m.endRow == -1 && m.endCol == -1)
+        {
+            return false;
+        }
+        if (m.startRow < 0)
+        {
+            tryCastling(m);
+            return true;
+        }
+        if (m.isEP)
+        {
+            board[3][epCol] = ee;
+        }
+        else
+        {
+            if (m.startRow >= 0 && board[m.startRow][m.startCol] == wK)
+            {
+                doKingMoveUpdates(m.endRow, m.endCol, white);
+            }
+            doCornerUpdates(m.startRow, m.startCol);
+            doCornerUpdates(m.endRow, m.endCol);
+        }
+        if (m.endRow == 0 && board[m.startRow][m.startCol] == wp)
+        {
+            board[m.endRow][m.endCol] = wQ;
+        }
+        else
+        {
+            board[m.endRow][m.endCol] = board[m.startRow][m.startCol];
+        }
+        board[m.startRow][m.startCol] = ee;
+        return true;
+    }
+
+    public Move getRandomMove(int color)
+    {
+        setMoves(white);
+        List<Move> possible = legalMoves(color);
+        if (possible.Count == 0)
+        {
+            return new Move(-1, -1, -1, -1);
+        }
+        System.Random rnd = new System.Random();
+        return possible[rnd.Next(0, possible.Count)];
     }
 
     public void promote(int col, int piece)
@@ -255,6 +306,12 @@ public class ChessState
         blackCanCastleQS = true;
     }
 
+    private void setMoves(int color)
+    {
+        potentialMoves = possibleMoves(color);
+        realMoves = legalMoves(color);
+    }
+
     private void onMove(int color) {
         potentialMoves = possibleMoves(color);
         realMoves = legalMoves(color);
@@ -344,6 +401,7 @@ public class ChessState
     private List<Move> pawnMoves(int row, int col, int color) {
         List<Move> moves = new List<Move>();
         if (color == white) {
+            //buggy on promotion
             if (board[row-1][col] < 0) {
                 moves.Add(new Move(row, col, row-1, col));
                 //checks on pawns first move only
@@ -355,6 +413,7 @@ public class ChessState
             }
         }
         else {
+            //buggy on promotion
             if (board[row+1][col] < 0) {
                 moves.Add(new Move(row, col, row+1, col));
                 //checks on pawns first move only

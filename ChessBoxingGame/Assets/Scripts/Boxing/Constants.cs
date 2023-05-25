@@ -4,18 +4,20 @@ public static class Constants
 {
     public static class Enemy
     {
-        public const float BLOCKING_TIME = 3.0f;
+        public const float BLOCKING_TIME_MIN = 3.0f;
+        public const float BLOCKING_TIME_MAX = 5.0f;
         public const float LIGHT_PUNCH_TELE_TIME = 0.6f;
         public const float LIGHT_PUNCH_DAMAGE = 10.0f;
         public const float HEAVY_PUNCH_FST_TELE_TIME = 1.0f;
         public const float HEAVY_PUNCH_SND_TELE_TIME = .5f;
         public const float HEAVY_PUNCH_DAMAGE = 12.0f;
         public const float STUN_TIME = 1.0f;
+        public const float FAKE_IDLE_TIME = 0.5f;
         public const float BLOCKING_REDUC = 0.7f;
         public const float HEALTH_MAX = 100;
         public const float POSS_BLOCKING = 0.07f;
-        public const float POSS_LIGHT_PUNCH = 0.005f;
-        public const float POSS_HEAVY_PUNCH = 0.01f;
+        public const float POSS_LIGHT_PUNCH = 0.003f;
+        public const float POSS_HEAVY_PUNCH = 0.006f;
     }
 
     public static class Player
@@ -29,4 +31,6 @@ public static class Constants
         public const float DODGE_NO_IMMMUNITY_TIME = 0.2f;
         public const float HEALTH_MAX = 100;
     }
+
+    public const float chessTime = 60 * 5;
 }

@@ -31,16 +31,18 @@ public class ChessUI : MonoBehaviour
         selectedRow = -1;
         selectedCol = -1;
         chess = new ChessState();
-        board = chess.getBoard();
         buttons = this.GetComponentsInChildren<Button>();
         Array.Sort(buttons, new ButtonCompare());
         //i think its fine to hard code 8 unless chess drops an update to the board size
         //this hasnt been updated in a few centuries so it should be fine
+        board = chess.getBoard();
         refreshUI();
+        playWhite();
     }
 
     public void squareClicked(int buttonNo) 
     {
+        bool moved = false;
         int row = buttonNo / 8;
         int col = buttonNo % 8;
         if (selectedRow < 0)
@@ -66,6 +68,7 @@ public class ChessUI : MonoBehaviour
                 {
                     color = (color + 1) % 2;
                     board = chess.getBoard();
+                    moved = true;
                 }
                 if (row == 0 && board[row][col] == 0)
                 {
@@ -86,6 +89,19 @@ public class ChessUI : MonoBehaviour
                 selectedRow = -1;
             }
         }
+        refreshUI();
+        if (moved)
+        {
+            playWhite();
+        }
+    }
+
+    public void playWhite()
+    {
+        //do something better
+        chess.playWhite();
+        color = (color + 1) % 2;
+        board = chess.getBoard();
         refreshUI();
     }
 

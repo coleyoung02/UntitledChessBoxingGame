@@ -27,24 +27,13 @@ public class EnemyBlocking : State
 
     public IEnumerator startBlocking()
     {
-        yield return new WaitForSeconds(Constants.Enemy.BLOCKING_TIME);
+        float blocking_time = UnityEngine.Random.Range(0.0f, 1.0f)*(Constants.Enemy.BLOCKING_TIME_MAX - Constants.Enemy.BLOCKING_TIME_MIN) + Constants.Enemy.BLOCKING_TIME_MIN;
+        yield return new WaitForSeconds(blocking_time);
         if (fighter.currentState == this)
         {
             nextState = new EnemyIdle(anim, player, (EnemyFighter)fighter);
             stage = EVENT.EXIT;
         }
-    }
-    
-    public void goLightPunching()
-    {
-        nextState = new EnemyLightPunching(anim, player, (EnemyFighter)fighter);
-        stage = EVENT.EXIT;
-    }
-    
-    public void goHeavyPunching()
-    {
-        nextState = new EnemyHeavyPunchingFst(anim, player, (EnemyFighter)fighter);
-        stage = EVENT.EXIT;
     }
 
     public override void goKO()
