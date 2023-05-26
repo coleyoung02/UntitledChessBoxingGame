@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class BoxingRound : MonoBehaviour
 {
@@ -31,6 +32,7 @@ public class BoxingRound : MonoBehaviour
     {
         gameManager.setPlayerHealth(player.getHealth());
         gameManager.setEnemyHealth(enemy.getHealth());
+        SceneManager.LoadScene("ChessTesting1");
     }
 
     private void Update()

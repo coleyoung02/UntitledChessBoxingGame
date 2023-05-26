@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ChessTimerDisplay : MonoBehaviour
 {
@@ -23,6 +24,7 @@ public class ChessTimerDisplay : MonoBehaviour
         if (timeToDisplay < 0)
         {
             timeToDisplay = 0;
+            SceneManager.LoadScene("BoxingScene");
         }
 
         float minutes = Mathf.FloorToInt(timeToDisplay / 60);

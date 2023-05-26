@@ -22,7 +22,7 @@ public class PlayerFighter : Fighter
     [SerializeField] private AudioClip damageNoise;
     [SerializeField] private AudioClip hurtNoise;
     [SerializeField] private AudioClip KONoise;
-
+    private GameManagerClass gameManager;
 
     void Start()
     {
@@ -33,7 +33,8 @@ public class PlayerFighter : Fighter
         spriteRenderer = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
         healthMax = Constants.Player.HEALTH_MAX;
-        currentHealth = healthMax;
+        gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
+        currentHealth = gameManager.getPlayerHealth();
         blockingReduction = Constants.Player.BLOCKING_REDUC;
         currentState = new PlayerIdle(anim, transform, this);
         lightPunch = new Attack(Constants.Player.LIGHT_PUNCH_DAMAGE, Constants.Player.LIGHT_PUNCH_TELE_TIME, true);
