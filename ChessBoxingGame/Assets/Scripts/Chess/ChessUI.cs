@@ -18,6 +18,9 @@ public class ChessUI : MonoBehaviour
     private int selectedRow;
     private int selectedCol;
     private int promotionCol;
+    private GameManagerClass gameManager;
+    private float playerChessTime;
+    private float enemyChessTime;
 
 
     //for testing only, can (and should) be deleted once ai is implemented
@@ -30,7 +33,10 @@ public class ChessUI : MonoBehaviour
         color = 0;
         selectedRow = -1;
         selectedCol = -1;
-        chess = new ChessState();
+        gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
+        chess = gameManager.getChessState();
+        playerChessTime = gameManager.getPlayerChessTime();
+        enemyChessTime = gameManager.getEnemyChessTime();
         buttons = this.GetComponentsInChildren<Button>();
         Array.Sort(buttons, new ButtonCompare());
         //i think its fine to hard code 8 unless chess drops an update to the board size
@@ -38,6 +44,13 @@ public class ChessUI : MonoBehaviour
         board = chess.getBoard();
         refreshUI();
         playWhite();
+    }
+
+    public void OnDestroy()
+    {
+        gameManager.setChessState(chess); // theoretically no need
+        gameManager.setPlayerChessTime(playerChessTime);
+        gameManager.setEnemyChessTime(enemyChessTime);
     }
 
     public void squareClicked(int buttonNo) 

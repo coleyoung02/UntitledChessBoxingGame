@@ -8,13 +8,15 @@ public class EnemyFighter : Fighter
     public string stateName; // Debug only
     [SerializeField] Sprite[] sprites; // Delete after testing
     private SpriteRenderer spriteRenderer; // Delete after testing
+    private GameManagerClass gameManager;
 
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
         healthMax = Constants.Enemy.HEALTH_MAX;
-        currentHealth = healthMax;
+        gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
+        currentHealth = gameManager.getEnemyHealth();
         blockingReduction = Constants.Enemy.BLOCKING_REDUC;
         currentState = new EnemyIdle(anim, transform, this);
         lightPunch = new Attack(Constants.Enemy.LIGHT_PUNCH_DAMAGE, Constants.Enemy.LIGHT_PUNCH_TELE_TIME, true);
