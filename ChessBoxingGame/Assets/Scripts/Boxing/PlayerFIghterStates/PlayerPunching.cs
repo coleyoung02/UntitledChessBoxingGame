@@ -24,6 +24,7 @@ public class PlayerPunching : State
         {
             fighter.doAttack(fighter.LightPunch);
             nextState = new PlayerIdle(anim, player, (PlayerFighter)fighter);
+            anim.SetTrigger("GoIdle");
             stage = EVENT.EXIT;
         }
         coroutine = null;
@@ -36,6 +37,7 @@ public class PlayerPunching : State
             fighter.StopCoroutine(coroutine);
             coroutine = null;
         }
+        anim.SetTrigger("GoIdle");
         nextState = new PlayerIdle(anim, player, (PlayerFighter)fighter);
         stage = EVENT.EXIT;
     }
@@ -47,6 +49,7 @@ public class PlayerPunching : State
             fighter.StopCoroutine(coroutine);
             coroutine = null;
         }
+        anim.SetTrigger("KO");
         nextState = new PlayerKO(anim, player, (PlayerFighter)fighter);
         stage = EVENT.EXIT;
     }

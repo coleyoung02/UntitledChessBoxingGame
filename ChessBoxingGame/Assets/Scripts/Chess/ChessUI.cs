@@ -99,6 +99,12 @@ public class ChessUI : MonoBehaviour
     public void playWhite()
     {
         //do something better
+        StartCoroutine(playMove());
+    }
+
+    IEnumerator playMove()
+    {
+        yield return new WaitForSeconds(1.5f);
         chess.playWhite();
         color = (color + 1) % 2;
         board = chess.getBoard();

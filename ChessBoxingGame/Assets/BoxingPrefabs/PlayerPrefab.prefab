@@ -96,6 +96,7 @@ GameObject:
   - component: {fileID: 7662089822704607864}
   - component: {fileID: 200947595}
   - component: {fileID: -6213480772804061452}
+  - component: {fileID: 1009267759665206969}
   m_Layer: 0
   m_Name: PlayerPrefab
   m_TagString: Untagged
@@ -132,6 +133,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   opponent: {fileID: 0}
+  round: {fileID: 0}
+  healthBar: {fileID: 0}
   stateName: 
   sprites:
   - {fileID: 21300000, guid: 91986bd572e3b13489b9950941fda0c9, type: 3}
@@ -293,3 +296,23 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!95 &1009267759665206969
+Animator:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6721387810911140637}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 53713bfcae519414bba7d6ab56c7468b, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0

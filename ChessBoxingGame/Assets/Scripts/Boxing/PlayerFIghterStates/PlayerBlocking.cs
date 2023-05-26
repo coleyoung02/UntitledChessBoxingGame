@@ -24,12 +24,14 @@ public class PlayerBlocking : State
     public void goIdle()
     {
         nextState = new PlayerIdle(anim, player, (PlayerFighter)fighter);
+        anim.SetTrigger("GoIdle");
         stage = EVENT.EXIT;
     }
 
     public override void goKO()
     {
         nextState = new PlayerKO(anim, player, (PlayerFighter)fighter);
+        anim.SetTrigger("KO");
         stage = EVENT.EXIT;
     }
 
