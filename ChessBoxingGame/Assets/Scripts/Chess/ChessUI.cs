@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 
@@ -51,6 +52,11 @@ public class ChessUI : MonoBehaviour
         gameManager.setChessState(chess); // theoretically no need
         gameManager.setPlayerChessTime(playerChessTime);
         gameManager.setEnemyChessTime(enemyChessTime);
+    }
+
+    public void endRound()
+    {
+        SceneManager.LoadScene("BoxingScene");
     }
 
     public void squareClicked(int buttonNo) 

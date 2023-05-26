@@ -5,10 +5,9 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TimerCountdown : MonoBehaviour
+public class Timer : MonoBehaviour
 {
     [SerializeField] private float timeValue = 90f;
-    [SerializeField] public BoxingRound round;
 
     [Header("ClockUI References")]
     [SerializeField] private Transform pos1;
@@ -26,11 +25,16 @@ public class TimerCountdown : MonoBehaviour
         else
         {
             timeValue = 0;
-            round.endRound();
+            endTimer();
             this.enabled = false;
         }
 
         DisplayTime(timeValue);
+    }
+
+    protected virtual void endTimer()
+    {
+        Debug.Log("Over");
     }
 
     void DisplayTime(float timeToDisplay)

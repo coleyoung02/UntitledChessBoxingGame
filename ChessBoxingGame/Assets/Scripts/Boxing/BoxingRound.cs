@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class BoxingRound : MonoBehaviour
 {
-    [SerializeField] private TimerCountdown timer;
+    [SerializeField] private RoundCountdown timer;
     [SerializeField] private PlayerFighter player;
     [SerializeField] private EnemyFighter enemy;
     [SerializeField] private int roundNumber;

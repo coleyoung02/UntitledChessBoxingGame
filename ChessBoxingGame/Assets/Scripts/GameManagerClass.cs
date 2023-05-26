@@ -70,6 +70,8 @@ public class GameManagerClass : MonoBehaviour
         if (Instance != null && Instance != this)
         {
             Debug.Log("Destroy Game Manager");
+            Debug.Log(this.chessState);
+            Debug.Log(Instance.chessState);
             Destroy(this);
         }
         else
@@ -87,6 +89,7 @@ public class GameManagerClass : MonoBehaviour
         playerHealth = Constants.Player.HEALTH_MAX;
         enemyHealth = Constants.Enemy.HEALTH_MAX;
         chessState = new ChessState();
+        Debug.Log(chessState);
         playerChessTime = Constants.chessTime;
         enemyChessTime = Constants.chessTime;
     }
