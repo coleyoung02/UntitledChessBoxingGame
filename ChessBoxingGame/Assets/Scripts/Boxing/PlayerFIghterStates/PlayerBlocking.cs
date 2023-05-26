@@ -18,6 +18,7 @@ public class PlayerBlocking : State
     public void goPunching()
     {
         nextState = new PlayerPunching(anim, player, (PlayerFighter)fighter);
+        anim.SetTrigger("Punch");
         stage = EVENT.EXIT;
     }
 

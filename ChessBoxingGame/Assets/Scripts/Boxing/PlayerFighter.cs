@@ -69,13 +69,20 @@ public class PlayerFighter : Fighter
     void Punch()
     {
         Debug.Log("entering punch");
-        if (currentState.name == State.STATE.P_IDLE)
+        if (currentState.name == State.STATE.P_IDLE || currentState.name == State.STATE.P_DODGING2)
         {
             //Debug.Log("punch " + numPunches);
             if (canPunch)
             {
                 playAudioClip(damageNoise);
-                ((PlayerIdle)currentState).goPunching();
+                if (currentState.name == State.STATE.P_IDLE)
+                {
+                    ((PlayerIdle)currentState).goPunching();
+                }
+                else
+                {
+                    ((PlayerDodging2)currentState).goPunching();
+                }
             }
             else if (!waiting)
             {
@@ -85,7 +92,16 @@ public class PlayerFighter : Fighter
         }
         else if (currentState.name == State.STATE.P_BLOCKING)
         {
-            ((PlayerBlocking)currentState).goPunching();
+            if (canPunch)
+            {
+                playAudioClip(damageNoise);
+                ((PlayerBlocking)currentState).goPunching();
+            }
+            else if (!waiting)
+            {
+                waiting = true;
+                StartCoroutine(waitBeforePunching());
+            }
         }
     }
 

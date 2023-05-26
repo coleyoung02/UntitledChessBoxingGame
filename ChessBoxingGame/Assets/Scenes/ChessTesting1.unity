@@ -2016,6 +2016,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 5050783094459300460, guid: 0e3fbf51b12783740906c2c3b872df15, type: 3}
+    - {fileID: 8112346351725300552, guid: 0e3fbf51b12783740906c2c3b872df15, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 0e3fbf51b12783740906c2c3b872df15, type: 3}
 --- !u!1 &1375920039 stripped
 GameObject:
@@ -2039,7 +2040,7 @@ MonoBehaviour:
   pos2: {fileID: 1375920043}
   pos3: {fileID: 1375920042}
   pos4: {fileID: 1375920041}
-  round: {fileID: 0}
+  round: {fileID: 526656259}
 --- !u!224 &1375920041 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3640527892504275125, guid: 0e3fbf51b12783740906c2c3b872df15, type: 3}
@@ -2147,7 +2148,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
