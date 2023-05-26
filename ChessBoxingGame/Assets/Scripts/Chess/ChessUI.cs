@@ -31,11 +31,11 @@ public class ChessUI : MonoBehaviour
     void Start()
     {
         promotionCol = -1;
-        color = 0;
         selectedRow = -1;
         selectedCol = -1;
         gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
         chess = gameManager.getChessState();
+        color = chess.getColor();
         playerChessTime = gameManager.getPlayerChessTime();
         enemyChessTime = gameManager.getEnemyChessTime();
         buttons = this.GetComponentsInChildren<Button>();
@@ -44,7 +44,10 @@ public class ChessUI : MonoBehaviour
         //this hasnt been updated in a few centuries so it should be fine
         board = chess.getBoard();
         refreshUI();
-        playWhite();
+        if (color == 0)
+        {
+            playWhite();
+        }
     }
 
     public void OnDestroy()

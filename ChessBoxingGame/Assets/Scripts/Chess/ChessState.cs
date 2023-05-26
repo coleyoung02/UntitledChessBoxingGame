@@ -36,12 +36,18 @@ public class ChessState
     public ChessState() {
         this.init_new_board();
         this.setMoves(white);
+        this.currentColor = white;
     }
 
     //whoever gets this array should really not touch it
     //maybe i should make a copy
     public int[][] getBoard() {
         return this.board;
+    }
+
+    public int getColor()
+    {
+        return this.currentColor;
     }
 
     public bool playMove(int row, int col, int newRow, int newCol, int color) {
@@ -101,6 +107,7 @@ public class ChessState
             }
             board[newRow][newCol] = board[row][col];
             board[row][col] = ee;
+            this.currentColor = white;
             return true;
         }
         else if (isCastling(row, col, newRow, newCol, color))
@@ -112,6 +119,7 @@ public class ChessState
                     if (tryCastling(castleType))
                     {
                         epCol = -1;
+                        this.currentColor = white;
                         return true;
                     }
                 }
@@ -131,6 +139,7 @@ public class ChessState
         if (m.startRow < 0)
         {
             tryCastling(m);
+            this.currentColor = black;
             return true;
         }
         if (m.isEP)
@@ -155,6 +164,7 @@ public class ChessState
             board[m.endRow][m.endCol] = board[m.startRow][m.startCol];
         }
         board[m.startRow][m.startCol] = ee;
+        this.currentColor = black;
         return true;
     }
 
@@ -251,6 +261,8 @@ public class ChessState
     private int wkCol;
     private int bkRow;
     private int bkCol;
+
+    private int currentColor;
 
     private Move castleType;
     
