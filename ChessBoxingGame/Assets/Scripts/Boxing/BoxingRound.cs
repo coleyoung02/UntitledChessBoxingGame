@@ -8,6 +8,14 @@ public class BoxingRound : MonoBehaviour
     [SerializeField] private PlayerFighter player;
     [SerializeField] private EnemyFighter enemy;
     [SerializeField] private int roundNumber;
+    private GameManagerClass gameManager;
+
+    private void Start()
+    {
+        gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
+        player.setHealth(gameManager.getPlayerHealth());
+        enemy.setHealth(gameManager.getEnemyHealth());
+    }
 
     public void Win()
     {
@@ -18,9 +26,11 @@ public class BoxingRound : MonoBehaviour
     {
 
     }
+
     public void endRound()
     {
-        
+        gameManager.setPlayerHealth(player.getHealth());
+        gameManager.setEnemyHealth(enemy.getHealth());
     }
 
     private void Update()
