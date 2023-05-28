@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -9,17 +10,21 @@ using UnityEngine.UI;
 public class ChessUI : MonoBehaviour
 {
     private ChessState chess;
+    private ChessAI AI;
     private int[][] board;
     private Button[] buttons;
     [SerializeField] private Sprite[] sprites;
     [SerializeField] private Sprite[] highlighted;
+    [SerializeField] private Sprite[] indicators;
     [SerializeField] private GameObject promotionMenu;
     [SerializeField] private GameObject whitePiecesSelect;
     [SerializeField] private GameObject blackPiecesSelect;
     private int selectedRow;
     private int selectedCol;
     private int promotionCol;
+    private GameObject[] overlay;
     private GameManagerClass gameManager;
+    [SerializeField] private GameObject backupManager;
     private float playerChessTime;
     private float enemyChessTime;
 
@@ -34,15 +39,22 @@ public class ChessUI : MonoBehaviour
         selectedRow = -1;
         selectedCol = -1;
         gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
+        if (gameManager.getChessState() == null)
+        {
+            gameManager = Instantiate(backupManager, new Vector2(0, 0), Quaternion.identity).GetComponent<GameManagerClass>();
+        }
         chess = gameManager.getChessState();
         color = chess.getColor();
         playerChessTime = gameManager.getPlayerChessTime();
         enemyChessTime = gameManager.getEnemyChessTime();
         buttons = this.GetComponentsInChildren<Button>();
+        overlay = GameObject.FindGameObjectsWithTag("Overlay");
         Array.Sort(buttons, new ButtonCompare());
+        Array.Sort(overlay, new OverlayCompare());
         //i think its fine to hard code 8 unless chess drops an update to the board size
         //this hasnt been updated in a few centuries so it should be fine
         board = chess.getBoard();
+        AI = new ChessAI(chess);
         refreshUI();
         if (color == 0)
         {
@@ -62,59 +74,63 @@ public class ChessUI : MonoBehaviour
         SceneManager.LoadScene("BoxingScene");
     }
 
-    public void squareClicked(int buttonNo) 
+    public void squareClicked(int buttonNo)
     {
-        bool moved = false;
-        int row = buttonNo / 8;
-        int col = buttonNo % 8;
-        if (selectedRow < 0)
+        board = chess.getBoard();
+        if (color == 1)
         {
-            int piece = board[row][col];
-            if (piece >= 0 && piece % 2 == color)
+            bool moved = false;
+            int row = buttonNo / 8;
+            int col = buttonNo % 8;
+            if (selectedRow < 0)
             {
-                selectedRow = row;
-                selectedCol = col;
-                //refreshUI();
-            }
-        }
-        else
-        {
-            if (board[row][col] % 2 == color)
-            {
-                selectedRow = row;
-                selectedCol = col;
+                int piece = board[row][col];
+                if (piece >= 0 && piece % 2 == color)
+                {
+                    setMoveSquares(row, col);
+                    //refreshUI();
+                }
+                else
+                    Debug.Log("Not your piece " + board[row][col]);
             }
             else
             {
-                if (chess.playMove(selectedRow, selectedCol, row, col, color))
+                if (board[row][col] % 2 == color)
                 {
-                    color = (color + 1) % 2;
-                    board = chess.getBoard();
-                    moved = true;
+                    setMoveSquares(row, col);
                 }
-                if (row == 0 && board[row][col] == 0)
+                else
                 {
-                    Debug.Log("hey");
-                    promotionCol = col;
-                    whitePiecesSelect.SetActive(true);
-                    promotionMenu.SetActive(true);
-                }
-                else if (row == 7 && board[row][col] == 1)
-                {
-                    Debug.Log("hey");
+                    if (chess.playMove(selectedRow, selectedCol, row, col, color))
+                    {
+                        color = (color + 1) % 2;
+                        board = chess.getBoard();
+                        moved = true;
+                    }
+                    if (row == 0 && board[row][col] == 0)
+                    {
+                        Debug.Log("hey");
+                        promotionCol = col;
+                        whitePiecesSelect.SetActive(true);
+                        promotionMenu.SetActive(true);
+                    }
+                    else if (row == 7 && board[row][col] == 1)
+                    {
+                        Debug.Log("hey");
 
-                    promotionCol = col;
-                    blackPiecesSelect.SetActive(true);
-                    promotionMenu.SetActive(true);
+                        promotionCol = col;
+                        blackPiecesSelect.SetActive(true);
+                        promotionMenu.SetActive(true);
+                    }
+                    selectedCol = -1;
+                    selectedRow = -1;
                 }
-                selectedCol = -1;
-                selectedRow = -1;
             }
-        }
-        refreshUI();
-        if (moved)
-        {
-            playWhite();
+            refreshUI();
+            if (moved)
+            {
+                playWhite();
+            }
         }
     }
 
@@ -126,8 +142,18 @@ public class ChessUI : MonoBehaviour
 
     IEnumerator playMove()
     {
-        yield return new WaitForSeconds(1.5f);
-        chess.playWhite();
+        yield return new WaitForSeconds(1.2f);
+        Move m = AI.GetBest();
+        if (m.startRow < 0)
+        {
+            overlay[7 * 8 + 3].GetComponent<Image>().sprite = indicators[4];
+        }
+        else
+        {
+            overlay[m.startRow * 8 + m.startCol].GetComponent<Image>().sprite = indicators[4];
+        }
+        yield return new WaitForSeconds(.3f);
+        chess.playWhiteMove(m);
         color = (color + 1) % 2;
         board = chess.getBoard();
         refreshUI();
@@ -136,7 +162,7 @@ public class ChessUI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     public void replace(int piece)
@@ -158,11 +184,61 @@ public class ChessUI : MonoBehaviour
             {
                 if (selectedRow >= 0 && selectedRow == i && selectedCol == j)
                 {
-                    buttons[i * 8 + j].GetComponent<Image>().sprite = highlighted[board[i][j] + 1];
+                    overlay[i * 8 + j].GetComponent<Image>().sprite = indicators[1];
                 }
                 else
                 {
-                    buttons[i * 8 + j].GetComponent<Image>().sprite = sprites[board[i][j] + 1];
+                    overlay[i * 8 + j].GetComponent<Image>().sprite = indicators[0];
+                    
+                }
+                buttons[i * 8 + j].GetComponent<Image>().sprite = sprites[board[i][j] + 1];
+            }
+        }
+        highlightLegal();
+    }
+
+    private void setMoveSquares(int row, int col)
+    {
+        selectedRow = row;
+        selectedCol = col;
+    }
+
+    private void highlightLegal()
+    {
+        List<Move> legal = chess.getLegalMoves();
+        for (int i = 0; i < legal.Count; ++i)
+        {
+            if (legal[i].startRow == selectedRow && legal[i].startCol == selectedCol)
+            {
+                if (chess.getBoard()[legal[i].endRow][legal[i].endCol] % 2 != 0)
+                {
+                    overlay[legal[i].endRow * 8 + legal[i].endCol].GetComponent<Image>().sprite = indicators[2];
+                }
+                else
+                {
+                    overlay[legal[i].endRow * 8 + legal[i].endCol].GetComponent<Image>().sprite = indicators[3];
+                }
+            }
+            else if (legal[i].startRow < 0 && selectedRow == 7 && selectedCol == 3)
+            {
+                if (legal[i].endCol < 0)
+                {   
+                    overlay[7 * 8 + 1].GetComponent<Image>().sprite = indicators[2];
+                }
+                else if (legal[i].endRow < 0)
+                {
+                    overlay[7 * 8 + 5].GetComponent<Image>().sprite = indicators[2];
+                }
+            }
+            else if (legal[i].startCol < 0 && selectedRow == 0 && selectedCol == 3)
+            {
+                if (legal[i].endCol < 0)
+                {
+                    overlay[0 * 8 + 1].GetComponent<Image>().sprite = indicators[2];
+                }
+                else if (legal[i].endRow < 0)
+                {
+                    overlay[0 * 8 + 5].GetComponent<Image>().sprite = indicators[2];
                 }
             }
         }
@@ -170,10 +246,19 @@ public class ChessUI : MonoBehaviour
 }
 
 
+
 class ButtonCompare : IComparer
 {
     public int Compare(object x, object y)
     {
         return (new CaseInsensitiveComparer()).Compare(((Button)x).name, ((Button)y).name);
+    }
+}
+
+class OverlayCompare : IComparer
+{
+    public int Compare(object x, object y)
+    {
+        return (new CaseInsensitiveComparer()).Compare(((GameObject)x).name, ((GameObject)y).name);
     }
 }

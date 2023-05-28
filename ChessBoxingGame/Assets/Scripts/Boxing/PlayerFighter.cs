@@ -107,7 +107,7 @@ public class PlayerFighter : Fighter
 
     public IEnumerator waitBeforePunching()
     {
-        yield return new WaitForSeconds(1.5f); //this should not be hard coded
+        yield return new WaitForSeconds(3f); //this should not be hard coded
         numPunches = 0;
         canPunch = true;
         waiting = false;
