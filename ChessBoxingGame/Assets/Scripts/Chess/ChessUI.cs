@@ -14,7 +14,6 @@ public class ChessUI : MonoBehaviour
     private int[][] board;
     private Button[] buttons;
     [SerializeField] private Sprite[] sprites;
-    [SerializeField] private Sprite[] highlighted;
     [SerializeField] private Sprite[] indicators;
     [SerializeField] private GameObject promotionMenu;
     [SerializeField] private GameObject whitePiecesSelect;
@@ -27,6 +26,9 @@ public class ChessUI : MonoBehaviour
     [SerializeField] private GameObject backupManager;
     [SerializeField] ChessPlayerClock whiteClock;
     [SerializeField] ChessPlayerClock blackClock;
+    [SerializeField] AudioClip[] sounds;
+
+    private AudioSource source;
 
 
     //for testing only, can (and should) be deleted once ai is implemented
@@ -35,6 +37,7 @@ public class ChessUI : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        source = GetComponent<AudioSource>();
         promotionCol = -1;
         selectedRow = -1;
         selectedCol = -1;
@@ -87,6 +90,7 @@ public class ChessUI : MonoBehaviour
         int col = buttonNo % 8;
         if (handleClick(row, col))
         {
+            playSound();
             setTurn(0);
             playWhite();
         }
@@ -177,6 +181,7 @@ public class ChessUI : MonoBehaviour
         chess.playWhiteMove(m);
         color = (color + 1) % 2;
         board = chess.getBoard();
+        playSound();
         refreshUI();
         setTurn(1);
     }
@@ -258,6 +263,12 @@ public class ChessUI : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void playSound()
+    {
+        source.clip = sounds[UnityEngine.Random.Range(0, sounds.Length)];
+        source.Play();
     }
 }
 
