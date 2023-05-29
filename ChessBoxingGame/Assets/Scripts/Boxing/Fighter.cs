@@ -73,6 +73,7 @@ public abstract class Fighter : MonoBehaviour
     private int healthToInt()
     {
         float value = (currentHealth / healthMax) * 82;
+        Debug.Log("TO INTING " + value);
         if (value < 1  && value > 0)
         {
             return 1;

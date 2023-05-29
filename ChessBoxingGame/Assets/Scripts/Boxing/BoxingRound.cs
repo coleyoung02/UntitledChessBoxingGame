@@ -14,6 +14,7 @@ public class BoxingRound : MonoBehaviour
     private void Start()
     {
         gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
+        Debug.Log("Setting health to " + gameManager.getPlayerHealth());
         player.setHealth(gameManager.getPlayerHealth());
         enemy.setHealth(gameManager.getEnemyHealth());
     }
@@ -32,7 +33,7 @@ public class BoxingRound : MonoBehaviour
     {
         gameManager.setPlayerHealth(player.getHealth());
         gameManager.setEnemyHealth(enemy.getHealth());
-        SceneManager.LoadScene("ChessTesting1");
+        SceneManager.LoadScene("ChessScene");
     }
 
     private void Update()

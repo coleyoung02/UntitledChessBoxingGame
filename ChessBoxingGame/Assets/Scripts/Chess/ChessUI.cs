@@ -25,8 +25,8 @@ public class ChessUI : MonoBehaviour
     private GameObject[] overlay;
     private GameManagerClass gameManager;
     [SerializeField] private GameObject backupManager;
-    private float playerChessTime;
-    private float enemyChessTime;
+    [SerializeField] ChessPlayerClock whiteClock;
+    [SerializeField] ChessPlayerClock blackClock;
 
 
     //for testing only, can (and should) be deleted once ai is implemented
@@ -38,6 +38,23 @@ public class ChessUI : MonoBehaviour
         promotionCol = -1;
         selectedRow = -1;
         selectedCol = -1;
+        manageGame();
+        buttons = this.GetComponentsInChildren<Button>();
+        overlay = GameObject.FindGameObjectsWithTag("Overlay");
+        Array.Sort(buttons, new ButtonCompare());
+        Array.Sort(overlay, new OverlayCompare());
+        board = chess.getBoard();
+        AI = new ChessAI(chess);
+        refreshUI();
+        setTurn(color);
+        if (color == 0)
+        {
+            playWhite();
+        }
+    }
+
+    private void manageGame()
+    {
         gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
         if (gameManager.getChessState() == null)
         {
@@ -45,28 +62,17 @@ public class ChessUI : MonoBehaviour
         }
         chess = gameManager.getChessState();
         color = chess.getColor();
-        playerChessTime = gameManager.getPlayerChessTime();
-        enemyChessTime = gameManager.getEnemyChessTime();
-        buttons = this.GetComponentsInChildren<Button>();
-        overlay = GameObject.FindGameObjectsWithTag("Overlay");
-        Array.Sort(buttons, new ButtonCompare());
-        Array.Sort(overlay, new OverlayCompare());
-        //i think its fine to hard code 8 unless chess drops an update to the board size
-        //this hasnt been updated in a few centuries so it should be fine
-        board = chess.getBoard();
-        AI = new ChessAI(chess);
-        refreshUI();
-        if (color == 0)
-        {
-            playWhite();
-        }
+        blackClock.setTime(gameManager.getPlayerChessTime());
+        whiteClock.setTime(gameManager.getEnemyChessTime());
     }
+
+
 
     public void OnDestroy()
     {
         gameManager.setChessState(chess); // theoretically no need
-        gameManager.setPlayerChessTime(playerChessTime);
-        gameManager.setEnemyChessTime(enemyChessTime);
+        gameManager.setPlayerChessTime(blackClock.getTime());
+        gameManager.setEnemyChessTime(whiteClock.getTime());
     }
 
     public void endRound()
@@ -77,21 +83,27 @@ public class ChessUI : MonoBehaviour
     public void squareClicked(int buttonNo)
     {
         board = chess.getBoard();
+        int row = buttonNo / 8;
+        int col = buttonNo % 8;
+        if (handleClick(row, col))
+        {
+            setTurn(0);
+            playWhite();
+        }
+    }
+
+    private bool handleClick(int row, int col)
+    {
         if (color == 1)
         {
             bool moved = false;
-            int row = buttonNo / 8;
-            int col = buttonNo % 8;
             if (selectedRow < 0)
             {
                 int piece = board[row][col];
                 if (piece >= 0 && piece % 2 == color)
                 {
                     setMoveSquares(row, col);
-                    //refreshUI();
                 }
-                else
-                    Debug.Log("Not your piece " + board[row][col]);
             }
             else
             {
@@ -109,15 +121,12 @@ public class ChessUI : MonoBehaviour
                     }
                     if (row == 0 && board[row][col] == 0)
                     {
-                        Debug.Log("hey");
                         promotionCol = col;
                         whitePiecesSelect.SetActive(true);
                         promotionMenu.SetActive(true);
                     }
                     else if (row == 7 && board[row][col] == 1)
                     {
-                        Debug.Log("hey");
-
                         promotionCol = col;
                         blackPiecesSelect.SetActive(true);
                         promotionMenu.SetActive(true);
@@ -127,17 +136,29 @@ public class ChessUI : MonoBehaviour
                 }
             }
             refreshUI();
-            if (moved)
-            {
-                playWhite();
-            }
+            return moved;
         }
+        return false;
     }
 
     public void playWhite()
     {
         //do something better
         StartCoroutine(playMove());
+    }
+
+    private void setTurn(int color)
+    {
+        if (color == 0)
+        {
+            whiteClock.setTicking(true);
+            blackClock.setTicking(false);
+        }
+        else
+        {
+            whiteClock.setTicking(false);
+            blackClock.setTicking(true);
+        }
     }
 
     IEnumerator playMove()
@@ -157,12 +178,7 @@ public class ChessUI : MonoBehaviour
         color = (color + 1) % 2;
         board = chess.getBoard();
         refreshUI();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
+        setTurn(1);
     }
 
     public void replace(int piece)

@@ -2,13 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerFighter : Fighter
 {
     private Animator anim;
     public string stateName; // Debug only
-    [SerializeField] Sprite[] sprites;
-    private SpriteRenderer spriteRenderer;
     private static int stateNumOffset = 8;
 
 
@@ -16,7 +15,7 @@ public class PlayerFighter : Fighter
     private int numPunches;
     private bool waiting;
     private Coroutine lastPunch;
-    [SerializeField] SpriteRenderer glove; // defintely delete later
+    [SerializeField] Image glove; 
 
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip damageNoise;
@@ -24,13 +23,12 @@ public class PlayerFighter : Fighter
     [SerializeField] private AudioClip KONoise;
     private GameManagerClass gameManager;
 
-    void Start()
+    void Awake()
     {
         lastPunch = null;
         canPunch = true;
         numPunches = 0;
         waiting = false;
-        spriteRenderer = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
         healthMax = Constants.Player.HEALTH_MAX;
         gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
@@ -46,7 +44,6 @@ public class PlayerFighter : Fighter
     {
         glove.gameObject.SetActive(canPunch); // defintely delete later
         stateName = currentState.name.ToString();
-        spriteRenderer.sprite = sprites[(int)currentState.name - stateNumOffset];
         if (Input.GetKeyDown("f"))
         {
             Punch();

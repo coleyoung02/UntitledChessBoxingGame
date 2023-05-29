@@ -13889,6 +13889,8 @@ MonoBehaviour:
   whitePiecesSelect: {fileID: 8800574949828663069}
   blackPiecesSelect: {fileID: 2293592592974059854}
   backupManager: {fileID: 7842370749825360580, guid: 965c5dd81a5f6924ab8037e76cb6ebfd, type: 3}
+  whiteClock: {fileID: 0}
+  blackClock: {fileID: 0}
 --- !u!1001 &1542004862055535155
 PrefabInstance:
   m_ObjectHideFlags: 0

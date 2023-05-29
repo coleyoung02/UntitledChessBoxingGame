@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class Timer : MonoBehaviour
 {
-    [SerializeField] private float timeValue = 90f;
+    [SerializeField] protected float timeValue = 90f;
 
     [Header("ClockUI References")]
     [SerializeField] private Transform pos1;
@@ -16,7 +16,7 @@ public class Timer : MonoBehaviour
     [SerializeField] private Transform pos4;
 
     //Update is called once per frame
-    void Update()
+    public virtual void Update()
     {
         if (timeValue > 0)
         {
@@ -37,7 +37,7 @@ public class Timer : MonoBehaviour
         Debug.Log("Over");
     }
 
-    void DisplayTime(float timeToDisplay)
+    protected void DisplayTime(float timeToDisplay)
     {
         if (timeToDisplay < 0)
         {

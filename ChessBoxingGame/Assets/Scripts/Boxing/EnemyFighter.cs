@@ -10,7 +10,7 @@ public class EnemyFighter : Fighter
     private SpriteRenderer spriteRenderer; // Delete after testing
     private GameManagerClass gameManager;
 
-    void Start()
+    void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();

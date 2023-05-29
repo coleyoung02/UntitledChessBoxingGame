@@ -96,7 +96,7 @@ public class ChessState
                 canMove = true;
                 break;
             }
-            Debug.Log(moveStr(possible[i]));
+            //Debug.Log(moveStr(possible[i]));
         }
         if (canMove)
         {
@@ -303,7 +303,7 @@ public class ChessState
     private int currentColor;
 
     private Move castleType;
-    
+    private int movesIn;
 
     private void init_new_board() {
         board = new int[8][];

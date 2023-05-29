@@ -32,5 +32,5 @@ public static class Constants
         public const float HEALTH_MAX = 82;
     }
 
-    public const float chessTime = 60 * 5;
+    public const float chessTime = 60 * 3;
 }
