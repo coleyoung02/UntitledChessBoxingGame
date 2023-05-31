@@ -31,7 +31,7 @@ Transform:
   m_Children:
   - {fileID: 4362142329235900198}
   - {fileID: 3296258893825024426}
-  - {fileID: 4932939765871034339}
+
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -188,6 +188,10 @@ PrefabInstance:
       propertyPath: opponent
       value: 
       objectReference: {fileID: 6315955824875874234}
+    - target: {fileID: 7662089822704607864, guid: 0e68a484fd223fe45993ece7ee5419e8, type: 3}
+      propertyPath: healthBar
+      value: 
+      objectReference: {fileID: 5634333921097100443}
     - target: {fileID: 7964856094738980253, guid: 0e68a484fd223fe45993ece7ee5419e8, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -265,6 +269,10 @@ PrefabInstance:
       propertyPath: opponent
       value: 
       objectReference: {fileID: 4059041943063705795}
+    - target: {fileID: -8815968452279178414, guid: 0b631f53c58117a49aaf2d0887a0d268, type: 3}
+      propertyPath: healthBar
+      value: 
+      objectReference: {fileID: 691615148727622315}
     - target: {fileID: 474117706807180559, guid: 0b631f53c58117a49aaf2d0887a0d268, type: 3}
       propertyPath: m_Name
       value: PlaytestEnemyFighter
@@ -331,3 +339,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a5e09577f3547e79b46c185953f220b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+

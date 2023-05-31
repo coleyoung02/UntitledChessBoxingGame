@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
-using UnityEngine;
+using UnityEngine; //for debugging
 
 //replacing lists with arrays will make it more time and space efficient if needed
 //switching ints to sbytes will make it more space efficient (up to 4 times) if needed but less stable (not CLS compliant)
@@ -36,12 +36,48 @@ public class ChessState
     public ChessState() {
         this.init_new_board();
         this.setMoves(white);
+        this.currentColor = white;
+    }
+
+    public ChessState(ChessState current)
+    {
+        this.board = new int[8][];
+        for (int i = 0; i < 8; i++)
+        {
+            this.board[i] = new int[8];
+            for (int j = 0; j < 8; ++j)
+            {
+                this.board[i][j] = current.board[i][j];
+            }
+        }
+        this.whiteCanCastleQS = current.whiteCanCastleQS;
+        this.blackCanCastleQS = current.blackCanCastleQS;
+        this.whiteCanCastleKS = current.whiteCanCastleKS;
+        this.blackCanCastleKS = current.blackCanCastleKS;
+
+        this.epCol = current.epCol;
+        this.wkRow = current.wkRow;
+        this.wkCol = current.wkCol;
+        this.bkRow = current.bkRow;
+        this.bkCol = current.bkCol;
+        this.currentColor = current.currentColor;
+        this.setMoves(currentColor);
+    }
+
+    public int getPlayer()
+    {
+        return currentColor;
     }
 
     //whoever gets this array should really not touch it
     //maybe i should make a copy
     public int[][] getBoard() {
         return this.board;
+    }
+
+    public int getColor()
+    {
+        return this.currentColor;
     }
 
     public bool playMove(int row, int col, int newRow, int newCol, int color) {
@@ -60,7 +96,7 @@ public class ChessState
                 canMove = true;
                 break;
             }
-            Debug.Log(moveStr(possible[i]));
+            //Debug.Log(moveStr(possible[i]));
         }
         if (canMove)
         {
@@ -101,6 +137,7 @@ public class ChessState
             }
             board[newRow][newCol] = board[row][col];
             board[row][col] = ee;
+            this.currentColor = white;
             return true;
         }
         else if (isCastling(row, col, newRow, newCol, color))
@@ -112,6 +149,7 @@ public class ChessState
                     if (tryCastling(castleType))
                     {
                         epCol = -1;
+                        this.currentColor = white;
                         return true;
                     }
                 }
@@ -121,17 +159,13 @@ public class ChessState
         return false;
     }
 
-    public bool playWhite()
+    public void playWhiteMove(Move m)
     {
-        Move m = getRandomMove(white);
-        if (m.startRow == -1 && m.startCol == -1 && m.endRow == -1 && m.endCol == -1)
-        {
-            return false;
-        }
         if (m.startRow < 0)
         {
             tryCastling(m);
-            return true;
+            this.currentColor = black;
+            return;
         }
         if (m.isEP)
         {
@@ -155,6 +189,18 @@ public class ChessState
             board[m.endRow][m.endCol] = board[m.startRow][m.startCol];
         }
         board[m.startRow][m.startCol] = ee;
+        this.currentColor = black;
+        return;
+    }
+
+    public bool playWhite()
+    {
+        Move m = getRandomMove(white);
+        if (m.startRow == -1 && m.startCol == -1 && m.endRow == -1 && m.endCol == -1)
+        {
+            return false;
+        }
+        playWhiteMove(m);
         return true;
     }
 
@@ -196,8 +242,10 @@ public class ChessState
         }
     }
 
-    public List<Move> getLegalMoves(int color) {
-        return null;
+    public List<Move> getLegalMoves()
+    {
+        setMoves(currentColor);
+        return realMoves;
     }
 
 
@@ -211,21 +259,21 @@ public class ChessState
     // 6/7   : rook
     // 8/9   : queen
     // 10/11 : king
-    private const int white = 0;
-    private const int black = 1;
-    private const int ee = -1;
-    private const int wp = 0;
-    private const int bp = 1;
-    private const int wk = 2;
-    private const int bk = 3;
-    private const int wb = 4;
-    private const int bb = 5;
-    private const int wr = 6;
-    private const int br = 7;
-    private const int wQ = 8;
-    private const int bQ = 9;
-    private const int wK = 10;
-    private const int bK = 11;
+    public const int white = 0;
+    public const int black = 1;
+    public const int ee = -1;
+    public const int wp = 0;
+    public const int bp = 1;
+    public const int wk = 2;
+    public const int bk = 3;
+    public const int wb = 4;
+    public const int bb = 5;
+    public const int wr = 6;
+    public const int br = 7;
+    public const int wQ = 8;
+    public const int bQ = 9;
+    public const int wK = 10;
+    public const int bK = 11;
     //this shouldn't ever be on the board outside of the 
     //square attacker count function being called with true for the default arg
     private const int placeHolderPiece = 12;
@@ -252,8 +300,10 @@ public class ChessState
     private int bkRow;
     private int bkCol;
 
+    private int currentColor;
+
     private Move castleType;
-    
+    private int movesIn;
 
     private void init_new_board() {
         board = new int[8][];
@@ -414,7 +464,7 @@ public class ChessState
         }
         else {
             //buggy on promotion
-            if (board[row+1][col] < 0) {
+            if (board[row+1][col] < 0) { //error was here
                 moves.Add(new Move(row, col, row+1, col));
                 //checks on pawns first move only
                 if (row == 1) {

@@ -32,7 +32,7 @@ public class EnemyStunned : State
         yield return new WaitForSeconds(Constants.Enemy.STUN_TIME);
         if (fighter.currentState == this)
         {
-            nextState = new EnemyIdle(anim, player, (EnemyFighter)fighter);
+            nextState = new EnemyBlocking(anim, player, (EnemyFighter)fighter);
             stage = EVENT.EXIT;
         }
         coroutine = null;

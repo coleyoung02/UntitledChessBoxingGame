@@ -15,7 +15,7 @@ public class EnemyHeavyPunchingFst : State
 
     public override void enter()
     {
-        Debug.Log("EnemyHeavyPunchingFst.enter()");
+        //Debug.Log("EnemyHeavyPunchingFst.enter()");
         coroutine = fighter.StartCoroutine(startHeavyPunchingFst());
         base.enter();
     }
@@ -27,7 +27,7 @@ public class EnemyHeavyPunchingFst : State
 
     public override void exit()
     {
-        Debug.Log("EnemyHeavyPunchingFst.exit()");
+        //Debug.Log("EnemyHeavyPunchingFst.exit()");
         base.exit();
     }
     

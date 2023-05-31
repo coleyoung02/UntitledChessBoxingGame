@@ -8,13 +8,15 @@ public class EnemyFighter : Fighter
     public string stateName; // Debug only
     [SerializeField] Sprite[] sprites; // Delete after testing
     private SpriteRenderer spriteRenderer; // Delete after testing
+    private GameManagerClass gameManager;
 
-    void Start()
+    void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
         healthMax = Constants.Enemy.HEALTH_MAX;
-        currentHealth = healthMax;
+        gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
+        currentHealth = gameManager.getEnemyHealth();
         blockingReduction = Constants.Enemy.BLOCKING_REDUC;
         currentState = new EnemyIdle(anim, transform, this);
         lightPunch = new Attack(Constants.Enemy.LIGHT_PUNCH_DAMAGE, Constants.Enemy.LIGHT_PUNCH_TELE_TIME, true);
@@ -60,12 +62,12 @@ public class EnemyFighter : Fighter
 
         if (currentHealth - damage <= 0)
         {
-            currentHealth = 0;
+            setHealth(0);
             currentState.goKO();
         }
         else
         {
-            currentHealth -= damage;
+            setHealth(currentHealth - damage);
             if (currentState.name == State.STATE.E_IDLE)
             {
                 ((EnemyIdle)currentState).goStunned();
