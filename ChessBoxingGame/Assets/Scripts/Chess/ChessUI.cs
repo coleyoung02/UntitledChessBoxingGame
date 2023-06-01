@@ -86,10 +86,12 @@ public class ChessUI : MonoBehaviour
     public void squareClicked(int buttonNo)
     {
         board = chess.getBoard();
+        color = chess.getColor();
         int row = buttonNo / 8;
         int col = buttonNo % 8;
         if (handleClick(row, col))
         {
+            refreshUI();
             playSound();
             setTurn(0);
             if (chess.isMate() < 0)
@@ -118,9 +120,26 @@ public class ChessUI : MonoBehaviour
             }
             else
             {
+                Debug.Log("selected " + row + ", " + col);
                 if (board[row][col] % 2 == color)
                 {
                     setMoveSquares(row, col);
+                }
+                else if (board[selectedRow][selectedCol] == ChessState.bp && row == 7)
+                {
+                    Debug.Log("Boop " + row + " " + col);
+                    List<Move> moves = chess.getLegalMoves();
+                    for (int i = 0; i < moves.Count; ++i)
+                    {
+                        if (moves[i].startCol == selectedCol && moves[i].startRow == selectedRow &&
+                            moves[i].endRow == row && moves[i].endCol == col)
+                        {
+                            Debug.Log("ACTIVE " + row + " " + col);
+                            promotionCol = col;
+                            blackPiecesSelect.SetActive(true);
+                            promotionMenu.SetActive(true);
+                        }
+                    }
                 }
                 else
                 {
@@ -138,9 +157,6 @@ public class ChessUI : MonoBehaviour
                     }
                     else if (row == 7 && board[row][col] == 1)
                     {
-                        promotionCol = col;
-                        blackPiecesSelect.SetActive(true);
-                        promotionMenu.SetActive(true);
                     }
                     selectedCol = -1;
                     selectedRow = -1;
@@ -174,8 +190,8 @@ public class ChessUI : MonoBehaviour
 
     IEnumerator playMove()
     {
-        yield return new WaitForSeconds(1.2f);
-        Move m = AI.GetBest();
+        yield return new WaitForSeconds(.1f);
+        Move m = AI.GetBestMove(chess);
         if (m.startRow < 0)
         {
             overlay[7 * 8 + 3].GetComponent<Image>().sprite = indicators[4];
@@ -184,7 +200,7 @@ public class ChessUI : MonoBehaviour
         {
             overlay[m.startRow * 8 + m.startCol].GetComponent<Image>().sprite = indicators[4];
         }
-        yield return new WaitForSeconds(.3f);
+        yield return new WaitForSeconds(.5f);
         chess.playWhiteMove(m);
         color = (color + 1) % 2;
         board = chess.getBoard();
@@ -196,10 +212,22 @@ public class ChessUI : MonoBehaviour
     public void replace(int piece)
     {
         //color gets flipped after moving pawn to end so this passes the correct color
-        chess.promote(promotionCol, piece + (color + 1) % 2);
+        chess.promote(promotionCol, piece + (color) % 2, selectedRow, selectedCol);
+        playSound();
+        selectedCol = -1;
+        selectedRow = -1;
+        if (chess.isMate() < 0)
+        {
+            playWhite();
+        }
+        else
+        {
+            Debug.Log("You win! " + chess.isMate());
+        }
+        setTurn(0);
         refreshUI();
         promotionMenu.SetActive(false);
-        whitePiecesSelect.SetActive(false);
+        blackPiecesSelect.SetActive(false);
         whitePiecesSelect.SetActive(false);
     }
 

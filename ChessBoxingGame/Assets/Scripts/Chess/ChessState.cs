@@ -90,8 +90,7 @@ public class ChessState
     //if mate, return losing color, otherwise return -1
     public int isMate()
     {
-        Debug.Log(this.realMoves.Count + " possible moves");
-        if (this.realMoves.Count == 0 && this.inCheck(currentColor))
+        if (this.realMoves.Count == 0 && this.inCheck(currentColor) > 0)
         {
             return this.currentColor;
         }
@@ -100,7 +99,7 @@ public class ChessState
 
     public bool isStale()
     {
-        return this.realMoves.Count == 0 && !this.inCheck(currentColor);
+        return this.realMoves.Count == 0 && this.inCheck(currentColor) == 0;
     }
 
     public bool playMove(int row, int col, int newRow, int newCol, int color) {
@@ -182,9 +181,21 @@ public class ChessState
         return false;
     }
 
+    public void playMove(Move m)
+    {
+        if (this.currentColor == white)
+        {
+            playWhiteMove(m);
+        }
+        else
+        {
+            playBlackMove(m);
+        }
+    }
+
     public void playWhiteMove(Move m)
     {
-        if (m.startRow < 0)
+        if (m.startRow < 0 && m.startCol >= 0)
         {
             tryCastling(m);
             this.onMove(white);
@@ -216,6 +227,40 @@ public class ChessState
         return;
     }
 
+    public void playBlackMove(Move m)
+    {
+        if (m.startCol < 0 && m.startRow >=0)
+        {
+            tryCastling(m);
+            this.onMove(black);
+            return;
+        }
+        if (m.isEP)
+        {
+            board[5][epCol] = ee;
+        }
+        else
+        {
+            if (m.startRow >= 0 && board[m.startRow][m.startCol] == bK)
+            {
+                doKingMoveUpdates(m.endRow, m.endCol, black);
+            }
+            doCornerUpdates(m.startRow, m.startCol);
+            doCornerUpdates(m.endRow, m.endCol);
+        }
+        if (m.endRow == 7 && board[m.startRow][m.startCol] == bp)
+        {
+            board[m.endRow][m.endCol] = bQ;
+        }
+        else
+        {
+            board[m.endRow][m.endCol] = board[m.startRow][m.startCol];
+        }
+        board[m.startRow][m.startCol] = ee;
+        this.onMove(black);
+        return;
+    }
+
     public bool playWhite()
     {
         Move m = getRandomMove(white);
@@ -239,7 +284,7 @@ public class ChessState
         return possible[rnd.Next(0, possible.Count)];
     }
 
-    public void promote(int col, int piece)
+    public void promote(int col, int piece, int prevRow, int prevCol)
     {
         int row = -1;
         if (piece % 2 == white)
@@ -251,19 +296,22 @@ public class ChessState
             row = 7;
         }
         board[row][col] = piece;
+        board[prevRow][prevCol] = ee;
+        this.onMove(black);
     }
 
-    public bool inCheck(int color)
+    public int inCheck(int color)
     {
         if (color == white)
         {
-            return squareAttacked(wkRow, wkCol, white) > 0;
+            return squareAttacked(wkRow, wkCol, white);
         }
         else
         {
-            return squareAttacked(bkRow, bkCol, black) > 0;
+            return squareAttacked(bkRow, bkCol, black);
         }
     }
+
 
     public List<Move> getLegalMoves()
     {
@@ -327,6 +375,8 @@ public class ChessState
 
     private Move castleType;
     private int halfMovesIn;
+    private int whiteCheck;
+    private int blackCheck;
 
     private void init_new_board() {
         board = new int[8][];
@@ -390,6 +440,14 @@ public class ChessState
         realMoves = legalMoves(color);
         this.halfMovesIn++;
         this.currentColor = (color + 1) % 2;
+        if (this.currentColor == black)
+        {
+            blackCheck = inCheck(black);
+        }
+        if (this.currentColor == white)
+        {
+            whiteCheck = inCheck(white);
+        }
     }
 
     private List<Move> legalMoves(int color) {
@@ -780,7 +838,7 @@ public class ChessState
 
     private bool tryCastling(Move m)
     {
-        if (m.startRow == -1 && isCastlingSafe(m))
+        if (m.startRow == -1 && m.startCol != -1 && isCastlingSafe(m))
         {
             if (m.endCol == -1 && whiteCanCastleKS)
             {
@@ -805,7 +863,7 @@ public class ChessState
                 return true;
             }
         }
-        if (m.startCol == -1 && isCastlingSafe(m))
+        if (m.startCol == -1 && m.startRow != -1 && isCastlingSafe(m))
         {
             if (m.endCol == -1 && blackCanCastleKS)
             {
@@ -944,7 +1002,7 @@ public class ChessState
     }
 
     //only here for debugging
-    private string moveStr(Move m)
+    public static string moveStr(Move m)
     {
         return "" + m.startRow + " " + m.startCol + "->" + m.endRow + " " + m.endCol;
     }
