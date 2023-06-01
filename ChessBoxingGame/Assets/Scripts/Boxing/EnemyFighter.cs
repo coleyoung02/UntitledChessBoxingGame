@@ -2,25 +2,21 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-using System.Collections.Generic;
-
 public class EnemyFighter : Fighter
 {
     private Animator anim;
     public string stateName; // Debug only
     [SerializeField] Sprite[] sprites; // Delete after testing
     private SpriteRenderer spriteRenderer; // Delete after testing
+    private GameManagerClass gameManager;
 
-    //Trash talk things
-    public List<string> trashTalkList = new List<string>() {"test1", "test2", "test3" };
-    private bool trashTalking = false;
-
-    void Start()
+    void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
         healthMax = Constants.Enemy.HEALTH_MAX;
-        currentHealth = healthMax;
+        gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
+        currentHealth = gameManager.getEnemyHealth();
         blockingReduction = Constants.Enemy.BLOCKING_REDUC;
         currentState = new EnemyIdle(anim, transform, this);
         lightPunch = new Attack(Constants.Enemy.LIGHT_PUNCH_DAMAGE, Constants.Enemy.LIGHT_PUNCH_TELE_TIME, true);
@@ -46,7 +42,6 @@ public class EnemyFighter : Fighter
         }
 
         currentState = currentState.process();
-        handleTrashTalk();
     }
 
 
@@ -117,29 +112,5 @@ public class EnemyFighter : Fighter
     protected override void onKO()
     {
         this.round.Win();
-    }
-
-    private void handleTrashTalk()
-    {
-        if (trashTalking) return;
-        switch (currentState.name)
-        {
-            case State.STATE.E_LIGHTPUNCHING:
-                Debug.Log(trashTalkList[UnityEngine.Random.Range(0, 2)]);
-                break;
-            case State.STATE.E_HEAVYPUNCHINGFST:
-                Debug.Log(trashTalkList[UnityEngine.Random.Range(0, 2)]);
-                break;
-            default:
-                return;
-        }
-
-        trashTalking = true;
-        Invoke("resetTrashTalk", 3f);
-    }
-
-    private void resetTrashTalk()
-    {
-        trashTalking = false;
     }
 }

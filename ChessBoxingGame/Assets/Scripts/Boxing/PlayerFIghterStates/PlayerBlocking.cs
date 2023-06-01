@@ -18,18 +18,21 @@ public class PlayerBlocking : State
     public void goPunching()
     {
         nextState = new PlayerPunching(anim, player, (PlayerFighter)fighter);
+        anim.SetTrigger("Punch");
         stage = EVENT.EXIT;
     }
 
     public void goIdle()
     {
         nextState = new PlayerIdle(anim, player, (PlayerFighter)fighter);
+        anim.SetTrigger("GoIdle");
         stage = EVENT.EXIT;
     }
 
     public override void goKO()
     {
         nextState = new PlayerKO(anim, player, (PlayerFighter)fighter);
+        anim.SetTrigger("KO");
         stage = EVENT.EXIT;
     }
 

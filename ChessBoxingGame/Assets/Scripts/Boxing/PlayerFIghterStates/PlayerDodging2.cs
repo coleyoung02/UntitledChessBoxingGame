@@ -23,9 +23,22 @@ public class PlayerDodging2 : State
         if (fighter.currentState == this)
         {
             nextState = new PlayerIdle(anim, player, (PlayerFighter)fighter);
+            anim.SetTrigger("GoIdle");
             stage = EVENT.EXIT;
         }
         coroutine = null;
+    }
+
+    public void goPunching()
+    {
+        if (coroutine != null)
+        {
+            fighter.StopCoroutine(coroutine);
+            coroutine = null;
+        }
+        nextState = new PlayerPunching(anim, player, (PlayerFighter)fighter);
+        anim.SetTrigger("Punch");
+        stage = EVENT.EXIT;
     }
 
     public override void goKO()
@@ -36,6 +49,7 @@ public class PlayerDodging2 : State
             coroutine = null;
         }
         nextState = new PlayerKO(anim, player, (PlayerFighter)fighter);
+        anim.SetTrigger("KO");
         stage = EVENT.EXIT;
     }
 }

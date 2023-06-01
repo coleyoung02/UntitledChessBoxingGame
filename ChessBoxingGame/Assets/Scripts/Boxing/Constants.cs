@@ -28,9 +28,9 @@ public static class Constants
         public const float HEAVY_PUNCH_DAMAGE = 4.0f; //for single round, use 16.0f
         public const float BLOCKING_REDUC = 0.8f;
         public const float DODGE_IMMMUNITY_TIME = 0.4f;
-        public const float DODGE_NO_IMMMUNITY_TIME = 0.2f;
+        public const float DODGE_NO_IMMMUNITY_TIME = 0.3f;
         public const float HEALTH_MAX = 82;
     }
 
-    public const float chessTime = 60 * 5;
+    public const float chessTime = 60 * 3;
 }

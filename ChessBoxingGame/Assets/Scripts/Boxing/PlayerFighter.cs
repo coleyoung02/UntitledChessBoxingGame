@@ -2,13 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerFighter : Fighter
 {
     private Animator anim;
     public string stateName; // Debug only
-    [SerializeField] Sprite[] sprites;
-    private SpriteRenderer spriteRenderer;
     private static int stateNumOffset = 8;
 
 
@@ -16,24 +15,24 @@ public class PlayerFighter : Fighter
     private int numPunches;
     private bool waiting;
     private Coroutine lastPunch;
-    [SerializeField] SpriteRenderer glove; // defintely delete later
+    [SerializeField] Image glove; 
 
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip damageNoise;
     [SerializeField] private AudioClip hurtNoise;
     [SerializeField] private AudioClip KONoise;
+    private GameManagerClass gameManager;
 
-
-    void Start()
+    void Awake()
     {
         lastPunch = null;
         canPunch = true;
         numPunches = 0;
         waiting = false;
-        spriteRenderer = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
         healthMax = Constants.Player.HEALTH_MAX;
-        currentHealth = healthMax;
+        gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
+        currentHealth = gameManager.getPlayerHealth();
         blockingReduction = Constants.Player.BLOCKING_REDUC;
         currentState = new PlayerIdle(anim, transform, this);
         lightPunch = new Attack(Constants.Player.LIGHT_PUNCH_DAMAGE, Constants.Player.LIGHT_PUNCH_TELE_TIME, true);
@@ -45,7 +44,6 @@ public class PlayerFighter : Fighter
     {
         glove.gameObject.SetActive(canPunch); // defintely delete later
         stateName = currentState.name.ToString();
-        spriteRenderer.sprite = sprites[(int)currentState.name - stateNumOffset];
         if (Input.GetKeyDown("f"))
         {
             Punch();
@@ -68,13 +66,20 @@ public class PlayerFighter : Fighter
     void Punch()
     {
         Debug.Log("entering punch");
-        if (currentState.name == State.STATE.P_IDLE)
+        if (currentState.name == State.STATE.P_IDLE || currentState.name == State.STATE.P_DODGING2)
         {
             //Debug.Log("punch " + numPunches);
             if (canPunch)
             {
                 playAudioClip(damageNoise);
-                ((PlayerIdle)currentState).goPunching();
+                if (currentState.name == State.STATE.P_IDLE)
+                {
+                    ((PlayerIdle)currentState).goPunching();
+                }
+                else
+                {
+                    ((PlayerDodging2)currentState).goPunching();
+                }
             }
             else if (!waiting)
             {
@@ -84,13 +89,22 @@ public class PlayerFighter : Fighter
         }
         else if (currentState.name == State.STATE.P_BLOCKING)
         {
-            ((PlayerBlocking)currentState).goPunching();
+            if (canPunch)
+            {
+                playAudioClip(damageNoise);
+                ((PlayerBlocking)currentState).goPunching();
+            }
+            else if (!waiting)
+            {
+                waiting = true;
+                StartCoroutine(waitBeforePunching());
+            }
         }
     }
 
     public IEnumerator waitBeforePunching()
     {
-        yield return new WaitForSeconds(1.5f); //this should not be hard coded
+        yield return new WaitForSeconds(3f); //this should not be hard coded
         numPunches = 0;
         canPunch = true;
         waiting = false;

@@ -5,11 +5,11 @@ using UnityEngine;
 public class GameManagerClass : MonoBehaviour
 {
     public static GameManagerClass Instance { get; private set; }
-    private float playerHealth;
-    private float enemyHealth;
-    private ChessState chessState;
-    private float playerChessTime;
-    private float enemyChessTime;
+    [SerializeField] private float playerHealth;
+    [SerializeField] private float enemyHealth;
+    [SerializeField] private ChessState chessState;
+    [SerializeField] private float playerChessTime;
+    [SerializeField] private float enemyChessTime;
 
     public void setPlayerHealth(float health)
     {
@@ -50,6 +50,16 @@ public class GameManagerClass : MonoBehaviour
     {
         return enemyChessTime;
     }
+    
+    public ChessState getChessState()
+    {
+        return chessState;
+    }
+    
+    public void setChessState(ChessState state)
+    {
+        chessState = state;
+    }
 
 
 
@@ -59,6 +69,9 @@ public class GameManagerClass : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
+            Debug.Log("Destroy Game Manager");
+            Debug.Log(this.chessState);
+            Debug.Log(Instance.chessState);
             Destroy(this);
         }
         else
@@ -76,6 +89,7 @@ public class GameManagerClass : MonoBehaviour
         playerHealth = Constants.Player.HEALTH_MAX;
         enemyHealth = Constants.Enemy.HEALTH_MAX;
         chessState = new ChessState();
+        Debug.Log(chessState);
         playerChessTime = Constants.chessTime;
         enemyChessTime = Constants.chessTime;
     }

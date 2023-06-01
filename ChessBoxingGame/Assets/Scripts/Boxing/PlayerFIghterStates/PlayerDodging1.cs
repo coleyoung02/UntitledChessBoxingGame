@@ -23,6 +23,7 @@ public class PlayerDodging1 : State
         if (fighter.currentState == this)
         {
             nextState = new PlayerDodging2(anim, player, (PlayerFighter)fighter);
+            anim.SetTrigger("Dodge2");
             stage = EVENT.EXIT;
         }
         coroutine = null;
@@ -35,6 +36,7 @@ public class PlayerDodging1 : State
             fighter.StopCoroutine(coroutine);
             coroutine = null;
         }
+        anim.SetTrigger("KO");
         nextState = new PlayerKO(anim, player, (PlayerFighter)fighter);
         stage = EVENT.EXIT;
     }
