@@ -49,7 +49,7 @@ public class ChessUI : MonoBehaviour
         board = chess.getBoard();
         AI = new ChessAI(chess);
         refreshUI();
-        setTurn(color);
+        color = chess.getColor();
         if (color == 0)
         {
             playWhite();
@@ -92,7 +92,14 @@ public class ChessUI : MonoBehaviour
         {
             playSound();
             setTurn(0);
-            playWhite();
+            if (chess.isMate() < 0)
+            {
+                playWhite();
+            }
+            else
+            {
+                Debug.Log("You win! " + chess.isMate());
+            }
         }
     }
 

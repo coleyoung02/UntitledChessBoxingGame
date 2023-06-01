@@ -65,7 +65,6 @@ public class PlayerFighter : Fighter
 
     void Punch()
     {
-        Debug.Log("entering punch");
         if (currentState.name == State.STATE.P_IDLE || currentState.name == State.STATE.P_DODGING2)
         {
             //Debug.Log("punch " + numPunches);

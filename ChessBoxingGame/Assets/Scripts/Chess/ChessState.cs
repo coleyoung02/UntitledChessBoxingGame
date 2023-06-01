@@ -37,6 +37,7 @@ public class ChessState
         this.init_new_board();
         this.setMoves(white);
         this.currentColor = white;
+        this.halfMovesIn = 0;
     }
 
     public ChessState(ChessState current)
@@ -62,11 +63,17 @@ public class ChessState
         this.bkCol = current.bkCol;
         this.currentColor = current.currentColor;
         this.setMoves(currentColor);
+        this.halfMovesIn = current.halfMovesIn;
     }
 
     public int getPlayer()
     {
         return currentColor;
+    }
+
+    public int getHalfMoves()
+    {
+        return halfMovesIn;
     }
 
     //whoever gets this array should really not touch it
@@ -78,6 +85,22 @@ public class ChessState
     public int getColor()
     {
         return this.currentColor;
+    }
+
+    //if mate, return losing color, otherwise return -1
+    public int isMate()
+    {
+        Debug.Log(this.realMoves.Count + " possible moves");
+        if (this.realMoves.Count == 0 && this.inCheck(currentColor))
+        {
+            return this.currentColor;
+        }
+        else return -1;
+    }
+
+    public bool isStale()
+    {
+        return this.realMoves.Count == 0 && !this.inCheck(currentColor);
     }
 
     public bool playMove(int row, int col, int newRow, int newCol, int color) {
@@ -137,7 +160,7 @@ public class ChessState
             }
             board[newRow][newCol] = board[row][col];
             board[row][col] = ee;
-            this.currentColor = white;
+            this.onMove(black);
             return true;
         }
         else if (isCastling(row, col, newRow, newCol, color))
@@ -149,7 +172,7 @@ public class ChessState
                     if (tryCastling(castleType))
                     {
                         epCol = -1;
-                        this.currentColor = white;
+                        this.onMove(black);
                         return true;
                     }
                 }
@@ -164,7 +187,7 @@ public class ChessState
         if (m.startRow < 0)
         {
             tryCastling(m);
-            this.currentColor = black;
+            this.onMove(white);
             return;
         }
         if (m.isEP)
@@ -189,7 +212,7 @@ public class ChessState
             board[m.endRow][m.endCol] = board[m.startRow][m.startCol];
         }
         board[m.startRow][m.startCol] = ee;
-        this.currentColor = black;
+        this.onMove(white);
         return;
     }
 
@@ -303,7 +326,7 @@ public class ChessState
     private int currentColor;
 
     private Move castleType;
-    private int movesIn;
+    private int halfMovesIn;
 
     private void init_new_board() {
         board = new int[8][];
@@ -365,7 +388,8 @@ public class ChessState
     private void onMove(int color) {
         potentialMoves = possibleMoves(color);
         realMoves = legalMoves(color);
-        color = (color + 1) % 2;
+        this.halfMovesIn++;
+        this.currentColor = (color + 1) % 2;
     }
 
     private List<Move> legalMoves(int color) {
