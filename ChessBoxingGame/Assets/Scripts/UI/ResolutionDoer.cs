@@ -32,7 +32,7 @@ public class ResolutionDoer : MonoBehaviour
 
     public void debugPrint(float input)
     {
-        Debug.Log(input);
+        //Debug.Log(input);
     }
     public void changeRes(int increment)
     {

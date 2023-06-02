@@ -35,11 +35,11 @@ public class ChessPlayerClock : Timer
         return this.timeValue;
     }
 
-    public override void Update()
+    public override void FixedUpdate()
     {
         if (ticking)
         {
-            base.Update();
+            base.FixedUpdate();
         }
     }
 

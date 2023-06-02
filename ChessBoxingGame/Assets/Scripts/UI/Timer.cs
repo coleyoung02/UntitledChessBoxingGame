@@ -16,11 +16,11 @@ public class Timer : MonoBehaviour
     [SerializeField] private Transform pos4;
 
     //Update is called once per frame
-    public virtual void Update()
+    public virtual void FixedUpdate()
     {
         if (timeValue > 0)
         {
-            timeValue -= Time.deltaTime;
+            timeValue -= Time.fixedDeltaTime;
         }
         else
         {
