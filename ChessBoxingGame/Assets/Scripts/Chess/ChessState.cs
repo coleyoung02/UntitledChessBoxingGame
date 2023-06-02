@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using UnityEngine; //for debugging
+using static Unity.VisualScripting.Member;
 
 //replacing lists with arrays will make it more time and space efficient if needed
 //switching ints to sbytes will make it more space efficient (up to 4 times) if needed but less stable (not CLS compliant)
@@ -62,7 +63,7 @@ public class ChessState
         this.bkRow = current.bkRow;
         this.bkCol = current.bkCol;
         this.currentColor = current.currentColor;
-        this.setMoves(currentColor);
+        this.realMoves = new List<Move>(current.realMoves);
         this.halfMovesIn = current.halfMovesIn;
     }
 
@@ -181,19 +182,19 @@ public class ChessState
         return false;
     }
 
-    public void playMove(Move m)
+    public void playMove(Move m, bool setNext=true)
     {
         if (this.currentColor == white)
         {
-            playWhiteMove(m);
+            playWhiteMove(m, setNext);
         }
         else
         {
-            playBlackMove(m);
+            playBlackMove(m, setNext);
         }
     }
 
-    public void playWhiteMove(Move m)
+    public void playWhiteMove(Move m, bool setNext = true)
     {
         if (m.startRow < 0 && m.startCol >= 0)
         {
@@ -211,6 +212,10 @@ public class ChessState
             {
                 doKingMoveUpdates(m.endRow, m.endCol, white);
             }
+            if (board[m.startRow][m.startCol] == wp && m.endRow == m.startRow - 2)
+            {
+                epCol = m.endCol;
+            }
             doCornerUpdates(m.startRow, m.startCol);
             doCornerUpdates(m.endRow, m.endCol);
         }
@@ -223,11 +228,14 @@ public class ChessState
             board[m.endRow][m.endCol] = board[m.startRow][m.startCol];
         }
         board[m.startRow][m.startCol] = ee;
-        this.onMove(white);
+        if (setNext)
+        {
+            this.onMove(white);
+        }
         return;
     }
 
-    public void playBlackMove(Move m)
+    public void playBlackMove(Move m, bool setNext = true)
     {
         if (m.startCol < 0 && m.startRow >=0)
         {
@@ -245,6 +253,10 @@ public class ChessState
             {
                 doKingMoveUpdates(m.endRow, m.endCol, black);
             }
+            if (board[m.startRow][m.startCol] == bp && m.endRow == m.startRow + 2)
+            {
+                epCol = m.endCol;
+            }
             doCornerUpdates(m.startRow, m.startCol);
             doCornerUpdates(m.endRow, m.endCol);
         }
@@ -257,11 +269,14 @@ public class ChessState
             board[m.endRow][m.endCol] = board[m.startRow][m.startCol];
         }
         board[m.startRow][m.startCol] = ee;
-        this.onMove(black);
+        if (setNext)
+        {
+            this.onMove(black);
+        }
         return;
     }
 
-    public bool playWhite()
+    public bool playWhiteRandom()
     {
         Move m = getRandomMove(white);
         if (m.startRow == -1 && m.startCol == -1 && m.endRow == -1 && m.endCol == -1)
@@ -315,7 +330,6 @@ public class ChessState
 
     public List<Move> getLegalMoves()
     {
-        setMoves(currentColor);
         return realMoves;
     }
 
@@ -429,17 +443,17 @@ public class ChessState
         blackCanCastleQS = true;
     }
 
-    private void setMoves(int color)
+    public void setMoves(int color)
     {
         potentialMoves = possibleMoves(color);
         realMoves = legalMoves(color);
     }
 
     private void onMove(int color) {
-        potentialMoves = possibleMoves(color);
-        realMoves = legalMoves(color);
-        this.halfMovesIn++;
         this.currentColor = (color + 1) % 2;
+        potentialMoves = possibleMoves(this.currentColor);
+        realMoves = legalMoves(this.currentColor);
+        this.halfMovesIn++;
         if (this.currentColor == black)
         {
             blackCheck = inCheck(black);

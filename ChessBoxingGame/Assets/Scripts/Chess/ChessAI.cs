@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,12 +13,19 @@ public class ChessAI
 {
 
     private static int mateScore = 32000;
+    private static int baseSearch = 3;
     private int searchDepth = 2;
     private List<Move> bestMoves = new List<Move>();
+    
 
-    private float pieceScore(int piece, int row, int col)
+    public void setDepth(int depth)
     {
-        int[][] board = chess.getBoard();
+        baseSearch = depth;
+    }
+    private float pieceScore(ChessState state, int row, int col)
+    {
+        int[][] board = state.getBoard();
+        int piece = board[row][col];
         switch (piece)
         {
             case ChessState.ee: return 0;
@@ -28,6 +36,14 @@ public class ChessAI
                         {
                             return .7f;
                         }
+                    }
+                    if (col - 1 >=0 && board[row + 1][col - 1] == ChessState.wp)
+                    {
+                        return 1.1f;
+                    }
+                    if (col + 1 <= 7 && board[row + 1][col + 1] == ChessState.wp)
+                    {
+                        return 1.1f;
                     }
                     return 1;
                 };
@@ -40,6 +56,14 @@ public class ChessAI
                             return -.7f;
                         }
                     }
+                    if (col - 1 >= 0 && board[row - 1][col - 1] == ChessState.wp)
+                    {
+                        return 1.1f;
+                    }
+                    if (col + 1 <= 7 && board[row - 1][col + 1] == ChessState.wp)
+                    {
+                        return 1.1f;
+                    }
                     return -1;
                 };
             case ChessState.wk:
@@ -48,13 +72,21 @@ public class ChessAI
                     {
                         return 2.8f;
                     }
-                    return 3;
+                    if (col == 1 || col == 6)
+                    {
+                        return 2.9f;
+                    }
+                    return 3f;
                 };
             case ChessState.bk:
                 {
                     if (col == 0 || col == 7)
                     {
                         return -2.8f;
+                    }
+                    if (col == 1 || col == 6)
+                    {
+                        return -2.9f;
                     }
                     return -3;
                 };
@@ -83,6 +115,7 @@ public class ChessAI
         }
         return 0;
     }
+    
 
     public ChessState chess;
 
@@ -91,38 +124,6 @@ public class ChessAI
         this.chess = chess;
     }
 
-    public Move GetBest()
-    {
-        Move openable = doOpening();
-        if (!(openable.startCol == -2))
-        {
-            return openable;
-        }
-        List<Move> possible = chess.getLegalMoves();
-        List<Move> highest = new List<Move>();
-        ChessState result;
-        float bestScore = -10000;
-        float newScore;
-        for (int k = 0; k < possible.Count; ++k)
-        {
-            result = new ChessState(chess);
-            result.playWhiteMove(possible[k]);
-            newScore = getMaterialScore(result);
-            if (newScore > bestScore)
-            {
-                bestScore = newScore;
-                highest = new List<Move>();
-            }
-            if (newScore == bestScore)
-            {
-                highest.Add(possible[k]);
-            }
-        }
-        System.Random rnd = new System.Random();
-        int j = rnd.Next(0, highest.Count);
-        return highest[j];
-    }
-    /*
     public Move GetBestMove(ChessState chess)
     {
         Move openable = doOpening();
@@ -140,17 +141,18 @@ public class ChessAI
         }
         else
         {
-            searchDepth = 2;
+            searchDepth = baseSearch;
         }
         bestMoves = new List<Move>();
         //MinMax(chess, searchDepth);
-        negaMax(chess, searchDepth, -(chess.getColor() * 2 - 1));
+        negaMaxAB(chess, searchDepth, -(chess.getColor() * 2 - 1), -mateScore, mateScore);
         System.Random rnd = new System.Random();
         int j = rnd.Next(0, bestMoves.Count);
         Debug.Log("Making move " + j + " of " + bestMoves.Count);
         return bestMoves[j];
     }
     
+    /*
     private float MinMax(ChessState chess, int depth)
     {
         List<Move> possible = chess.getLegalMoves();
@@ -236,6 +238,16 @@ public class ChessAI
             result = new ChessState(state);
             result.playMove(possible[i]);
             maxScore = -negaMax(result, depth - 1, -multiplier);
+            if (maxScore > bestMaxScore)
+            {
+                bestMaxScore = maxScore;
+                if (depth == searchDepth)
+                {
+                    Debug.Log("new max score " + bestMaxScore + " from depth " + depth + " mv " + ChessState.moveStr(possible[i]));
+
+                    bestMoves = new List<Move> { possible[i] };
+                }
+            }
             if (maxScore == bestMaxScore)
             {
                 if (depth == searchDepth)
@@ -243,18 +255,67 @@ public class ChessAI
                     bestMoves.Add(possible[i]);
                 }
             }
-            else if (maxScore > bestMaxScore)
+        }
+        return bestMaxScore;
+    }
+
+    private float negaMaxAB(ChessState state, int depth, int multiplier, float a, float b, bool evalFinal=false)
+    {
+        List<Move> possible = state.getLegalMoves();
+        float bestMaxScore;
+        float maxScore;
+        ChessState result;
+        int piece = -1;
+        if (depth == 0)
+        {
+            return multiplier * getMaterialScore(state);
+        }
+        bestMaxScore = -mateScore;
+        for (int i = 0; i < possible.Count; ++i)
+        { 
+            if (possible[i].startRow >= 0 && possible[i].startCol >=0)
+            {
+                piece = state.getBoard()[possible[i].startRow][possible[i].startCol];
+            }
+            result = new ChessState(state);
+            result = new ChessState(state);
+            if (depth == 1 && !evalFinal)
+            {
+                result.playMove(possible[i], false);
+            }
+            else
+            {
+                result.playMove(possible[i]);
+            }
+            //Debug.Log("depth = " + depth);
+            maxScore = -negaMaxAB(result, depth - 1, -multiplier, -b, -a);
+            if (maxScore > bestMaxScore)
             {
                 bestMaxScore = maxScore;
                 if (depth == searchDepth)
                 {
-                    Debug.Log("new max score " + bestMaxScore);
                     bestMoves = new List<Move> { possible[i] };
                 }
+            }
+            else if (maxScore == bestMaxScore)
+            {
+                if (depth == searchDepth)
+                {
+                    bestMoves.Add(possible[i]);
+                }
+            }
+            if (bestMaxScore > a)
+            {
+                a = bestMaxScore;
+            }
+            if (a > b)
+            {
+                break;
             }
         }
         return bestMaxScore;
     }
+
 
     private float getMaterialScore(ChessState state)
     {
@@ -277,15 +338,15 @@ public class ChessAI
         {
             for (int j = 0; j < 8; ++j)
             {
-                cumScore += pieceScore(board[i][j], i, j);
+                cumScore += pieceScore(state, i, j);
             }
         }
         if (chess.getColor() == ChessState.white) {
-            cumScore -= .5f * chess.inCheck(ChessState.white);
+            cumScore -= .5f * state.inCheck(ChessState.white);
         }
         else if (chess.getColor() == ChessState.black)
         {
-            cumScore += .5f * chess.inCheck(ChessState.black);
+            cumScore += .5f * state.inCheck(ChessState.black);
         }
         return cumScore;
     }

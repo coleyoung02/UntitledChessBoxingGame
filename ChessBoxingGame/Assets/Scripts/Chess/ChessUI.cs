@@ -2,10 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-
 
 public class ChessUI : MonoBehaviour
 {
@@ -28,8 +28,10 @@ public class ChessUI : MonoBehaviour
     [SerializeField] ChessPlayerClock blackClock;
     [SerializeField] AudioClip[] sounds;
 
+    private Move AIMove;
     private AudioSource source;
-
+    private bool moveDone;
+    private float extraDelay = .5f;
 
     //for testing only, can (and should) be deleted once ai is implemented
     private int color;
@@ -49,10 +51,21 @@ public class ChessUI : MonoBehaviour
         board = chess.getBoard();
         AI = new ChessAI(chess);
         refreshUI();
+        moveDone = false;
         color = chess.getColor();
+        setTurn(color);
         if (color == 0)
         {
-            playWhite();
+            threadMove();
+        }
+    }
+
+    private void Update()
+    {
+        if(moveDone)
+        {
+            moveDone = false;
+            StartCoroutine(finishMove());
         }
     }
 
@@ -85,6 +98,7 @@ public class ChessUI : MonoBehaviour
 
     public void squareClicked(int buttonNo)
     {
+        refreshUI();
         board = chess.getBoard();
         color = chess.getColor();
         int row = buttonNo / 8;
@@ -120,21 +134,18 @@ public class ChessUI : MonoBehaviour
             }
             else
             {
-                Debug.Log("selected " + row + ", " + col);
                 if (board[row][col] % 2 == color)
                 {
                     setMoveSquares(row, col);
                 }
                 else if (board[selectedRow][selectedCol] == ChessState.bp && row == 7)
                 {
-                    Debug.Log("Boop " + row + " " + col);
                     List<Move> moves = chess.getLegalMoves();
                     for (int i = 0; i < moves.Count; ++i)
                     {
                         if (moves[i].startCol == selectedCol && moves[i].startRow == selectedRow &&
                             moves[i].endRow == row && moves[i].endCol == col)
                         {
-                            Debug.Log("ACTIVE " + row + " " + col);
                             promotionCol = col;
                             blackPiecesSelect.SetActive(true);
                             promotionMenu.SetActive(true);
@@ -171,7 +182,7 @@ public class ChessUI : MonoBehaviour
     public void playWhite()
     {
         //do something better
-        StartCoroutine(playMove());
+        threadMove();
     }
 
     private void setTurn(int color)
@@ -186,13 +197,27 @@ public class ChessUI : MonoBehaviour
             whiteClock.setTicking(false);
             blackClock.setTicking(true);
         }
+        if (whiteClock.getTime() < blackClock.getTime())
+        {
+            AI.setDepth(3);
+        }
+        else 
+        {
+            AI.setDepth(4);
+        }
     }
 
-    IEnumerator playMove()
+    private void threadMove()
     {
-        yield return new WaitForSeconds(.1f);
-        Move m = AI.GetBestMove(chess);
-        if (m.startRow < 0)
+        AIMove = chess.getRandomMove(ChessState.white);
+        Thread backgroundThread = new Thread(new ThreadStart(this.setMove));
+        backgroundThread.Start();
+    }
+
+    IEnumerator finishMove()
+    {
+        Move m = AIMove;
+        if (AIMove.startRow < 0)
         {
             overlay[7 * 8 + 3].GetComponent<Image>().sprite = indicators[4];
         }
@@ -200,7 +225,7 @@ public class ChessUI : MonoBehaviour
         {
             overlay[m.startRow * 8 + m.startCol].GetComponent<Image>().sprite = indicators[4];
         }
-        yield return new WaitForSeconds(.5f);
+        yield return new WaitForSeconds(extraDelay);
         chess.playWhiteMove(m);
         color = (color + 1) % 2;
         board = chess.getBoard();
@@ -209,6 +234,13 @@ public class ChessUI : MonoBehaviour
         setTurn(1);
     }
 
+    private void setMove()
+    {
+        AIMove = AI.GetBestMove(chess);
+        moveDone = true;
+    }
+
+    
     public void replace(int piece)
     {
         //color gets flipped after moving pawn to end so this passes the correct color
@@ -261,6 +293,10 @@ public class ChessUI : MonoBehaviour
 
     private void highlightLegal()
     {
+        if (color == ChessState.black) 
+        {
+            chess.setMoves(ChessState.black);
+        }
         List<Move> legal = chess.getLegalMoves();
         for (int i = 0; i < legal.Count; ++i)
         {
