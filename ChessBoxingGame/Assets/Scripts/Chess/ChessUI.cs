@@ -204,11 +204,11 @@ public class ChessUI : MonoBehaviour
         }
         if (whiteClock.getTime() < blackClock.getTime())
         {
-            AI.setDepth(3);
+            AI.setDepth(AI.getBaseDepth());
         }
         else 
         {
-            AI.setDepth(4);
+            AI.setDepth(AI.getBaseDepth() + 1);
         }
     }
 

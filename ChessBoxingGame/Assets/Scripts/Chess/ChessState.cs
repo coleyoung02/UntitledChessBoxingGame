@@ -100,7 +100,7 @@ public class ChessState
 
     public bool isStale()
     {
-        return this.realMoves.Count == 0 && this.inCheck(currentColor) == 0;
+        return this.realMoves.Count == 0 && this.inCheck(currentColor) == -1;
     }
 
     public bool playMove(int row, int col, int newRow, int newCol, int color) {
@@ -317,6 +317,11 @@ public class ChessState
 
     public int inCheck(int color)
     {
+        if (speedyCheck(color))
+        {
+            return 1;
+        }
+        return 0;
         if (color == white)
         {
             return squareAttacked(wkRow, wkCol, white);
@@ -325,6 +330,96 @@ public class ChessState
         {
             return squareAttacked(bkRow, bkCol, black);
         }
+    }
+
+    //ugly but fast
+    public bool speedyCheck(int color)
+    {
+        int newRow;
+        int newCol;
+        int row;
+        int col;
+        int delta = color * 2 - 1;
+        bool checkPawns;
+
+        if (Math.Abs(wkRow - bkRow) <= 1 && Math.Abs(wkCol - bkCol) <= 1)
+        {
+            return true;
+        }
+        if (color == white)
+        {
+            row = wkRow;
+            col = wkCol;
+            checkPawns = row + delta > 0;
+        }
+        else
+        {
+            row = bkRow;
+            col = bkCol;
+            checkPawns = row + delta < 7;
+        }
+
+        foreach (int[] dir in rookDirs)
+        {
+            newRow = row + dir[0];
+            newCol = col + dir[1];
+            while (newRow < 8 && newRow >= 0 && newCol < 8 && newCol >= 0)
+            {
+                if (board[newRow][newCol] < 0)
+                {
+                    newRow = newRow + dir[0];
+                    newCol = newCol + dir[1];
+                }
+                else if (board[newRow][newCol] == br - color || board[newRow][newCol] == bQ - color)
+                {
+                    Debug.Log("rook");
+                    return true;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+        foreach (int[] dir in bishopDirs)
+        {
+            newRow = row + dir[0];
+            newCol = col + dir[1];
+            while (newRow < 8 && newRow >= 0 && newCol < 8 && newCol >= 0)
+            {
+                if (board[newRow][newCol] < 0)
+                {
+                    newRow = newRow + dir[0];
+                    newCol = newCol + dir[1];
+                }
+                else if (board[newRow][newCol] == bb - color || board[newRow][newCol] == bQ - color)
+                {
+                    return true;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+        foreach (int[] dir in knightPossiblities)
+        {
+            newRow = row + dir[0];
+            newCol = col + dir[1];
+            //check if its on the board, and then if its not occupied by the same color piece
+            if (newRow < 8 && newRow >= 0 && newCol < 8 && newCol >= 0 &&
+                (board[newRow][newCol] == bk - color))
+            {
+                Debug.Log("kight");
+                return true;
+            }
+        }
+        if (checkPawns && ((col - 1 >= 0 && board[row + delta][col - 1] == bp - color) ||
+            (col + 1 <= 7 && board[row + delta][col + 1] == bp - color)))
+        {
+            return true;
+        }
+        return false;
     }
 
 
@@ -490,7 +585,7 @@ public class ChessState
                     potentialMoves.RemoveAt(i);
                 }
             }
-            else if (!isSafe(potentialMoves[i], color))
+            else if (!isSafe(m, color))
             {
                 int k = board[m.startRow][m.startCol] - color;
                 potentialMoves.RemoveAt(i);
@@ -996,15 +1091,20 @@ public class ChessState
         board[m.endRow][m.endCol] = boardCopy[m.startRow][m.startCol];
         board[m.startRow][m.startCol] = -1;
         bool validity;
+        if (m.isEP)
+        {
+            board[m.startRow + (2 * color - 1)][epCol] = ee;
+        }
         if (color == white)
         {
-            validity = squareAttacked(wkRow, wkCol, white) <= 0;
+            validity = !speedyCheck(color);
         }
         else
         {
-            validity = squareAttacked(bkRow, bkCol, black) <= 0;
+            validity = !speedyCheck(color);
 
         }
+
         board = boardCopy;
         return validity;
     }

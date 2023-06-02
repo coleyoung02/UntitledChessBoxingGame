@@ -1,22 +1,28 @@
 ﻿using Mono.Cecil;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class ChessAI
 {
 
     private static int mateScore = 32000;
     private static int baseSearch = 3;
+    private static int baseBaseSearch = 3;
     private int searchDepth = 2;
     private List<Move> bestMoves = new List<Move>();
-    
+    private int count = 0;
+
+    public int getBaseDepth()
+    {
+        return baseBaseSearch;
+    }
 
     public void setDepth(int depth)
     {
@@ -68,15 +74,20 @@ public class ChessAI
                 };
             case ChessState.wk:
                 {
+                    float increment = 0;
+                    if (row > 1 && row < 6)
+                    {
+                        increment = .3f;
+                    }
                     if (col == 0 || col == 7)
                     {
-                        return 2.8f;
+                        return 2.8f + increment;
                     }
                     if (col == 1 || col == 6)
                     {
-                        return 2.9f;
+                        return 2.9f + increment;
                     }
-                    return 3f;
+                    return 3f + increment;
                 };
             case ChessState.bk:
                 {
@@ -126,6 +137,8 @@ public class ChessAI
 
     public Move GetBestMove(ChessState chess)
     {
+        Stopwatch stopWatch = new Stopwatch();
+        stopWatch.Start();
         Move openable = doOpening();
         if (!(openable.startCol == -2))
         {
@@ -133,11 +146,11 @@ public class ChessAI
         }
         if (piecesOnBoard() < 7)
         {
-            searchDepth = 3;
+            searchDepth = baseSearch + 1;
         }
         else if (piecesOnBoard() < 4)
         {
-            searchDepth = 4;
+            searchDepth = baseSearch + 2;
         }
         else
         {
@@ -148,7 +161,11 @@ public class ChessAI
         negaMaxAB(chess, searchDepth, -(chess.getColor() * 2 - 1), -mateScore, mateScore);
         System.Random rnd = new System.Random();
         int j = rnd.Next(0, bestMoves.Count);
-        Debug.Log("Making move " + j + " of " + bestMoves.Count);
+        UnityEngine.Debug.Log("Making move " + j + " of " + bestMoves.Count);
+        UnityEngine.Debug.Log("did " + count + " iterations");
+        stopWatch.Stop();
+        UnityEngine.Debug.Log(stopWatch.Elapsed);
+        count = 0;
         return bestMoves[j];
     }
     
@@ -220,7 +237,7 @@ public class ChessAI
         }
     }
     */
-
+    /*
     private float negaMax(ChessState state, int depth, int multiplier)
     {
         List<Move> possible = chess.getLegalMoves();
@@ -258,26 +275,51 @@ public class ChessAI
         }
         return bestMaxScore;
     }
+    */
 
-    private float negaMaxAB(ChessState state, int depth, int multiplier, float a, float b, bool evalFinal=false)
+    private float negaMaxAB(ChessState state, int depth, int multiplier, float a, float b, bool evalFinal=true)
     {
+        count++;
         List<Move> possible = state.getLegalMoves();
         float bestMaxScore;
         float maxScore;
         ChessState result;
         int piece = -1;
+        int adjustment = 0;
         if (depth == 0)
+        {
+            return multiplier * getMaterialScore(state);
+        }
+        else if (getMaterialScore(state) > 100)
         {
             return multiplier * getMaterialScore(state);
         }
         bestMaxScore = -mateScore;
         for (int i = 0; i < possible.Count; ++i)
         { 
+
             if (possible[i].startRow >= 0 && possible[i].startCol >=0)
             {
                 piece = state.getBoard()[possible[i].startRow][possible[i].startCol];
+                if (state.getHalfMoves() < 4)
+                {
+                    if (piece == ChessState.wQ || piece == ChessState.bQ)
+                    {
+                        adjustment = -2;
+                    }
+                    if (piece == ChessState.wK || piece == ChessState.bK)
+                    {
+                        adjustment = -3;
+                    }
+                }
+                if (state.getHalfMoves() < 8)
+                {
+                    if (piece == ChessState.wQ || piece == ChessState.bQ)
+                    {
+                        adjustment = -1;
+                    } 
+                }
             }
-            result = new ChessState(state);
             result = new ChessState(state);
             if (depth == 1 && !evalFinal)
             {
@@ -287,13 +329,14 @@ public class ChessAI
             {
                 result.playMove(possible[i]);
             }
-            //Debug.Log("depth = " + depth);
             maxScore = -negaMaxAB(result, depth - 1, -multiplier, -b, -a);
+            maxScore += adjustment;
             if (maxScore > bestMaxScore)
             {
                 bestMaxScore = maxScore;
                 if (depth == searchDepth)
                 {
+                    UnityEngine.Debug.Log("Best move is " + ChessState.moveStr(possible[i]) + " with score " + bestMaxScore);
                     bestMoves = new List<Move> { possible[i] };
                 }
             }
@@ -308,10 +351,12 @@ public class ChessAI
             {
                 a = bestMaxScore;
             }
+            
             if (a > b)
             {
                 break;
             }
+            
         }
         return bestMaxScore;
     }
@@ -357,6 +402,7 @@ public class ChessAI
         System.Random rnd = new System.Random();
         if (chess.getHalfMoves() == 0)
         {
+            return new Move(7, 6, 5, 5);
             if (rnd.Next(0, 2) == 0)
                 return new Move(6, 3, 4, 3);
             else
