@@ -26,6 +26,7 @@ public class ChessUI : MonoBehaviour
     [SerializeField] private GameObject backupManager;
     [SerializeField] ChessPlayerClock whiteClock;
     [SerializeField] ChessPlayerClock blackClock;
+    [SerializeField] ChessText chessText;
     [SerializeField] AudioClip[] sounds;
 
     private Move AIMove;
@@ -110,11 +111,15 @@ public class ChessUI : MonoBehaviour
             setTurn(0);
             if (chess.isMate() < 0)
             {
+                if (chess.inCheck(ChessState.white) > 0)
+                {
+                    chessText.onCheck();
+                }
                 playWhite();
             }
-            else
+            else 
             {
-                Debug.Log("You win! " + chess.isMate());
+                chessText.onMate();
             }
         }
     }
@@ -227,11 +232,22 @@ public class ChessUI : MonoBehaviour
         }
         yield return new WaitForSeconds(extraDelay);
         chess.playWhiteMove(m);
-        color = (color + 1) % 2;
-        board = chess.getBoard();
+        if (chess.isMate() < 0)
+        {
+            if (chess.inCheck(ChessState.black) > 0)
+            {
+                chessText.onCheck();
+            }
+            color = (color + 1) % 2;
+            board = chess.getBoard();
+            setTurn(1);
+        }
+        else
+        {
+            chessText.onMate();
+        }
         playSound();
         refreshUI();
-        setTurn(1);
     }
 
     private void setMove()
