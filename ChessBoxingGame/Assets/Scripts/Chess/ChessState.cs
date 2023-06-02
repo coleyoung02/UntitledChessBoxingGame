@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using UnityEngine; //for debugging
 using static Unity.VisualScripting.Member;
@@ -34,11 +35,14 @@ public struct Move {
 
 public class ChessState
 {
+
+    public Stopwatch stopWatch;
     public ChessState() {
         this.init_new_board();
         this.setMoves(white);
         this.currentColor = white;
         this.halfMovesIn = 0;
+        stopWatch = new Stopwatch();
     }
 
     public ChessState(ChessState current)
@@ -65,6 +69,32 @@ public class ChessState
         this.currentColor = current.currentColor;
         this.realMoves = new List<Move>(current.realMoves);
         this.halfMovesIn = current.halfMovesIn;
+        stopWatch = current.stopWatch;
+    }
+
+    //we can avoid checking this for every single move only checking positions since the last piece was captured or pawn was moved
+    public bool Equals(ChessState c2)
+    {
+        for (int i = 0; i < 7; ++i)
+        {
+            for (int j = 0; j < 7; ++j)
+            {
+                if (this.board[i][j] != c2.board[i][j])
+                {
+                    return false;
+                }
+            }
+        }
+        if (this.epCol != c2.epCol)
+        {
+            return false;
+        }
+        if (!(this.whiteCanCastleKS == c2.whiteCanCastleKS && this.whiteCanCastleQS == c2.whiteCanCastleQS &&
+            this.blackCanCastleKS == c2.blackCanCastleKS && this.blackCanCastleQS == c2.blackCanCastleQS))
+        {
+            return false;
+        }
+        return true;
     }
 
     public int getPlayer()
@@ -91,16 +121,26 @@ public class ChessState
     //if mate, return losing color, otherwise return -1
     public int isMate()
     {
-        if (this.realMoves.Count == 0 && this.inCheck(currentColor) > 0)
+        stopWatch.Start();
+        if (this.realMoves.Count == 0 && (blackCheck >= 0 || whiteCheck >= 0))
         {
+            stopWatch.Stop();
             return this.currentColor;
         }
-        else return -1;
+        else
+        {
+            stopWatch = new Stopwatch();
+            return -1;
+        }
     }
 
     public bool isStale()
     {
-        return this.realMoves.Count == 0 && this.inCheck(currentColor) == -1;
+        bool b;
+        stopWatch.Start();
+        b = this.realMoves.Count == 0 && !(blackCheck >= 0 || whiteCheck >= 0);
+        stopWatch.Stop();
+        return b;
     }
 
     public bool playMove(int row, int col, int newRow, int newCol, int color) {
@@ -372,7 +412,6 @@ public class ChessState
                 }
                 else if (board[newRow][newCol] == br - color || board[newRow][newCol] == bQ - color)
                 {
-                    Debug.Log("rook");
                     return true;
                 }
                 else
@@ -410,7 +449,6 @@ public class ChessState
             if (newRow < 8 && newRow >= 0 && newCol < 8 && newCol >= 0 &&
                 (board[newRow][newCol] == bk - color))
             {
-                Debug.Log("kight");
                 return true;
             }
         }
@@ -486,6 +524,7 @@ public class ChessState
     private int halfMovesIn;
     private int whiteCheck;
     private int blackCheck;
+
 
     private void init_new_board() {
         board = new int[8][];

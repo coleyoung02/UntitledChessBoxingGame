@@ -9,15 +9,15 @@ EditorBuildSettings:
     path: Assets/Scenes/ResolutionTesting.unity
     guid: 9ee280ac48aaf9846be8cc263d317a57
   - enabled: 0
-    path: Assets/Scenes/SampleScene.unity
-    guid: 2cda990e2423bbf4892e6590ba056729
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 0
     path: Assets/Scenes/PlaytestingScene.unity
     guid: 4fa90520e70732041a66c3a0524087dc
   - enabled: 1
-    path: Assets/Scenes/FinalScenes/BoxingScene.unity
-    guid: 8e56407d46ec6c740aef521f26a266e0
-  - enabled: 1
     path: Assets/Scenes/FinalScenes/ChessScene.unity
     guid: 6692f3a2e47b2f540978b015dfa550ab
+  - enabled: 1
+    path: Assets/Scenes/FinalScenes/BoxingScene.unity
+    guid: 8e56407d46ec6c740aef521f26a266e0
   m_configObjects: {}
