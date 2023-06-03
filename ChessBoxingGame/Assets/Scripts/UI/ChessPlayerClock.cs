@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class ChessPlayerClock : Timer
 {
     private bool ticking;
+    [SerializeField] Image piece;
 
     private void Awake()
     {
@@ -22,6 +23,7 @@ public class ChessPlayerClock : Timer
     public void setTicking(bool ticking)
     {
         this.ticking = ticking;
+        this.piece.gameObject.SetActive(ticking);
     }
 
     public void setTime(float time)
