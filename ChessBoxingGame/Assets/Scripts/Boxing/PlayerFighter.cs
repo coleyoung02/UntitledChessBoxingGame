@@ -22,9 +22,11 @@ public class PlayerFighter : Fighter
     [SerializeField] private AudioClip hurtNoise;
     [SerializeField] private AudioClip KONoise;
     private GameManagerClass gameManager;
+    private bool gameWon;
 
     void Start()
     {
+        gameWon = false;
         lastPunch = null;
         canPunch = true;
         numPunches = 0;
@@ -44,9 +46,18 @@ public class PlayerFighter : Fighter
     {
         glove.gameObject.SetActive(canPunch); 
         stateName = currentState.name.ToString();
-        if (currentState.name == State.STATE.P_KO)
+        if (currentState.name == State.STATE.P_KO && !gameWon)
         {
+            gameWon = true;
+            Debug.Log("should only happen once");
             gameManager.setWinner(GameManagerClass.Winner.ENEMY);
+            bText.onKO();
+        }
+        else if (this.opponent.currentState.name == State.STATE.E_KO && !gameWon)
+        {
+            gameWon = true;
+            Debug.Log("should only happen once");
+            gameManager.setWinner(GameManagerClass.Winner.PLAYER);
             bText.onKO();
         }
         if (Input.GetKeyDown("f"))
