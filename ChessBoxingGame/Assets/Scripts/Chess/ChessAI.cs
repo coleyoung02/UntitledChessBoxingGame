@@ -475,6 +475,10 @@ public class ChessAI
                     } 
                 }
             }
+            else
+            {
+                adjustment = 2;
+            }
             result = new ChessState(state);
             if (depth == 1 && !evalFinal)
             {

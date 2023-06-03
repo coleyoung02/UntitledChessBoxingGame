@@ -31,9 +31,22 @@ public class EnemyBlocking : State
         yield return new WaitForSeconds(blocking_time);
         if (fighter.currentState == this)
         {
+            //should pick a random of idle, heavy, or light punch
             nextState = new EnemyIdle(anim, player, (EnemyFighter)fighter);
             stage = EVENT.EXIT;
         }
+    }
+
+    public void goLightPunching()
+    {
+        nextState = new EnemyLightPunching(anim, player, (EnemyFighter)fighter);
+        stage = EVENT.EXIT;
+    }
+
+    public void goHeavyPunching()
+    {
+        nextState = new EnemyHeavyPunchingFst(anim, player, (EnemyFighter)fighter);
+        stage = EVENT.EXIT;
     }
 
     public override void goKO()

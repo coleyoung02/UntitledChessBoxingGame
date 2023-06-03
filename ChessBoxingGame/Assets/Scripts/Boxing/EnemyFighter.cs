@@ -89,7 +89,7 @@ public class EnemyFighter : Fighter
 
     public void hitLightPunch()
     {
-        if (currentState.name == State.STATE.E_IDLE)
+        if (currentState.name == State.STATE.E_IDLE || currentState.name == State.STATE.E_BLOCKING)
         {
             ((EnemyIdle)currentState).goLightPunching();
         }
@@ -97,7 +97,7 @@ public class EnemyFighter : Fighter
 
     public void hitHeavyPunch()
     {
-        if (currentState.name == State.STATE.E_IDLE)
+        if (currentState.name == State.STATE.E_IDLE || currentState.name == State.STATE.E_BLOCKING)
         {
             ((EnemyIdle)currentState).goHeavyPunching();
         }

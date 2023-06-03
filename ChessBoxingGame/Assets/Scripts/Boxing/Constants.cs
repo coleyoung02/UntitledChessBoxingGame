@@ -16,7 +16,7 @@ public static class Constants
         public const float BLOCKING_REDUC = 0.95f;
         public const float HEALTH_MAX = 82;
         public const float POSS_BLOCKING = 0.07f;
-        public const float POSS_LIGHT_PUNCH = 0.003f;
+        public const float POSS_LIGHT_PUNCH = 0.004f;
         public const float POSS_HEAVY_PUNCH = 0.006f;
     }
 
