@@ -9,6 +9,7 @@ public class EnemyFighter : Fighter
     [SerializeField] Sprite[] sprites; // Delete after testing
     private SpriteRenderer spriteRenderer; // Delete after testing
     private GameManagerClass gameManager;
+    private float time;
 
     void Awake()
     {
@@ -18,10 +19,11 @@ public class EnemyFighter : Fighter
         gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
         currentHealth = gameManager.getEnemyHealth();
         blockingReduction = Constants.Enemy.BLOCKING_REDUC;
-        currentState = new EnemyIdle(anim, transform, this);
+        currentState = new EnemyBlocking(anim, transform, this);
         lightPunch = new Attack(Constants.Enemy.LIGHT_PUNCH_DAMAGE, Constants.Enemy.LIGHT_PUNCH_TELE_TIME, true);
         heavyPunch = new Attack(Constants.Enemy.HEAVY_PUNCH_DAMAGE,
             Constants.Enemy.HEAVY_PUNCH_FST_TELE_TIME + Constants.Enemy.HEAVY_PUNCH_SND_TELE_TIME, false);
+        time = 3f;
     }
 
 
@@ -31,16 +33,27 @@ public class EnemyFighter : Fighter
         // random possbility
         spriteRenderer.sprite = sprites[(int)currentState.name]; //Delete after testing
         // Comment it out to use buttons instead
-        float rand = UnityEngine.Random.Range(0.0f, 1.0f); 
-        if (rand < Constants.Enemy.POSS_LIGHT_PUNCH)
+        if (time <= 0)
         {
-            hitLightPunch();
+            time = UnityEngine.Random.Range(1.0f, 2.0f) + UnityEngine.Random.Range(1.0f, 2.0f) + UnityEngine.Random.Range(1.0f, 2.0f);
+            float rand = UnityEngine.Random.Range(0f, 1.0f);
+            if (rand < Constants.Enemy.POSS_LIGHT_PUNCH)
+            {
+                hitLightPunch();
+            }
+            else if (rand < Constants.Enemy.POSS_LIGHT_PUNCH + Constants.Enemy.POSS_HEAVY_PUNCH)
+            {
+                hitHeavyPunch();
+            }
+            else if (rand < Constants.Enemy.POSS_LIGHT_PUNCH + Constants.Enemy.POSS_HEAVY_PUNCH + Constants.Enemy.POSS_IDLE)
+            {
+                goIdle();
+            }
         }
-        else if (rand < Constants.Enemy.POSS_LIGHT_PUNCH + Constants.Enemy.POSS_HEAVY_PUNCH)
+        else if (currentState.name == State.STATE.E_BLOCKING || currentState.name == State.STATE.E_IDLE)
         {
-            hitHeavyPunch();
+            time -= Time.deltaTime;
         }
-
         currentState = currentState.process();
     }
 
@@ -89,17 +102,33 @@ public class EnemyFighter : Fighter
 
     public void hitLightPunch()
     {
-        if (currentState.name == State.STATE.E_IDLE || currentState.name == State.STATE.E_BLOCKING)
+        if (currentState.name == State.STATE.E_IDLE)
         {
             ((EnemyIdle)currentState).goLightPunching();
+        }
+        else if (currentState.name == State.STATE.E_BLOCKING)
+        {
+            ((EnemyBlocking)currentState).goLightPunching();
         }
     }
 
     public void hitHeavyPunch()
     {
-        if (currentState.name == State.STATE.E_IDLE || currentState.name == State.STATE.E_BLOCKING)
+        if (currentState.name == State.STATE.E_IDLE)
         {
             ((EnemyIdle)currentState).goHeavyPunching();
+        }
+        else if (currentState.name == State.STATE.E_BLOCKING)
+        {
+            ((EnemyBlocking)currentState).goHeavyPunching();
+        }
+    }
+
+    public void goIdle()
+    {
+        if (currentState.name == State.STATE.E_BLOCKING)
+        {
+            ((EnemyBlocking)currentState).goIdle();
         }
     }
 

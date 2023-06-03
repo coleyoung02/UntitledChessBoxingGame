@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class ChessText : MonoBehaviour
@@ -39,5 +40,7 @@ public class ChessText : MonoBehaviour
     {
         yield return new WaitForSeconds(.65f);
         mate.gameObject.SetActive(true);
+        yield return new WaitForSeconds(2f);
+        SceneManager.LoadScene("EndScreen");
     }
 }

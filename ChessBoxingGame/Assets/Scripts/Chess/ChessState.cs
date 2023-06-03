@@ -33,22 +33,46 @@ public struct Move {
 
 }
 
+public struct CastlingRights
+{
+    public bool wQS;
+    public bool bQS;
+    public bool wKS;
+    public bool bKS;
+    public bool wH;
+    public bool bH;
+
+    public CastlingRights(bool wQS, bool bQS, bool wKS, bool bKS, bool wH, bool bH)
+    {
+        this.wQS = wQS;
+        this.bQS = bQS;
+        this.wKS = wKS;
+        this.bKS = bKS;
+        this.wH = wH;
+        this.bH = bH;
+    }
+}
+
 public class ChessState
 {
 
-    public Stopwatch stopWatch;
     public ChessState() {
         this.init_new_board();
         this.setMoves(white);
         this.currentColor = white;
         this.halfMovesIn = 0;
-        stopWatch = new Stopwatch();
+        this.blackHasCastled = false;
+        this.whiteHasCastled = false;
+        this.threeMove = false;
+        this.epCol = -1;
+        statesToCheck = new Queue<ChessState>();
+        statesToCheck.Enqueue(new ChessState(this));
     }
 
     public ChessState(ChessState current)
     {
         this.board = new int[8][];
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 8; ++i)
         {
             this.board[i] = new int[8];
             for (int j = 0; j < 8; ++j)
@@ -69,12 +93,30 @@ public class ChessState
         this.currentColor = current.currentColor;
         this.realMoves = new List<Move>(current.realMoves);
         this.halfMovesIn = current.halfMovesIn;
-        stopWatch = current.stopWatch;
+        this.whiteHasCastled = current.whiteHasCastled;
+        this.blackHasCastled = current.blackHasCastled;
+        this.threeMove = current.threeMove;
+        this.statesToCheck = new Queue<ChessState>();
+        foreach (ChessState s in current.statesToCheck)
+        {
+            this.statesToCheck.Enqueue(s);
+        }
     }
 
     //we can avoid checking this for every single move only checking positions since the last piece was captured or pawn was moved
     public bool Equals(ChessState c2)
     {
+        if (this.currentColor != c2.currentColor)
+        {
+            return false;
+        }
+
+        if (!(this.whiteCanCastleKS == c2.whiteCanCastleKS && this.whiteCanCastleQS == c2.whiteCanCastleQS &&
+            this.blackCanCastleKS == c2.blackCanCastleKS && this.blackCanCastleQS == c2.blackCanCastleQS))
+        {
+            return false;
+        }
+
         for (int i = 0; i < 7; ++i)
         {
             for (int j = 0; j < 7; ++j)
@@ -85,16 +127,17 @@ public class ChessState
                 }
             }
         }
+
         if (this.epCol != c2.epCol)
         {
             return false;
         }
-        if (!(this.whiteCanCastleKS == c2.whiteCanCastleKS && this.whiteCanCastleQS == c2.whiteCanCastleQS &&
-            this.blackCanCastleKS == c2.blackCanCastleKS && this.blackCanCastleQS == c2.blackCanCastleQS))
-        {
-            return false;
-        }
         return true;
+    }
+
+    public CastlingRights GetCastlingRights()
+    {
+        return new CastlingRights(whiteCanCastleQS, blackCanCastleQS, whiteCanCastleKS, blackCanCastleKS, whiteHasCastled, blackHasCastled);
     }
 
     public int getPlayer()
@@ -121,25 +164,24 @@ public class ChessState
     //if mate, return losing color, otherwise return -1
     public int isMate()
     {
-        stopWatch.Start();
         if (this.realMoves.Count == 0 && (blackCheck >= 0 || whiteCheck >= 0))
         {
-            stopWatch.Stop();
             return this.currentColor;
         }
         else
         {
-            stopWatch = new Stopwatch();
             return -1;
         }
     }
 
     public bool isStale()
     {
+        if (threeMove)
+        {
+            return true;
+        }
         bool b;
-        stopWatch.Start();
         b = this.realMoves.Count == 0 && !(blackCheck >= 0 || whiteCheck >= 0);
-        stopWatch.Stop();
         return b;
     }
 
@@ -149,7 +191,7 @@ public class ChessState
         List<Move> possible = legalMoves(color);
         bool canMove = false;
         bool isEP = false;
-        for (int i = 0; i < possible.Count; i++)
+        for (int i = 0; i < possible.Count; ++i)
         {
             //Debug.Log("possible move: " + moveStr(possible[i]));
             if (possible[i].startCol == col && possible[i].startRow == row
@@ -200,7 +242,7 @@ public class ChessState
             }
             board[newRow][newCol] = board[row][col];
             board[row][col] = ee;
-            this.onMove(black);
+            this.onMove(color);
             return true;
         }
         else if (isCastling(row, col, newRow, newCol, color))
@@ -212,7 +254,7 @@ public class ChessState
                     if (tryCastling(castleType))
                     {
                         epCol = -1;
-                        this.onMove(black);
+                        this.onMove(color);
                         return true;
                     }
                 }
@@ -224,6 +266,21 @@ public class ChessState
 
     public void playMove(Move m, bool setNext=true)
     {
+        if (m.startRow >= 0 & m.startCol >= 0)
+        {
+            if (board[m.endRow][m.endCol] != ee)
+            {
+                this.statesToCheck = new Queue<ChessState>();
+            }
+            else if (board[m.startRow][m.startCol] == wp || board[m.startRow][m.startCol] == bp)
+            {
+                this.statesToCheck = new Queue<ChessState>();
+            }
+        } 
+        else
+        {
+            this.statesToCheck = new Queue<ChessState>();
+        }
         if (this.currentColor == white)
         {
             playWhiteMove(m, setNext);
@@ -504,6 +561,8 @@ public class ChessState
     private bool blackCanCastleQS;
     private bool whiteCanCastleKS;
     private bool blackCanCastleKS;
+    private bool whiteHasCastled;
+    private bool blackHasCastled;
 
     private int[][] board;
     //may be more efficient as a linked list
@@ -525,10 +584,13 @@ public class ChessState
     private int whiteCheck;
     private int blackCheck;
 
+    private bool threeMove;
+    private Queue<ChessState> statesToCheck;
+
 
     private void init_new_board() {
         board = new int[8][];
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 8; ++i) {
             board[i] = new int[8];
         }
         //empty squares
@@ -596,6 +658,39 @@ public class ChessState
         {
             whiteCheck = inCheck(white);
         }
+        if (statesToCheck.Count >= 9)
+        {
+            statesToCheck.Dequeue();
+        }
+        if (statesToCheck.Count >= 4)
+        {
+            int counter = 0;
+            ChessState checkAgain = null;
+            foreach (ChessState s in statesToCheck)
+            {
+                if (this.Equals(s))
+                {
+                    ++counter;
+                    checkAgain = s;
+                }
+            }
+            if (checkAgain != null)
+            {
+                foreach (ChessState s in checkAgain.statesToCheck)
+                {
+                    if (this.Equals(s))
+                    {
+                        ++counter;
+                        checkAgain = s;
+                    }
+                }
+            }
+            if (counter >= 2)
+            {
+                threeMove = true;
+            }
+        }
+        statesToCheck.Enqueue(new ChessState(this));
     }
 
     private List<Move> legalMoves(int color) {
@@ -997,6 +1092,7 @@ public class ChessState
                 wkCol = 1;
                 whiteCanCastleKS = false;
                 whiteCanCastleQS = false;
+                whiteHasCastled = true;
                 return true;
             }
             if (m.endRow == -1 && whiteCanCastleQS)
@@ -1008,6 +1104,7 @@ public class ChessState
                 wkCol = 5;
                 whiteCanCastleKS = false;
                 whiteCanCastleQS = false;
+                whiteHasCastled = true;
                 return true;
             }
         }
@@ -1022,6 +1119,7 @@ public class ChessState
                 bkCol = 1;
                 blackCanCastleKS = false;
                 blackCanCastleQS = false;
+                blackHasCastled = true;
                 return true;
             }
             if (m.endRow == -1 && blackCanCastleQS)
@@ -1033,6 +1131,7 @@ public class ChessState
                 bkCol = 5;
                 blackCanCastleKS = false;
                 blackCanCastleQS = false;
+                blackHasCastled = true;
                 return true;
             }
         }
@@ -1158,6 +1257,25 @@ public class ChessState
     public static string moveStr(Move m)
     {
         return "" + m.startRow + " " + m.startCol + "->" + m.endRow + " " + m.endCol;
+    }
+
+    public string boardStr()
+    {
+        string s = "\n";
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                if (board[i][j] == ee)
+                {
+                    s += "_";
+                }
+                else 
+                    s += (board[i][j]%2).ToString();
+            }
+            s+= "\n";
+        }
+        return s;
     }
 
  }

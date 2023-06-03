@@ -87,7 +87,7 @@ public class ChessUI : MonoBehaviour
 
     public void OnDestroy()
     {
-        gameManager.setChessState(chess); // theoretically no need
+        gameManager.setChessStateAndAI(chess, AI);
         gameManager.setPlayerChessTime(blackClock.getTime());
         gameManager.setEnemyChessTime(whiteClock.getTime());
     }
@@ -109,7 +109,11 @@ public class ChessUI : MonoBehaviour
             refreshUI();
             playSound();
             setTurn(0);
-            if (chess.isMate() < 0)
+            if (chess.isStale())
+            {
+                Debug.Log("STALEMATE");
+            }
+            else if(chess.isMate() < 0)
             {
                 if (chess.inCheck(ChessState.white) > 0)
                 {
@@ -119,6 +123,7 @@ public class ChessUI : MonoBehaviour
             }
             else 
             {
+                gameManager.setWinner(GameManagerClass.Winner.PLAYER);
                 chessText.onMate();
             }
         }
@@ -232,7 +237,11 @@ public class ChessUI : MonoBehaviour
         }
         yield return new WaitForSeconds(extraDelay);
         chess.playWhiteMove(m);
-        if (chess.isMate() < 0)
+        if (chess.isStale())
+        {
+            Debug.Log("STALEMATE");
+        }
+        else if (chess.isMate() < 0)
         {
             if (chess.inCheck(ChessState.black) > 0)
             {
@@ -244,6 +253,7 @@ public class ChessUI : MonoBehaviour
         }
         else
         {
+            gameManager.setWinner(GameManagerClass.Winner.ENEMY);
             chessText.onMate();
         }
         playSound();

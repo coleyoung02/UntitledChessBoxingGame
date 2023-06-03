@@ -23,7 +23,7 @@ public class PlayerFighter : Fighter
     [SerializeField] private AudioClip KONoise;
     private GameManagerClass gameManager;
 
-    void Awake()
+    void Start()
     {
         lastPunch = null;
         canPunch = true;
@@ -42,8 +42,13 @@ public class PlayerFighter : Fighter
 
     private void Update()
     {
-        glove.gameObject.SetActive(canPunch); // defintely delete later
+        glove.gameObject.SetActive(canPunch); 
         stateName = currentState.name.ToString();
+        if (currentState.name == State.STATE.P_KO)
+        {
+            gameManager.setWinner(GameManagerClass.Winner.ENEMY);
+            bText.onKO();
+        }
         if (Input.GetKeyDown("f"))
         {
             Punch();
@@ -180,6 +185,8 @@ public class PlayerFighter : Fighter
 
     public override bool takeAttack(Attack attack)
     {
+        gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
+        Debug.Log(gameManager.getPlayerHealth());
         if (currentState.name == State.STATE.P_DODGING1)
         {
             return false;

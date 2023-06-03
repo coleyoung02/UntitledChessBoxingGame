@@ -9,13 +9,19 @@ public class BoxingRound : MonoBehaviour
     [SerializeField] private PlayerFighter player;
     [SerializeField] private EnemyFighter enemy;
     [SerializeField] private int roundNumber;
+    [SerializeField] GameObject backupManager;
     private GameManagerClass gameManager;
 
     private void Start()
     {
         gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
-        Debug.Log("Setting health to " + gameManager.getPlayerHealth());
+        if (gameManager.getChessState() == null)
+        {
+            gameManager = Instantiate(backupManager, new Vector2(0, 0), Quaternion.identity).GetComponent<GameManagerClass>();
+        }
+        Debug.Log("Setting player health to " + gameManager.getPlayerHealth());
         player.setHealth(gameManager.getPlayerHealth());
+        Debug.Log("Setting enemy health to " + gameManager.getEnemyHealth());
         enemy.setHealth(gameManager.getEnemyHealth());
     }
 

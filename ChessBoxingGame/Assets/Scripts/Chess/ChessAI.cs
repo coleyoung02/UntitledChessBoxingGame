@@ -14,12 +14,11 @@ public class ChessAI
 
     private static int mateScore = 32000;
     private static int baseSearch = 3;
-    private static int baseBaseSearch = 4;
+    private static int baseBaseSearch = 3;
     private int searchDepth = 2;
     private List<Move> bestMoves = new List<Move>();
     private int count = 0;
 
-    private Stack<ChessState> statesToCheck; 
 
     public int getBaseDepth()
     {
@@ -105,19 +104,22 @@ public class ChessAI
                 };
             case ChessState.wb:
                 {
-                    if (col == row || col == 7 - row)
+                    int centerness = Math.Min(Math.Abs(col - row), Math.Abs(col - (7 - row)));
+                    if (centerness < 3)
                     {
-                        return 3.2f;
+                        UnityEngine.Debug.Log("great position " + (3.3f + .1f * (3 - centerness)));
+                        return 3.3f + .1f * (2 - centerness);
                     }
-                    return 3;
+                    return 3.3f;
                 };
             case ChessState.bb:
                 {
-                    if (col == row || col == 7 - row)
+                    int centerness = Math.Min(Math.Abs(col - row), Math.Abs(col - (7 - row)));
+                    if (centerness < 3)
                     {
-                        return -3.2f;
+                        return -3.3f - .1f * (2 - centerness);
                     }
-                    return -3;
+                    return -3.3f;
                 };
             case ChessState.wr:
                 {
@@ -173,7 +175,7 @@ public class ChessAI
                     {
                         if (chess.getBoard()[row][i] == ChessState.br)
                         {
-                            return 5.3f;
+                            return -5.3f;
                         }
                         else if (chess.getBoard()[row][i] != ChessState.ee)
                         {
@@ -184,7 +186,7 @@ public class ChessAI
                     {
                         if (chess.getBoard()[row][i] == ChessState.br)
                         {
-                            return 5.3f;
+                            return -5.3f;
                         }
                         else if (chess.getBoard()[row][i] != ChessState.ee)
                         {
@@ -195,7 +197,7 @@ public class ChessAI
                     {
                         if (chess.getBoard()[row][i] == ChessState.br)
                         {
-                            return 5.3f;
+                            return -5.3f;
                         }
                         else if (chess.getBoard()[row][i] != ChessState.ee)
                         {
@@ -206,14 +208,14 @@ public class ChessAI
                     {
                         if (chess.getBoard()[i][col] == ChessState.br)
                         {
-                            return 5.3f;
+                            return -5.3f;
                         }
                         else if (chess.getBoard()[i][col] != ChessState.ee)
                         {
                             break;
                         }
                     }
-                    return 5f;
+                    return -5f;
                 };
             case ChessState.wQ: return 9;
             case ChessState.bQ: return -9;
@@ -240,7 +242,7 @@ public class ChessAI
                         return -.3f;
                     }
                     return 0f;
-                }; ;
+                };
         }
         return 0;
     }
@@ -248,27 +250,14 @@ public class ChessAI
 
     public ChessState chess;
 
-    public Stack<ChessState> getPast()
-    {
-        return this.statesToCheck;
-    }
 
     public ChessAI(ChessState chess)
     {
         this.chess = chess;
-        this.statesToCheck = new Stack<ChessState>();
-    }
-
-    public ChessAI(ChessState chess, Stack<ChessState> past)
-    {
-        this.chess = chess;
-        this.statesToCheck = past;
     }
 
     public Move GetBestMove(ChessState chess)
     {
-        Stopwatch stopWatch = new Stopwatch();
-        stopWatch.Start();
         Move openable = doOpening();
         if (!(openable.startCol == -2))
         {
@@ -286,17 +275,17 @@ public class ChessAI
         {
             searchDepth = baseSearch;
         }
+        if (chess.getLegalMoves().Count < 4)
+        {
+            searchDepth += 1;
+        }
         bestMoves = new List<Move>();
         //MinMax(chess, searchDepth);
+        UnityEngine.Debug.Log(" Depth of " + searchDepth);
         negaMaxAB(chess, searchDepth, -(chess.getColor() * 2 - 1), -mateScore, mateScore);
         System.Random rnd = new System.Random();
         int j = rnd.Next(0, bestMoves.Count);
-        UnityEngine.Debug.Log("Making move " + j + " of " + bestMoves.Count);
-        UnityEngine.Debug.Log("did " + count + " iterations");
-        stopWatch.Stop();
-        UnityEngine.Debug.Log(stopWatch.Elapsed);
-        UnityEngine.Debug.Log("in state " + chess.stopWatch.Elapsed);
-
+        UnityEngine.Debug.Log(count);
         count = 0;
         openable = bestMoves[j];
         /* would be for 3 move repitition
@@ -428,7 +417,7 @@ public class ChessAI
     }
     */
 
-    private float negaMaxAB(ChessState state, int depth, int multiplier, float a, float b, bool evalFinal=false)
+    private float negaMaxAB(ChessState state, int depth, int multiplier, float a, float b, bool evalFinal=true)
     {
         count++;
         List<Move> possible = state.getLegalMoves();
@@ -450,12 +439,26 @@ public class ChessAI
             return 0;
         }
         bestMaxScore = -mateScore;
+        List<Move> first = new List<Move>();
+        List<Move> second = new List<Move>();
         for (int i = 0; i < possible.Count; ++i)
+        {
+            if (possible[i].endRow >= 0 && possible[i].endCol >= 0 && state.getBoard()[possible[i].endRow][possible[i].endCol] >= 0)
+            {
+                first.Add(possible[i]);
+            }
+            else
+            {
+                second.Add(possible[i]);
+            }
+        }
+        first.AddRange(second);
+        for (int i = 0; i < first.Count; ++i)
         { 
 
-            if (possible[i].startRow >= 0 && possible[i].startCol >=0)
+            if (first[i].startRow >= 0 && first[i].startCol >=0)
             {
-                piece = state.getBoard()[possible[i].startRow][possible[i].startCol];
+                piece = state.getBoard()[first[i].startRow][first[i].startCol];
                 if (state.getHalfMoves() < 4)
                 {
                     if (piece == ChessState.wQ || piece == ChessState.bQ)
@@ -482,11 +485,11 @@ public class ChessAI
             result = new ChessState(state);
             if (depth == 1 && !evalFinal)
             {
-                result.playMove(possible[i], false);
+                result.playMove(first[i], false);
             }
             else
             {
-                result.playMove(possible[i]);
+                result.playMove(first[i]);
             }
             maxScore = -negaMaxAB(result, depth - 1, -multiplier, -b, -a);
             maxScore += adjustment;
@@ -495,15 +498,14 @@ public class ChessAI
                 bestMaxScore = maxScore;
                 if (depth == searchDepth)
                 {
-                    UnityEngine.Debug.Log("Best move is " + ChessState.moveStr(possible[i]) + " with score " + bestMaxScore);
-                    bestMoves = new List<Move> { possible[i] };
+                    bestMoves = new List<Move> { first[i] };
                 }
             }
             else if (maxScore == bestMaxScore)
             {
                 if (depth == searchDepth)
                 {
-                    bestMoves.Add(possible[i]);
+                    bestMoves.Add(first[i]);
                 }
             }
             if (bestMaxScore > a)
@@ -544,6 +546,37 @@ public class ChessAI
             {
                 cumScore += pieceScore(state, i, j);
             }
+        }
+        CastlingRights r = state.GetCastlingRights();
+        if (!r.wH)
+        {
+            if (!r.wQS)
+            {
+                cumScore -= .1f;
+            }
+            if (!r.wKS)
+            {
+                cumScore -= .2f;
+            }
+        }
+        else
+        {
+            cumScore += .1f;
+        }
+        if (!r.bH)
+        {
+            if (!r.bQS)
+            {
+                cumScore += .1f;
+            }
+            if (!r.bKS)
+            {
+                cumScore += .2f;
+            }
+        }
+        else
+        {
+            cumScore -= .1f;
         }
         return cumScore;
     }
