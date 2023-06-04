@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 9205079199008288066}
   - component: {fileID: -8815968452279178414}
   - component: {fileID: 2822025432398186369}
+  - component: {fileID: 1034582659}
   m_Layer: 0
   m_Name: PlaytestEnemyFighter
   m_TagString: Untagged
@@ -47,16 +48,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   opponent: {fileID: 0}
   round: {fileID: 0}
+  healthBar: {fileID: 0}
   stateName: 
   sprites:
-  - {fileID: 21300000, guid: 2d68b315c00a11144a7106b65f0b9270, type: 3}
-  - {fileID: 21300000, guid: 005a78325c40c9843a38506c2354060e, type: 3}
-  - {fileID: 21300000, guid: b0e331c4991a39d45a27ec67f35ad243, type: 3}
-  - {fileID: 21300000, guid: fb1d5a5859c1b4044bc33ae5a314925a, type: 3}
-  - {fileID: 21300000, guid: 352fb5b4af936fa429287d7a35831581, type: 3}
-  - {fileID: 21300000, guid: 523c55c90c6f5f64784ad135c80208b5, type: 3}
+  - {fileID: 21300000, guid: ac3bc52c47034a548a43cba5e8407d33, type: 3}
+  - {fileID: 21300000, guid: f7fec356a75dd5644b236074e1817922, type: 3}
+  - {fileID: 21300000, guid: 65bc8808d9f9ccf41bcf6b08006974f6, type: 3}
+  - {fileID: 21300000, guid: 3e5c78a098840a143b9d898225d68c7b, type: 3}
+  - {fileID: 21300000, guid: 3e5c78a098840a143b9d898225d68c7b, type: 3}
+  - {fileID: 21300000, guid: af0e90abf7db2b549bc79e039a3fab5e, type: 3}
   - {fileID: 21300000, guid: a0bed0df3a190cf48a2c0decc6cdf167, type: 3}
-  - {fileID: 21300000, guid: 43beac48ab3de5c47bdebe78c82bcaf9, type: 3}
+  - {fileID: 21300000, guid: ac3bc52c47034a548a43cba5e8407d33, type: 3}
 --- !u!212 &2822025432398186369
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -109,3 +111,23 @@ SpriteRenderer:
   m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!95 &1034582659
+Animator:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 474117706807180559}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 354324b78cf654dc996b17faea9a89b3, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0

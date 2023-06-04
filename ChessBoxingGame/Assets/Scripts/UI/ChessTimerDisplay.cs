@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ChessTimerDisplay : MonoBehaviour
 {
@@ -11,11 +12,29 @@ public class ChessTimerDisplay : MonoBehaviour
     [SerializeField] private Transform pos2;
     [SerializeField] private Transform pos3;
     [SerializeField] private Transform pos4;
+    [SerializeField] private bool isPlayer;
 
     // Update is called once per frame
     void Start()
     {
         DisplayTime(timeValue);
+    }
+    private void Update()
+    {
+        GameManagerClass gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
+        if (gameManager.getRound() != 0)
+        {
+            if (isPlayer)
+            {
+                DisplayTime(gameManager.getPlayerChessTime());
+            }
+            else
+            {
+                DisplayTime(gameManager.getEnemyChessTime());
+            }
+            this.enabled = false;
+        }
+
     }
 
     void DisplayTime(float timeToDisplay)
@@ -23,6 +42,7 @@ public class ChessTimerDisplay : MonoBehaviour
         if (timeToDisplay < 0)
         {
             timeToDisplay = 0;
+            SceneManager.LoadScene("BoxingScene");
         }
 
         float minutes = Mathf.FloorToInt(timeToDisplay / 60);

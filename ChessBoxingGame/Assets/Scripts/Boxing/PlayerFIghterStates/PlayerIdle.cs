@@ -12,24 +12,28 @@ public class PlayerIdle : State
     public void goDodging1()
     {
         nextState = new PlayerDodging1(anim, player, (PlayerFighter)fighter);
+        anim.SetTrigger("Dodge");
         stage = EVENT.EXIT;
     }
 
     public void goPunching()
     {
         nextState = new PlayerPunching(anim, player, (PlayerFighter)fighter);
+        anim.SetTrigger("Punch");
         stage = EVENT.EXIT;
     }
 
     public void goBlocking()
     {
         nextState = new PlayerBlocking(anim, player, (PlayerFighter)fighter);
+        anim.SetTrigger("Block");
         stage = EVENT.EXIT;
     }
 
     public override void goKO()
     {
         nextState = new PlayerKO(anim, player, (PlayerFighter)fighter);
+        anim.SetTrigger("KO");
         stage = EVENT.EXIT;
     }
 }

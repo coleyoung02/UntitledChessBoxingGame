@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
-using UnityEngine;
+using UnityEngine; //for debugging
+using static Unity.VisualScripting.Member;
 
 //replacing lists with arrays will make it more time and space efficient if needed
 //switching ints to sbytes will make it more space efficient (up to 4 times) if needed but less stable (not CLS compliant)
@@ -31,11 +33,121 @@ public struct Move {
 
 }
 
+public struct CastlingRights
+{
+    public bool wQS;
+    public bool bQS;
+    public bool wKS;
+    public bool bKS;
+    public bool wH;
+    public bool bH;
+
+    public CastlingRights(bool wQS, bool bQS, bool wKS, bool bKS, bool wH, bool bH)
+    {
+        this.wQS = wQS;
+        this.bQS = bQS;
+        this.wKS = wKS;
+        this.bKS = bKS;
+        this.wH = wH;
+        this.bH = bH;
+    }
+}
+
 public class ChessState
 {
+
     public ChessState() {
         this.init_new_board();
         this.setMoves(white);
+        this.currentColor = white;
+        this.halfMovesIn = 0;
+        this.blackHasCastled = false;
+        this.whiteHasCastled = false;
+        this.threeMove = false;
+        this.epCol = -1;
+        statesToCheck = new Queue<ChessState>();
+        statesToCheck.Enqueue(new ChessState(this));
+    }
+
+    public ChessState(ChessState current)
+    {
+        this.board = new int[8][];
+        for (int i = 0; i < 8; ++i)
+        {
+            this.board[i] = new int[8];
+            for (int j = 0; j < 8; ++j)
+            {
+                this.board[i][j] = current.board[i][j];
+            }
+        }
+        this.whiteCanCastleQS = current.whiteCanCastleQS;
+        this.blackCanCastleQS = current.blackCanCastleQS;
+        this.whiteCanCastleKS = current.whiteCanCastleKS;
+        this.blackCanCastleKS = current.blackCanCastleKS;
+
+        this.epCol = current.epCol;
+        this.wkRow = current.wkRow;
+        this.wkCol = current.wkCol;
+        this.bkRow = current.bkRow;
+        this.bkCol = current.bkCol;
+        this.currentColor = current.currentColor;
+        this.realMoves = new List<Move>(current.realMoves);
+        this.halfMovesIn = current.halfMovesIn;
+        this.whiteHasCastled = current.whiteHasCastled;
+        this.blackHasCastled = current.blackHasCastled;
+        this.threeMove = current.threeMove;
+        this.statesToCheck = new Queue<ChessState>();
+        foreach (ChessState s in current.statesToCheck)
+        {
+            this.statesToCheck.Enqueue(s);
+        }
+    }
+
+    //we can avoid checking this for every single move only checking positions since the last piece was captured or pawn was moved
+    public bool Equals(ChessState c2)
+    {
+        if (this.currentColor != c2.currentColor)
+        {
+            return false;
+        }
+
+        if (!(this.whiteCanCastleKS == c2.whiteCanCastleKS && this.whiteCanCastleQS == c2.whiteCanCastleQS &&
+            this.blackCanCastleKS == c2.blackCanCastleKS && this.blackCanCastleQS == c2.blackCanCastleQS))
+        {
+            return false;
+        }
+
+        for (int i = 0; i < 7; ++i)
+        {
+            for (int j = 0; j < 7; ++j)
+            {
+                if (this.board[i][j] != c2.board[i][j])
+                {
+                    return false;
+                }
+            }
+        }
+
+        if (this.epCol != c2.epCol)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    public CastlingRights GetCastlingRights()
+    {
+        return new CastlingRights(whiteCanCastleQS, blackCanCastleQS, whiteCanCastleKS, blackCanCastleKS, whiteHasCastled, blackHasCastled);
+    }
+
+    public int getPlayer()
+    {
+        return currentColor;
+    }
+
+    public int getHalfMoves()
+    {
+        return halfMovesIn;
     }
 
     //whoever gets this array should really not touch it
@@ -44,13 +156,42 @@ public class ChessState
         return this.board;
     }
 
+    public int getColor()
+    {
+        return this.currentColor;
+    }
+
+    //if mate, return losing color, otherwise return -1
+    public int isMate()
+    {
+        if (this.realMoves.Count == 0 && (blackCheck >= 0 || whiteCheck >= 0))
+        {
+            return this.currentColor;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
+    public bool isStale()
+    {
+        if (threeMove)
+        {
+            return true;
+        }
+        bool b;
+        b = this.realMoves.Count == 0 && !(blackCheck >= 0 || whiteCheck >= 0);
+        return b;
+    }
+
     public bool playMove(int row, int col, int newRow, int newCol, int color) {
         //List<Move> possible = squareMoves(row, col, color);
         potentialMoves = squareMoves(row, col, color);
         List<Move> possible = legalMoves(color);
         bool canMove = false;
         bool isEP = false;
-        for (int i = 0; i < possible.Count; i++)
+        for (int i = 0; i < possible.Count; ++i)
         {
             //Debug.Log("possible move: " + moveStr(possible[i]));
             if (possible[i].startCol == col && possible[i].startRow == row
@@ -60,7 +201,7 @@ public class ChessState
                 canMove = true;
                 break;
             }
-            Debug.Log(moveStr(possible[i]));
+            //Debug.Log(moveStr(possible[i]));
         }
         if (canMove)
         {
@@ -101,6 +242,7 @@ public class ChessState
             }
             board[newRow][newCol] = board[row][col];
             board[row][col] = ee;
+            this.onMove(color);
             return true;
         }
         else if (isCastling(row, col, newRow, newCol, color))
@@ -112,6 +254,7 @@ public class ChessState
                     if (tryCastling(castleType))
                     {
                         epCol = -1;
+                        this.onMove(color);
                         return true;
                     }
                 }
@@ -121,17 +264,40 @@ public class ChessState
         return false;
     }
 
-    public bool playWhite()
+    public void playMove(Move m, bool setNext=true)
     {
-        Move m = getRandomMove(white);
-        if (m.startRow == -1 && m.startCol == -1 && m.endRow == -1 && m.endCol == -1)
+        if (m.startRow >= 0 & m.startCol >= 0)
         {
-            return false;
+            if (board[m.endRow][m.endCol] != ee)
+            {
+                this.statesToCheck = new Queue<ChessState>();
+            }
+            else if (board[m.startRow][m.startCol] == wp || board[m.startRow][m.startCol] == bp)
+            {
+                this.statesToCheck = new Queue<ChessState>();
+            }
+        } 
+        else
+        {
+            this.statesToCheck = new Queue<ChessState>();
         }
-        if (m.startRow < 0)
+        if (this.currentColor == white)
+        {
+            playWhiteMove(m, setNext);
+        }
+        else
+        {
+            playBlackMove(m, setNext);
+        }
+    }
+
+    public void playWhiteMove(Move m, bool setNext = true)
+    {
+        if (m.startRow < 0 && m.startCol >= 0)
         {
             tryCastling(m);
-            return true;
+            this.onMove(white);
+            return;
         }
         if (m.isEP)
         {
@@ -142,6 +308,10 @@ public class ChessState
             if (m.startRow >= 0 && board[m.startRow][m.startCol] == wK)
             {
                 doKingMoveUpdates(m.endRow, m.endCol, white);
+            }
+            if (board[m.startRow][m.startCol] == wp && m.endRow == m.startRow - 2)
+            {
+                epCol = m.endCol;
             }
             doCornerUpdates(m.startRow, m.startCol);
             doCornerUpdates(m.endRow, m.endCol);
@@ -155,6 +325,62 @@ public class ChessState
             board[m.endRow][m.endCol] = board[m.startRow][m.startCol];
         }
         board[m.startRow][m.startCol] = ee;
+        if (setNext)
+        {
+            this.onMove(white);
+        }
+        return;
+    }
+
+    public void playBlackMove(Move m, bool setNext = true)
+    {
+        if (m.startCol < 0 && m.startRow >=0)
+        {
+            tryCastling(m);
+            this.onMove(black);
+            return;
+        }
+        if (m.isEP)
+        {
+            board[5][epCol] = ee;
+        }
+        else
+        {
+            if (m.startRow >= 0 && board[m.startRow][m.startCol] == bK)
+            {
+                doKingMoveUpdates(m.endRow, m.endCol, black);
+            }
+            if (board[m.startRow][m.startCol] == bp && m.endRow == m.startRow + 2)
+            {
+                epCol = m.endCol;
+            }
+            doCornerUpdates(m.startRow, m.startCol);
+            doCornerUpdates(m.endRow, m.endCol);
+        }
+        if (m.endRow == 7 && board[m.startRow][m.startCol] == bp)
+        {
+            board[m.endRow][m.endCol] = bQ;
+        }
+        else
+        {
+            board[m.endRow][m.endCol] = board[m.startRow][m.startCol];
+        }
+        board[m.startRow][m.startCol] = ee;
+        if (setNext)
+        {
+            this.onMove(black);
+        }
+        return;
+    }
+
+    public bool playWhiteRandom()
+    {
+        Move m = getRandomMove(white);
+        if (m.startRow == -1 && m.startCol == -1 && m.endRow == -1 && m.endCol == -1)
+        {
+            return false;
+        }
+        playWhiteMove(m);
         return true;
     }
 
@@ -170,7 +396,7 @@ public class ChessState
         return possible[rnd.Next(0, possible.Count)];
     }
 
-    public void promote(int col, int piece)
+    public void promote(int col, int piece, int prevRow, int prevCol)
     {
         int row = -1;
         if (piece % 2 == white)
@@ -182,22 +408,119 @@ public class ChessState
             row = 7;
         }
         board[row][col] = piece;
+        board[prevRow][prevCol] = ee;
+        this.onMove(black);
     }
 
-    public bool inCheck(int color)
+    public int inCheck(int color)
     {
+        if (speedyCheck(color))
+        {
+            return 1;
+        }
+        return 0;
         if (color == white)
         {
-            return squareAttacked(wkRow, wkCol, white) > 0;
+            return squareAttacked(wkRow, wkCol, white);
         }
         else
         {
-            return squareAttacked(bkRow, bkCol, black) > 0;
+            return squareAttacked(bkRow, bkCol, black);
         }
     }
 
-    public List<Move> getLegalMoves(int color) {
-        return null;
+    //ugly but fast
+    public bool speedyCheck(int color)
+    {
+        int newRow;
+        int newCol;
+        int row;
+        int col;
+        int delta = color * 2 - 1;
+        bool checkPawns;
+
+        if (Math.Abs(wkRow - bkRow) <= 1 && Math.Abs(wkCol - bkCol) <= 1)
+        {
+            return true;
+        }
+        if (color == white)
+        {
+            row = wkRow;
+            col = wkCol;
+            checkPawns = row + delta > 0;
+        }
+        else
+        {
+            row = bkRow;
+            col = bkCol;
+            checkPawns = row + delta < 7;
+        }
+
+        foreach (int[] dir in rookDirs)
+        {
+            newRow = row + dir[0];
+            newCol = col + dir[1];
+            while (newRow < 8 && newRow >= 0 && newCol < 8 && newCol >= 0)
+            {
+                if (board[newRow][newCol] < 0)
+                {
+                    newRow = newRow + dir[0];
+                    newCol = newCol + dir[1];
+                }
+                else if (board[newRow][newCol] == br - color || board[newRow][newCol] == bQ - color)
+                {
+                    return true;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+        foreach (int[] dir in bishopDirs)
+        {
+            newRow = row + dir[0];
+            newCol = col + dir[1];
+            while (newRow < 8 && newRow >= 0 && newCol < 8 && newCol >= 0)
+            {
+                if (board[newRow][newCol] < 0)
+                {
+                    newRow = newRow + dir[0];
+                    newCol = newCol + dir[1];
+                }
+                else if (board[newRow][newCol] == bb - color || board[newRow][newCol] == bQ - color)
+                {
+                    return true;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+        foreach (int[] dir in knightPossiblities)
+        {
+            newRow = row + dir[0];
+            newCol = col + dir[1];
+            //check if its on the board, and then if its not occupied by the same color piece
+            if (newRow < 8 && newRow >= 0 && newCol < 8 && newCol >= 0 &&
+                (board[newRow][newCol] == bk - color))
+            {
+                return true;
+            }
+        }
+        if (checkPawns && ((col - 1 >= 0 && board[row + delta][col - 1] == bp - color) ||
+            (col + 1 <= 7 && board[row + delta][col + 1] == bp - color)))
+        {
+            return true;
+        }
+        return false;
+    }
+
+
+    public List<Move> getLegalMoves()
+    {
+        return realMoves;
     }
 
 
@@ -211,21 +534,21 @@ public class ChessState
     // 6/7   : rook
     // 8/9   : queen
     // 10/11 : king
-    private const int white = 0;
-    private const int black = 1;
-    private const int ee = -1;
-    private const int wp = 0;
-    private const int bp = 1;
-    private const int wk = 2;
-    private const int bk = 3;
-    private const int wb = 4;
-    private const int bb = 5;
-    private const int wr = 6;
-    private const int br = 7;
-    private const int wQ = 8;
-    private const int bQ = 9;
-    private const int wK = 10;
-    private const int bK = 11;
+    public const int white = 0;
+    public const int black = 1;
+    public const int ee = -1;
+    public const int wp = 0;
+    public const int bp = 1;
+    public const int wk = 2;
+    public const int bk = 3;
+    public const int wb = 4;
+    public const int bb = 5;
+    public const int wr = 6;
+    public const int br = 7;
+    public const int wQ = 8;
+    public const int bQ = 9;
+    public const int wK = 10;
+    public const int bK = 11;
     //this shouldn't ever be on the board outside of the 
     //square attacker count function being called with true for the default arg
     private const int placeHolderPiece = 12;
@@ -238,6 +561,8 @@ public class ChessState
     private bool blackCanCastleQS;
     private bool whiteCanCastleKS;
     private bool blackCanCastleKS;
+    private bool whiteHasCastled;
+    private bool blackHasCastled;
 
     private int[][] board;
     //may be more efficient as a linked list
@@ -252,12 +577,20 @@ public class ChessState
     private int bkRow;
     private int bkCol;
 
+    private int currentColor;
+
     private Move castleType;
-    
+    private int halfMovesIn;
+    private int whiteCheck;
+    private int blackCheck;
+
+    private bool threeMove;
+    private Queue<ChessState> statesToCheck;
+
 
     private void init_new_board() {
         board = new int[8][];
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 8; ++i) {
             board[i] = new int[8];
         }
         //empty squares
@@ -306,16 +639,58 @@ public class ChessState
         blackCanCastleQS = true;
     }
 
-    private void setMoves(int color)
+    public void setMoves(int color)
     {
         potentialMoves = possibleMoves(color);
         realMoves = legalMoves(color);
     }
 
     private void onMove(int color) {
-        potentialMoves = possibleMoves(color);
-        realMoves = legalMoves(color);
-        color = (color + 1) % 2;
+        this.currentColor = (color + 1) % 2;
+        potentialMoves = possibleMoves(this.currentColor);
+        realMoves = legalMoves(this.currentColor);
+        this.halfMovesIn++;
+        if (this.currentColor == black)
+        {
+            blackCheck = inCheck(black);
+        }
+        if (this.currentColor == white)
+        {
+            whiteCheck = inCheck(white);
+        }
+        if (statesToCheck.Count >= 9)
+        {
+            statesToCheck.Dequeue();
+        }
+        if (statesToCheck.Count >= 4)
+        {
+            int counter = 0;
+            ChessState checkAgain = null;
+            foreach (ChessState s in statesToCheck)
+            {
+                if (this.Equals(s))
+                {
+                    ++counter;
+                    checkAgain = s;
+                }
+            }
+            if (checkAgain != null)
+            {
+                foreach (ChessState s in checkAgain.statesToCheck)
+                {
+                    if (this.Equals(s))
+                    {
+                        ++counter;
+                        checkAgain = s;
+                    }
+                }
+            }
+            if (counter >= 2)
+            {
+                threeMove = true;
+            }
+        }
+        statesToCheck.Enqueue(new ChessState(this));
     }
 
     private List<Move> legalMoves(int color) {
@@ -344,7 +719,7 @@ public class ChessState
                     potentialMoves.RemoveAt(i);
                 }
             }
-            else if (!isSafe(potentialMoves[i], color))
+            else if (!isSafe(m, color))
             {
                 int k = board[m.startRow][m.startCol] - color;
                 potentialMoves.RemoveAt(i);
@@ -401,6 +776,7 @@ public class ChessState
     private List<Move> pawnMoves(int row, int col, int color) {
         List<Move> moves = new List<Move>();
         if (color == white) {
+            //buggy on promotion
             if (board[row-1][col] < 0) {
                 moves.Add(new Move(row, col, row-1, col));
                 //checks on pawns first move only
@@ -412,7 +788,8 @@ public class ChessState
             }
         }
         else {
-            if (board[row+1][col] < 0) {
+            //buggy on promotion
+            if (board[row+1][col] < 0) { //error was here
                 moves.Add(new Move(row, col, row+1, col));
                 //checks on pawns first move only
                 if (row == 1) {
@@ -704,7 +1081,7 @@ public class ChessState
 
     private bool tryCastling(Move m)
     {
-        if (m.startRow == -1 && isCastlingSafe(m))
+        if (m.startRow == -1 && m.startCol != -1 && isCastlingSafe(m))
         {
             if (m.endCol == -1 && whiteCanCastleKS)
             {
@@ -715,6 +1092,7 @@ public class ChessState
                 wkCol = 1;
                 whiteCanCastleKS = false;
                 whiteCanCastleQS = false;
+                whiteHasCastled = true;
                 return true;
             }
             if (m.endRow == -1 && whiteCanCastleQS)
@@ -726,10 +1104,11 @@ public class ChessState
                 wkCol = 5;
                 whiteCanCastleKS = false;
                 whiteCanCastleQS = false;
+                whiteHasCastled = true;
                 return true;
             }
         }
-        if (m.startCol == -1 && isCastlingSafe(m))
+        if (m.startCol == -1 && m.startRow != -1 && isCastlingSafe(m))
         {
             if (m.endCol == -1 && blackCanCastleKS)
             {
@@ -740,6 +1119,7 @@ public class ChessState
                 bkCol = 1;
                 blackCanCastleKS = false;
                 blackCanCastleQS = false;
+                blackHasCastled = true;
                 return true;
             }
             if (m.endRow == -1 && blackCanCastleQS)
@@ -751,6 +1131,7 @@ public class ChessState
                 bkCol = 5;
                 blackCanCastleKS = false;
                 blackCanCastleQS = false;
+                blackHasCastled = true;
                 return true;
             }
         }
@@ -848,15 +1229,20 @@ public class ChessState
         board[m.endRow][m.endCol] = boardCopy[m.startRow][m.startCol];
         board[m.startRow][m.startCol] = -1;
         bool validity;
+        if (m.isEP)
+        {
+            board[m.startRow + (2 * color - 1)][epCol] = ee;
+        }
         if (color == white)
         {
-            validity = squareAttacked(wkRow, wkCol, white) <= 0;
+            validity = !speedyCheck(color);
         }
         else
         {
-            validity = squareAttacked(bkRow, bkCol, black) <= 0;
+            validity = !speedyCheck(color);
 
         }
+
         board = boardCopy;
         return validity;
     }
@@ -868,9 +1254,28 @@ public class ChessState
     }
 
     //only here for debugging
-    private string moveStr(Move m)
+    public static string moveStr(Move m)
     {
         return "" + m.startRow + " " + m.startCol + "->" + m.endRow + " " + m.endCol;
+    }
+
+    public string boardStr()
+    {
+        string s = "\n";
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                if (board[i][j] == ee)
+                {
+                    s += "_";
+                }
+                else 
+                    s += (board[i][j]%2).ToString();
+            }
+            s+= "\n";
+        }
+        return s;
     }
 
  }

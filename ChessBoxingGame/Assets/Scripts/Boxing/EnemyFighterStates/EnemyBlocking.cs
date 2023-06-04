@@ -11,7 +11,7 @@ public class EnemyBlocking : State
 
     public override void enter()
     {
-        fighter.StartCoroutine(startBlocking());
+        //fighter.StartCoroutine(startBlocking());
         base.enter();
     }
 
@@ -27,13 +27,32 @@ public class EnemyBlocking : State
 
     public IEnumerator startBlocking()
     {
-        float blocking_time = UnityEngine.Random.Range(0.0f, 1.0f)*(Constants.Enemy.BLOCKING_TIME_MAX - Constants.Enemy.BLOCKING_TIME_MIN) + Constants.Enemy.BLOCKING_TIME_MIN;
+        float blocking_time = (UnityEngine.Random.Range(Constants.Enemy.BLOCKING_TIME_MIN, Constants.Enemy.BLOCKING_TIME_MAX) + UnityEngine.Random.Range(Constants.Enemy.BLOCKING_TIME_MIN, Constants.Enemy.BLOCKING_TIME_MAX)) / 2f;
         yield return new WaitForSeconds(blocking_time);
         if (fighter.currentState == this)
         {
+            //should pick a random of idle, heavy, or light punch
             nextState = new EnemyIdle(anim, player, (EnemyFighter)fighter);
             stage = EVENT.EXIT;
         }
+    }
+
+    public void goLightPunching()
+    {
+        nextState = new EnemyLightPunching(anim, player, (EnemyFighter)fighter);
+        stage = EVENT.EXIT;
+    }
+
+    public void goHeavyPunching()
+    {
+        nextState = new EnemyHeavyPunchingFst(anim, player, (EnemyFighter)fighter);
+        stage = EVENT.EXIT;
+    }
+
+    public void goIdle()
+    {
+        nextState = new EnemyIdle(anim, player, (EnemyFighter)fighter);
+        stage = EVENT.EXIT;
     }
 
     public override void goKO()
