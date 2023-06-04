@@ -14,10 +14,34 @@ public class ChessAI
 
     private static int mateScore = 32000;
     private static int baseSearch = 3;
-    private static int baseBaseSearch = 3;
+    private const int baseBaseSearch = 4;
     private int searchDepth = 2;
     private List<Move> bestMoves = new List<Move>();
     private int count = 0;
+
+    private const float pawnScore = 1f;
+    private const float pawnDistanceMultiplier = .05f;
+    private const float pawnChainScore = .1f;
+    private const float doubledPawnPenalty = -.08f;
+    private const float pawnAttackBonus = 1.5f;
+
+
+    private const float bishopScore = 3.4f;
+    private const float diagonalnessMultiplier = .1f;
+
+
+    private const float knightScore = 2.9f;
+    private const float sidePenalty = .1f;
+
+    private const float rookScore = 5f;
+    private const float linkedBonus = .3f;
+
+
+    private const float queenScore = 9f;
+
+    private const float kingScore = 0f;
+    private const float edgenessMuliplier = .2f;
+
 
 
     public int getBaseDepth()
@@ -29,6 +53,161 @@ public class ChessAI
     {
         baseSearch = depth;
     }
+
+    private float scorePawn(int[][] board, int row, int col, int color)
+    {
+        float distanceScore;
+        int delta = -(color * 2 - 1);
+        bool supported = false;
+        if (color == ChessState.white)
+        {
+            distanceScore = (6 - row) * pawnDistanceMultiplier;
+        }
+        else
+        {
+            distanceScore = (row - 2) * pawnDistanceMultiplier;
+        }
+        for (int i = 0; i < 8; ++i)
+        {
+            if (i != row && board[i][col] == ChessState.wp)
+            {
+                distanceScore -= doubledPawnPenalty;
+            }
+        }
+        if (col - 1 >= 0 && board[row + delta][col - 1] == ChessState.wp + color)
+        {
+            distanceScore += pawnChainScore;
+            supported = true;
+        }
+        if (col + 1 <= 7 && board[row + delta][col + 1] == ChessState.wp + color)
+        {
+            distanceScore += pawnChainScore;
+            supported = true;
+        }
+        if (supported && col - 1 >= 0 && board[row - delta][col - 1] >= ChessState.wk && board[row - delta][col - 1] % 2 != color)
+        {
+            distanceScore += pawnAttackBonus;
+        }
+        if (supported && col + 1 <= 7 && board[row - delta][col + 1] >= ChessState.wk && board[row - delta][col + 1] % 2 != color)
+        {
+            distanceScore += pawnAttackBonus;
+        }
+        return pawnScore + distanceScore;
+    }
+
+    private float scoreKnight(int row, int col)
+    {
+        float increment = 0;
+        if (row > 1 && row < 6)
+        {
+            increment = sidePenalty * 2;
+        }
+        if (col == 0 || col == 7)
+        {
+            return knightScore - (sidePenalty * 2) + increment;
+        }
+        if (col == 1 || col == 6)
+        {
+            return knightScore - sidePenalty + increment;
+        }
+        return knightScore + increment;
+    }
+
+    private float scoreBishop(int row, int col)
+    {
+        {
+            int centerness = Math.Min(Math.Abs(col - row), Math.Abs(col - (7 - row)));
+            if (centerness < 3)
+            {
+                return bishopScore + diagonalnessMultiplier * (3 - centerness);
+            }
+            return bishopScore;
+        };
+    }
+
+    private float scoreRook(int[][] board, int row, int col, int color)
+    {
+        for (int i = col + 1; i < 8; ++i)
+        {
+            if (chess.getBoard()[row][i] == ChessState.wr + color)
+            {
+                return rookScore + linkedBonus;
+            }
+            else if (chess.getBoard()[row][i] != ChessState.ee)
+            {
+                break;
+            }
+        }
+        for (int i = col - 1; i >= 0; --i)
+        {
+            if (chess.getBoard()[row][i] == ChessState.wr + color)
+            {
+                return rookScore + linkedBonus;
+            }
+            else if (chess.getBoard()[row][i] != ChessState.ee)
+            {
+                break;
+            }
+        }
+        for (int i = row + 1; i < 8; ++i)
+        {
+            if (chess.getBoard()[i][col] == ChessState.wr + color)
+            {
+                return rookScore + linkedBonus;
+            }
+            else if (chess.getBoard()[row][i] != ChessState.ee)
+            {
+                break;
+            }
+        }
+        for (int i = row - 1; i >= 0; --i)
+        {
+            if (chess.getBoard()[i][col] == ChessState.wr + color)
+            {
+                return rookScore + linkedBonus;
+            }
+            else if (chess.getBoard()[i][col] != ChessState.ee)
+            {
+                break;
+            }
+        }
+        return rookScore;
+    }
+
+    private float scoreKing(ChessState state, int row, int col)
+    {
+        int edgeness = 0;
+        if (state.getHalfMoves() > 25 && piecesOnBoard(state) < 6)
+        {
+            if (row == 7 || row == 0)
+            {
+                edgeness += 2;
+            }
+            else if (row == 6 || row == 1)
+            {
+                edgeness += 1;
+            }
+            if (col == 7 || col == 0)
+            {
+                edgeness += 2;
+            }
+            else if (col == 6 || col == 1)
+            {
+                edgeness += 1;
+            }
+            return -edgeness * edgenessMuliplier;
+        }
+        if (row == 7 && col == 1)
+        {
+            return .3f;
+        }
+        if (row == 7 && col == 5)
+        {
+            return .3f;
+        }
+        return 0f;
+    }
+
     private float pieceScore(ChessState state, int row, int col)
     {
         int[][] board = state.getBoard();
@@ -36,213 +215,18 @@ public class ChessAI
         switch (piece)
         {
             case ChessState.ee: return 0;
-            case ChessState.wp: {
-                    for (int i = 0; i < 8; ++i)
-                    {
-                        if (i != row && board[i][col] == ChessState.wp)
-                        {
-                            return .7f;
-                        }
-                    }
-                    if (col - 1 >=0 && board[row + 1][col - 1] == ChessState.wp)
-                    {
-                        return 1.1f;
-                    }
-                    if (col + 1 <= 7 && board[row + 1][col + 1] == ChessState.wp)
-                    {
-                        return 1.1f;
-                    }
-                    return 1;
-                };
-            case ChessState.bp:
-                {
-                    for (int i = 0; i < 8; ++i)
-                    {
-                        if (i != row && board[i][col] == ChessState.bp)
-                        {
-                            return -.7f;
-                        }
-                    }
-                    if (col - 1 >= 0 && board[row - 1][col - 1] == ChessState.wp)
-                    {
-                        return 1.1f;
-                    }
-                    if (col + 1 <= 7 && board[row - 1][col + 1] == ChessState.wp)
-                    {
-                        return 1.1f;
-                    }
-                    return -1;
-                };
-            case ChessState.wk:
-                {
-                    float increment = 0;
-                    if (row > 1 && row < 6)
-                    {
-                        increment = .3f;
-                    }
-                    if (col == 0 || col == 7)
-                    {
-                        return 2.8f + increment;
-                    }
-                    if (col == 1 || col == 6)
-                    {
-                        return 2.9f + increment;
-                    }
-                    return 3f + increment;
-                };
-            case ChessState.bk:
-                {
-                    if (col == 0 || col == 7)
-                    {
-                        return -2.8f;
-                    }
-                    if (col == 1 || col == 6)
-                    {
-                        return -2.9f;
-                    }
-                    return -3;
-                };
-            case ChessState.wb:
-                {
-                    int centerness = Math.Min(Math.Abs(col - row), Math.Abs(col - (7 - row)));
-                    if (centerness < 3)
-                    {
-                        UnityEngine.Debug.Log("great position " + (3.3f + .1f * (3 - centerness)));
-                        return 3.3f + .1f * (2 - centerness);
-                    }
-                    return 3.3f;
-                };
-            case ChessState.bb:
-                {
-                    int centerness = Math.Min(Math.Abs(col - row), Math.Abs(col - (7 - row)));
-                    if (centerness < 3)
-                    {
-                        return -3.3f - .1f * (2 - centerness);
-                    }
-                    return -3.3f;
-                };
-            case ChessState.wr:
-                {
-                    for (int i = col + 1; i < 8; ++i)
-                    {
-                        if (chess.getBoard()[row][i] == ChessState.wr)
-                        {
-                            return 5.3f;
-                        }
-                        else if (chess.getBoard()[row][i] != ChessState.ee)
-                        {
-                            break;
-                        }
-                    }
-                    for (int i = col - 1; i >= 0; --i)
-                    {
-                        if (chess.getBoard()[row][i] == ChessState.wr)
-                        {
-                            return 5.3f;
-                        }
-                        else if (chess.getBoard()[row][i] != ChessState.ee)
-                        {
-                            break;
-                        }
-                    }
-                    for (int i = row + 1; i < 8; ++i)
-                    {
-                        if (chess.getBoard()[row][i] == ChessState.wr)
-                        {
-                            return 5.3f;
-                        }
-                        else if (chess.getBoard()[row][i] != ChessState.ee)
-                        {
-                            break;
-                        }
-                    }
-                    for (int i = row - 1; i >= 0; --i)
-                    {
-                        if (chess.getBoard()[i][col] == ChessState.wr)
-                        {
-                            return 5.3f;
-                        }
-                        else if (chess.getBoard()[i][col] != ChessState.ee)
-                        {
-                            break;
-                        }
-                    }
-                    return 5f;
-                };
-            case ChessState.br:
-                {
-                    for (int i = col + 1; i < 8; ++i)
-                    {
-                        if (chess.getBoard()[row][i] == ChessState.br)
-                        {
-                            return -5.3f;
-                        }
-                        else if (chess.getBoard()[row][i] != ChessState.ee)
-                        {
-                            break;
-                        }
-                    }
-                    for (int i = col - 1; i >= 0; --i)
-                    {
-                        if (chess.getBoard()[row][i] == ChessState.br)
-                        {
-                            return -5.3f;
-                        }
-                        else if (chess.getBoard()[row][i] != ChessState.ee)
-                        {
-                            break;
-                        }
-                    }
-                    for (int i = row + 1; i < 8; ++i)
-                    {
-                        if (chess.getBoard()[row][i] == ChessState.br)
-                        {
-                            return -5.3f;
-                        }
-                        else if (chess.getBoard()[row][i] != ChessState.ee)
-                        {
-                            break;
-                        }
-                    }
-                    for (int i = row - 1; i >= 0; --i)
-                    {
-                        if (chess.getBoard()[i][col] == ChessState.br)
-                        {
-                            return -5.3f;
-                        }
-                        else if (chess.getBoard()[i][col] != ChessState.ee)
-                        {
-                            break;
-                        }
-                    }
-                    return -5f;
-                };
-            case ChessState.wQ: return 9;
-            case ChessState.bQ: return -9;
-            case ChessState.wK:
-                {
-                    if (row == 7 && col == 1)
-                    {
-                        return .3f;
-                    }
-                    if (row == 7 && col == 5)
-                    {
-                        return .3f;
-                    }
-                    return 0f;
-                };
-            case ChessState.bK:
-                {
-                    if (row == 0 && col == 1)
-                    {
-                        return -.3f;
-                    }
-                    if (row == 0 && col == 5)
-                    {
-                        return -.3f;
-                    }
-                    return 0f;
-                };
+            case ChessState.wp: return scorePawn(board, row, col, ChessState.white);
+            case ChessState.bp: return -scorePawn(board, row, col, ChessState.black);
+            case ChessState.wk: return scoreKnight(row, col);
+            case ChessState.bk: return -scoreKnight(row, col);
+            case ChessState.wb: return scoreBishop(row, col);
+            case ChessState.bb: return -scoreBishop(row, col);
+            case ChessState.wr: return scoreRook(board, row, col, ChessState.white);
+            case ChessState.br: return -scoreRook(board, row, col, ChessState.black);
+            case ChessState.wQ: return queenScore;
+            case ChessState.bQ: return -queenScore;
+            case ChessState.wK: return scoreKing(state, row, col);
+            case ChessState.bK: return -scoreKing(state, row, col);
         }
         return 0;
     }
@@ -263,11 +247,11 @@ public class ChessAI
         {
             return openable;
         }
-        if (piecesOnBoard() < 7)
+        if (piecesOnBoard(chess) < 7)
         {
             searchDepth = baseSearch + 1;
         }
-        else if (piecesOnBoard() < 4)
+        else if (piecesOnBoard(chess) < 4)
         {
             searchDepth = baseSearch + 2;
         }
@@ -279,6 +263,10 @@ public class ChessAI
         {
             searchDepth += 1;
         }
+        if (chess.getHalfMoves() < 4)
+        {
+            searchDepth -= 1;
+        }
         bestMoves = new List<Move>();
         //MinMax(chess, searchDepth);
         UnityEngine.Debug.Log(" Depth of " + searchDepth);
@@ -288,143 +276,18 @@ public class ChessAI
         UnityEngine.Debug.Log(count);
         count = 0;
         openable = bestMoves[j];
-        /* would be for 3 move repitition
-        if (openable.startRow > 0 && openable.startCol > 0)
-        {
-            if (chess.getBoard()[openable.startRow][openable.startCol] == ChessState.wp || chess.getBoard()[openable.startRow][openable.startCol] == ChessState.bp)
-            {
-                statesToCheck = new Stack<ChessState>();
-            }
-            else if (chess.getBoard()[openable.endRow][openable.endCol] != ChessState.ee || openable.isEP)
-            {
-                statesToCheck = new Stack<ChessState>();
-            }
-        }
-        else
-        {
-            statesToCheck = new Stack<ChessState>();
-        }
-        statesToCheck.Push((new ChessState(chess)).playWhiteMove(openable));
-        */
         return openable;
     }
     
-    /*
-    private float MinMax(ChessState chess, int depth)
-    {
-        List<Move> possible = chess.getLegalMoves();
-        float bestMaxScore;
-        float bestMinScore;
-        float maxScore;
-        float minScore;
-        ChessState result;
-        if (depth == 0)
-        {
-            return getMaterialScore(chess);
-        }
-        if (chess.getColor() == ChessState.white)
-        {
-            bestMaxScore = -mateScore;
-            for (int i = 0; i < possible.Count; ++i)
-            {
-                result = new ChessState(chess);
-                result.playMove(possible[i]);
-                maxScore = MinMax(result, depth - 1);
-                if (maxScore == bestMaxScore)
-                {
-                    if (depth == searchDepth)
-                    {
-                        bestMoves.Add(possible[i]);
-                    }
-                }
-                else if (maxScore > bestMaxScore)
-                {
-                    Debug.Log("Max = " + maxScore);
-                    bestMaxScore = maxScore;
-                    if (depth == searchDepth)
-                    {
-                        bestMoves = new List<Move> { possible[i] };
-                    }
-                }
-            }
-            return bestMaxScore;
-        }
-        else
-        {
-            bestMinScore = mateScore;
-            for (int i = 0; i < possible.Count; ++i)
-            {
-                result = new ChessState(chess);
-                result.playMove(possible[i]);
-                minScore = MinMax(result, depth - 1);
-                if (minScore == bestMinScore)
-                {
-                    if (depth == searchDepth)
-                    {
-                        bestMoves.Add(possible[i]);
-                    }
-                }
-                else if (minScore < bestMinScore)
-                {
-                    bestMinScore = minScore;
-                    if (depth == searchDepth)
-                    {
-                        bestMoves = new List<Move> { possible[i] };
-                    }
-                }
-            }
-            return bestMinScore;
-        }
-    }
-    */
-    /*
-    private float negaMax(ChessState state, int depth, int multiplier)
-    {
-        List<Move> possible = chess.getLegalMoves();
-        float bestMaxScore;
-        float maxScore;
-        ChessState result;
 
-        if (depth == 0)
-        {
-            return multiplier * getMaterialScore(state);
-        }
-        bestMaxScore = -mateScore;
-        for (int i = 0; i < possible.Count; ++i)
-        {
-            result = new ChessState(state);
-            result.playMove(possible[i]);
-            maxScore = -negaMax(result, depth - 1, -multiplier);
-            if (maxScore > bestMaxScore)
-            {
-                bestMaxScore = maxScore;
-                if (depth == searchDepth)
-                {
-                    Debug.Log("new max score " + bestMaxScore + " from depth " + depth + " mv " + ChessState.moveStr(possible[i]));
-
-                    bestMoves = new List<Move> { possible[i] };
-                }
-            }
-            if (maxScore == bestMaxScore)
-            {
-                if (depth == searchDepth)
-                {
-                    bestMoves.Add(possible[i]);
-                }
-            }
-        }
-        return bestMaxScore;
-    }
-    */
-
-    private float negaMaxAB(ChessState state, int depth, int multiplier, float a, float b, bool evalFinal=true)
+    private float negaMaxAB(ChessState state, int depth, int multiplier, float a, float b)
     {
         count++;
         List<Move> possible = state.getLegalMoves();
         float bestMaxScore;
         float maxScore;
         ChessState result;
-        int piece = -1;
+        int piece;
         int adjustment = 0;
         if (depth == 0)
         {
@@ -441,18 +304,33 @@ public class ChessAI
         bestMaxScore = -mateScore;
         List<Move> first = new List<Move>();
         List<Move> second = new List<Move>();
+        List<Move> third = new List<Move>();
+        int p;
         for (int i = 0; i < possible.Count; ++i)
         {
-            if (possible[i].endRow >= 0 && possible[i].endCol >= 0 && state.getBoard()[possible[i].endRow][possible[i].endCol] >= 0)
+
+            if (possible[i].endRow >= 0 && possible[i].endCol >= 0)
             {
-                first.Add(possible[i]);
+                p = state.getBoard()[possible[i].endRow][possible[i].endCol];
+                if (p >= ChessState.wk)
+                {
+                    first.Add(possible[i]);
+                }
+                else if (p >= ChessState.wp)
+                {
+                    second.Add(possible[i]);
+                }
+                else {
+                    third.Add(possible[i]);
+                }
             }
             else
             {
-                second.Add(possible[i]);
+                first.Add(possible[i]);
             }
         }
         first.AddRange(second);
+        first.AddRange(third);
         for (int i = 0; i < first.Count; ++i)
         { 
 
@@ -483,14 +361,7 @@ public class ChessAI
                 adjustment = 2;
             }
             result = new ChessState(state);
-            if (depth == 1 && !evalFinal)
-            {
-                result.playMove(first[i], false);
-            }
-            else
-            {
-                result.playMove(first[i]);
-            }
+            result.playMove(first[i]);
             maxScore = -negaMaxAB(result, depth - 1, -multiplier, -b, -a);
             maxScore += adjustment;
             if (maxScore > bestMaxScore)
@@ -528,11 +399,11 @@ public class ChessAI
         int isMate = state.isMate();
         if (isMate == ChessState.white)
         {
-            return -ChessAI.mateScore;
+            return ChessAI.mateScore;
         } 
         else if (isMate == ChessState.black)
         {
-            return ChessAI.mateScore;
+            return -ChessAI.mateScore;
         }
         else if (state.isStale())
         {
@@ -561,7 +432,7 @@ public class ChessAI
         }
         else
         {
-            cumScore += .1f;
+            cumScore += .4f;
         }
         if (!r.bH)
         {
@@ -576,7 +447,7 @@ public class ChessAI
         }
         else
         {
-            cumScore -= .1f;
+            cumScore -= .4f;
         }
         return cumScore;
     }
@@ -630,21 +501,25 @@ public class ChessAI
         return new Move(-2, -2, -2, -2);
     }
     
-    private float piecesOnBoard()
+    private float piecesOnBoard(ChessState state)
     {
         float pieces = 0;
-        int[][] board = chess.getBoard(); 
+        int[][] board = state.getBoard(); 
         for (int i = 0; i < 8; ++i)
         {
             for (int j = 0; j < 8; ++j)
             {
                 if (board[i][j] == ChessState.wp || board[i][j] == ChessState.bp)
                 {
-                    pieces += .49f;
+                    pieces += .24f;
+                }
+                else if (board[i][j] == ChessState.wk || board[i][j] == ChessState.bk)
+                {
+                    pieces += .67f;
                 }
                 else if (board[i][j] == ChessState.wQ || board[i][j] == ChessState.bQ)
                 {
-                    pieces += 1.52f;
+                    pieces += 1.12f;
                 }
                 else if (board[i][j] != ChessState.ee)
                 {

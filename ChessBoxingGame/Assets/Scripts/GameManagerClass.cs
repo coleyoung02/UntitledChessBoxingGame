@@ -8,7 +8,8 @@ public class GameManagerClass : MonoBehaviour
     public enum Winner
     {
         PLAYER,
-        ENEMY
+        ENEMY,
+        DRAW
     }
 
     public static GameManagerClass Instance { get; private set; }
@@ -19,6 +20,17 @@ public class GameManagerClass : MonoBehaviour
     [SerializeField] private float enemyChessTime;
     private ChessAI chessAI;
     private Winner winner;
+    private int round;
+
+    public int getRound()
+    {
+        return round;
+    }
+
+    public void incrementRound()
+    {
+        round++;
+    }
 
     public void setPlayerHealth(float health)
     {
@@ -118,5 +130,6 @@ public class GameManagerClass : MonoBehaviour
         playerChessTime = Constants.chessTime;
         enemyChessTime = Constants.chessTime;
         chessAI = new ChessAI(chessState);
+        round = 1;
     }
 }

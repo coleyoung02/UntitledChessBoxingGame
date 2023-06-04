@@ -39,7 +39,27 @@ public class BoxingRound : MonoBehaviour
     {
         gameManager.setPlayerHealth(player.getHealth());
         gameManager.setEnemyHealth(enemy.getHealth());
-        SceneManager.LoadScene("ChessScene");
+        gameManager.incrementRound();
+        if (gameManager.getRound() <= Constants.MAX_ROUNDS)
+        {
+            SceneManager.LoadScene("ChessScene");
+        }
+        else
+        {
+            if (enemy.getHealth() < player.getHealth()) 
+            {
+                gameManager.setWinner(GameManagerClass.Winner.PLAYER);
+            }
+            else if (enemy.getHealth() > player.getHealth())
+            {
+                gameManager.setWinner(GameManagerClass.Winner.ENEMY);
+            }
+            else
+            {
+                gameManager.setWinner(GameManagerClass.Winner.DRAW);
+            }
+
+        }
     }
 
     private void Update()

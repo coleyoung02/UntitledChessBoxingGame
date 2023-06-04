@@ -33,5 +33,7 @@ public static class Constants
         public const float HEALTH_MAX = 82;
     }
 
-    public const float chessTime = 60 * 3;
+    public const float chessTime = 60 * 2;
+    public const int MAX_ROUNDS = 4;
+
 }
