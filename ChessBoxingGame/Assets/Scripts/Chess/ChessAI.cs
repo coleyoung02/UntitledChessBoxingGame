@@ -142,18 +142,18 @@ public class ChessAI
     {
         for (int i = col + 1; i < 8; ++i)
         {
-            if (chess.getBoard()[row][i] == ChessState.wr + color)
+            if (board[row][i] == ChessState.wr + color)
             {
                 return rookScore + linkedBonus;
             }
-            else if (chess.getBoard()[row][i] != ChessState.ee)
+            else if (board[row][i] != ChessState.ee)
             {
                 break;
             }
         }
         for (int i = col - 1; i >= 0; --i)
         {
-            if (chess.getBoard()[row][i] == ChessState.wr + color)
+            if (board[row][i] == ChessState.wr + color)
             {
                 return rookScore + linkedBonus;
             }
@@ -164,22 +164,22 @@ public class ChessAI
         }
         for (int i = row + 1; i < 8; ++i)
         {
-            if (chess.getBoard()[i][col] == ChessState.wr + color)
+            if (board[i][col] == ChessState.wr + color)
             {
                 return rookScore + linkedBonus;
             }
-            else if (chess.getBoard()[row][i] != ChessState.ee)
+            else if (board[row][i] != ChessState.ee)
             {
                 break;
             }
         }
         for (int i = row - 1; i >= 0; --i)
         {
-            if (chess.getBoard()[i][col] == ChessState.wr + color)
+            if (board[i][col] == ChessState.wr + color)
             {
                 return rookScore + linkedBonus;
             }
-            else if (chess.getBoard()[i][col] != ChessState.ee)
+            else if (board[i][col] != ChessState.ee)
             {
                 break;
             }
