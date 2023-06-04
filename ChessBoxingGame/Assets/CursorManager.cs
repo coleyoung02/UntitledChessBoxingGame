@@ -22,6 +22,8 @@ public class CursorManager : MonoBehaviour
 
     private void Update()
     {
+        if (Cursor.visible == true) Cursor.visible = false;
+
         Vector2 cursorPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         cursorObj.transform.position = cursorPos;
     }
