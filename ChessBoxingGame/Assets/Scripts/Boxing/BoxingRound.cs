@@ -23,6 +23,14 @@ public class BoxingRound : MonoBehaviour
         player.setHealth(gameManager.getPlayerHealth());
         Debug.Log("Setting enemy health to " + gameManager.getEnemyHealth());
         enemy.setHealth(gameManager.getEnemyHealth());
+        enemy.enabled = true;
+        player.enabled = true;
+    }
+
+    public void Disable()
+    {
+        enemy.enabled = false;
+        player.enabled = false;
     }
 
     public void Win()

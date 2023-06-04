@@ -10,6 +10,7 @@ public class ChessRoundTimer : RoundCountdown
     [SerializeField] public ChessUI round;
     protected override void endTimer()
     {
-        round.endRound();
+        StartCoroutine(bellWait(round.endRound));
+        round.Disable();
     }
 }

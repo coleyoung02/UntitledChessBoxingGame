@@ -37,12 +37,25 @@ public class ChessAI
     private const float linkedBonus = .3f;
 
 
-    private const float queenScore = 9f;
+    private const float queenScore = 12f;
 
     private const float kingScore = 0f;
     private const float edgenessMuliplier = .2f;
 
+    private static System.Random rng = new System.Random();
 
+    public static void Shuffle<Move>(IList<Move> list)
+    {
+        int n = list.Count;
+        while (n > 1)
+        {
+            n--;
+            int k = rng.Next(n + 1);
+            Move value = list[k];
+            list[k] = list[n];
+            list[n] = value;
+        }
+    }
 
     public int getBaseDepth()
     {
@@ -263,7 +276,7 @@ public class ChessAI
         {
             searchDepth += 1;
         }
-        if (chess.getHalfMoves() < 4)
+        if (chess.getHalfMoves() < 6)
         {
             searchDepth -= 1;
         }
@@ -287,7 +300,7 @@ public class ChessAI
         float bestMaxScore;
         float maxScore;
         ChessState result;
-        int piece;
+        int piece = -1;
         int adjustment = 0;
         if (depth == 0)
         {
@@ -304,36 +317,33 @@ public class ChessAI
         bestMaxScore = -mateScore;
         List<Move> first = new List<Move>();
         List<Move> second = new List<Move>();
-        List<Move> third = new List<Move>();
-        int p;
         for (int i = 0; i < possible.Count; ++i)
         {
-
-            if (possible[i].endRow >= 0 && possible[i].endCol >= 0)
-            {
-                p = state.getBoard()[possible[i].endRow][possible[i].endCol];
-                if (p >= ChessState.wk)
-                {
-                    first.Add(possible[i]);
-                }
-                else if (p >= ChessState.wp)
-                {
-                    second.Add(possible[i]);
-                }
-                else {
-                    third.Add(possible[i]);
-                }
-            }
-            else
+            if (possible[i].endRow >= 0 && possible[i].endCol >= 0 && state.getBoard()[possible[i].endRow][possible[i].endCol] >= 0)
             {
                 first.Add(possible[i]);
             }
+            else
+            {
+                second.Add(possible[i]);
+            }
+        }
+        if (depth == searchDepth)
+        {
+            Shuffle(first);
+            Shuffle(second);
         }
         first.AddRange(second);
-        first.AddRange(third);
         for (int i = 0; i < first.Count; ++i)
         { 
-
+            if (depth == searchDepth && count >= 50000)
+            {
+                break;
+            }
+            else if (depth == searchDepth - 1 && count >= 70000)
+            {
+                break;
+            }
             if (first[i].startRow >= 0 && first[i].startCol >=0)
             {
                 piece = state.getBoard()[first[i].startRow][first[i].startCol];
@@ -407,7 +417,7 @@ public class ChessAI
         }
         else if (state.isStale())
         {
-            return 0;
+            return -2;
         }
         int[][] board = state.getBoard();
         float cumScore = 0;

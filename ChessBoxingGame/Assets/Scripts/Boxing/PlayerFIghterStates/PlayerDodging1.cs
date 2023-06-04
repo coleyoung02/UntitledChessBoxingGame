@@ -29,6 +29,19 @@ public class PlayerDodging1 : State
         coroutine = null;
     }
 
+    public void goPunching()
+    {
+        if (coroutine != null)
+        {
+            fighter.StopCoroutine(coroutine);
+            coroutine = null;
+        }
+        nextState = new PlayerPunching(anim, player, (PlayerFighter)fighter);
+        anim.SetTrigger("Punch");
+        stage = EVENT.EXIT;
+    }
+
+
     public override void goKO()
     {
         if (coroutine != null)

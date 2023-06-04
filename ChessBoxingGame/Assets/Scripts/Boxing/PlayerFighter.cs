@@ -14,8 +14,10 @@ public class PlayerFighter : Fighter
     private bool canPunch;
     private int numPunches;
     private bool waiting;
+    private bool canDodge;
     private Coroutine lastPunch;
     [SerializeField] Image glove; 
+    [SerializeField] Image dodge; 
 
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip damageNoise;
@@ -31,6 +33,7 @@ public class PlayerFighter : Fighter
         canPunch = true;
         numPunches = 0;
         waiting = false;
+        canDodge = true;
         anim = GetComponent<Animator>();
         healthMax = Constants.Player.HEALTH_MAX;
         gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
@@ -44,7 +47,8 @@ public class PlayerFighter : Fighter
 
     private void Update()
     {
-        glove.gameObject.SetActive(canPunch); 
+        glove.gameObject.SetActive(canPunch);
+        dodge.gameObject.SetActive(canDodge);
         stateName = currentState.name.ToString();
         if (currentState.name == State.STATE.P_KO && !gameWon)
         {
@@ -81,7 +85,7 @@ public class PlayerFighter : Fighter
 
     void Punch()
     {
-        if (currentState.name == State.STATE.P_IDLE || currentState.name == State.STATE.P_DODGING2)
+        if (currentState.name == State.STATE.P_IDLE || currentState.name == State.STATE.P_DODGING1 || currentState.name == State.STATE.P_DODGING2)
         {
             //Debug.Log("punch " + numPunches);
             if (canPunch)
@@ -90,6 +94,10 @@ public class PlayerFighter : Fighter
                 if (currentState.name == State.STATE.P_IDLE)
                 {
                     ((PlayerIdle)currentState).goPunching();
+                }
+                else if (currentState.name == State.STATE.P_DODGING1)
+                {
+                    ((PlayerDodging1)currentState).goPunching();
                 }
                 else
                 {
@@ -150,14 +158,27 @@ public class PlayerFighter : Fighter
 
     void Dodge()
     {
-        if (currentState.name == State.STATE.P_IDLE)
+        if (canDodge)
         {
-            ((PlayerIdle)currentState).goDodging1();
+            if (currentState.name == State.STATE.P_IDLE)
+            {
+                ((PlayerIdle)currentState).goDodging1();
+                canDodge = false;
+                StartCoroutine(resetDodge());
+            }
+            else if (currentState.name == State.STATE.P_BLOCKING)
+            {
+                ((PlayerBlocking)currentState).goDodging1();
+                canDodge = false;
+                StartCoroutine(resetDodge());
+            }
         }
-        else if (currentState.name == State.STATE.P_BLOCKING)
-        {
-            ((PlayerBlocking)currentState).goDodging1();
-        }
+    }
+
+    IEnumerator resetDodge()
+    {
+        yield return new WaitForSeconds(Constants.Player.DODGE_DELAY);
+        canDodge = true;
     }
 
     public override bool doAttack(Attack attack)

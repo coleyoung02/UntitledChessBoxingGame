@@ -34,12 +34,15 @@ public class ChessUI : MonoBehaviour
     private bool moveDone;
     private float extraDelay = .5f;
 
-    //for testing only, can (and should) be deleted once ai is implemented
+    //for testing only, can (and should) be deleted once ai is implemented - or leave it so i can test again
     private int color;
+
+    private bool doStuff;
 
     // Start is called before the first frame update
     void Start()
     {
+        doStuff = true;
         source = GetComponent<AudioSource>();
         promotionCol = -1;
         selectedRow = -1;
@@ -63,11 +66,17 @@ public class ChessUI : MonoBehaviour
 
     private void Update()
     {
-        if(moveDone)
+        if(moveDone && doStuff)
         {
             moveDone = false;
             StartCoroutine(finishMove());
         }
+    }
+
+    public void Disable()
+    {
+        this.doStuff = false;
+        this.setTurn(-1);
     }
 
     private void manageGame()
@@ -99,32 +108,35 @@ public class ChessUI : MonoBehaviour
 
     public void squareClicked(int buttonNo)
     {
-        refreshUI();
-        board = chess.getBoard();
-        color = chess.getColor();
-        int row = buttonNo / 8;
-        int col = buttonNo % 8;
-        if (handleClick(row, col))
+        if (doStuff)
         {
             refreshUI();
-            playSound();
-            setTurn(0);
-            if (chess.isStale())
+            board = chess.getBoard();
+            color = chess.getColor();
+            int row = buttonNo / 8;
+            int col = buttonNo % 8;
+            if (handleClick(row, col))
             {
-                Debug.Log("STALEMATE");
-            }
-            else if(chess.isMate() < 0)
-            {
-                if (chess.inCheck(ChessState.white) > 0)
+                refreshUI();
+                playSound();
+                setTurn(0);
+                if (chess.isStale())
                 {
-                    chessText.onCheck();
+                    Debug.Log("STALEMATE");
                 }
-                playWhite();
-            }
-            else 
-            {
-                gameManager.setWinner(GameManagerClass.Winner.PLAYER);
-                chessText.onMate();
+                else if (chess.isMate() < 0)
+                {
+                    if (chess.inCheck(ChessState.white) > 0)
+                    {
+                        chessText.onCheck();
+                    }
+                    playWhite();
+                }
+                else
+                {
+                    gameManager.setWinner(GameManagerClass.Winner.PLAYER);
+                    chessText.onMate();
+                }
             }
         }
     }
@@ -202,10 +214,15 @@ public class ChessUI : MonoBehaviour
             whiteClock.setTicking(true);
             blackClock.setTicking(false);
         }
-        else
+        else if (color == 1)
         {
             whiteClock.setTicking(false);
             blackClock.setTicking(true);
+        }
+        else if (color < 0)
+        {
+            whiteClock.setTicking(false);
+            blackClock.setTicking(false);
         }
         if (whiteClock.getTime() < blackClock.getTime())
         {
