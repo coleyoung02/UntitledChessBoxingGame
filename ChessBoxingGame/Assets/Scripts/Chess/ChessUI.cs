@@ -16,8 +16,6 @@ public class ChessUI : MonoBehaviour
     [SerializeField] private Sprite[] sprites;
     [SerializeField] private Sprite[] indicators;
     [SerializeField] private GameObject promotionMenu;
-    [SerializeField] private GameObject whitePiecesSelect;
-    [SerializeField] private GameObject blackPiecesSelect;
     private int selectedRow;
     private int selectedCol;
     private int promotionCol;
@@ -169,7 +167,6 @@ public class ChessUI : MonoBehaviour
                             moves[i].endRow == row && moves[i].endCol == col)
                         {
                             promotionCol = col;
-                            blackPiecesSelect.SetActive(true);
                             promotionMenu.SetActive(true);
                         }
                     }
@@ -185,7 +182,6 @@ public class ChessUI : MonoBehaviour
                     if (row == 0 && board[row][col] == 0)
                     {
                         promotionCol = col;
-                        whitePiecesSelect.SetActive(true);
                         promotionMenu.SetActive(true);
                     }
                     else if (row == 7 && board[row][col] == 1)
@@ -253,7 +249,8 @@ public class ChessUI : MonoBehaviour
             overlay[m.startRow * 8 + m.startCol].GetComponent<Image>().sprite = indicators[4];
         }
         yield return new WaitForSeconds(extraDelay);
-        chess.playWhiteMove(m);
+        chess.playWhiteRandom();
+        //chess.playWhiteMove(m);
         if (chess.isStale())
         {
             Debug.Log("STALEMATE");
@@ -286,6 +283,7 @@ public class ChessUI : MonoBehaviour
     
     public void replace(int piece)
     {
+        Debug.Log("inputting");
         //color gets flipped after moving pawn to end so this passes the correct color
         chess.promote(promotionCol, piece + (color) % 2, selectedRow, selectedCol);
         playSound();
@@ -302,8 +300,6 @@ public class ChessUI : MonoBehaviour
         setTurn(0);
         refreshUI();
         promotionMenu.SetActive(false);
-        blackPiecesSelect.SetActive(false);
-        whitePiecesSelect.SetActive(false);
     }
 
     private void refreshUI()

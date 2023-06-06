@@ -400,7 +400,10 @@ public class ChessAI
             {
                 maxScore = -negaMaxAB(result, 1, -multiplier, -b, -a, true);
             }
-            maxScore = -negaMaxAB(result, depth - 1, -multiplier, -b, -a);
+            else
+            {
+                maxScore = -negaMaxAB(result, depth - 1, -multiplier, -b, -a);
+            }
             maxScore += adjustment;
             if (maxScore > bestMaxScore)
             {
