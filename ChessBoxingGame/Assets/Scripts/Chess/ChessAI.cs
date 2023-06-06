@@ -7,7 +7,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
-using UnityEngine;
 
 public class ChessAI
 {
@@ -269,7 +268,7 @@ public class ChessAI
         this.chess = chess;
     }
 
-    public Move GetBestMove(ChessState chess)
+    public Move GetBestMove(ChessState chess, float whiteTime, float blackTime)
     {
         Move openable = doOpening();
         if (!(openable.startCol == -2))
@@ -296,13 +295,29 @@ public class ChessAI
         {
             searchDepth = Math.Min(searchDepth, 2);
         }
-        else if (chess.getHalfMoves() < 20)
+        else if (chess.getHalfMoves() < 25)
         {
             searchDepth = Math.Min(searchDepth, 3);
         }
-        else if (chess.getHalfMoves() < 40)
+        else if (chess.getHalfMoves() < 50)
         {
             searchDepth = Math.Min(searchDepth, 4);
+        }
+        if (whiteTime < 15)
+        {
+            searchDepth = Math.Min(searchDepth, 3);
+        }
+        else if (whiteTime < 8)
+        {
+            searchDepth = Math.Min(searchDepth, 2);
+        }
+        if (whiteTime - blackTime > 30)
+        {
+            searchDepth = Math.Min(searchDepth, 2);
+        }
+        else if (whiteTime - blackTime > 15)
+        {
+            searchDepth = Math.Min(searchDepth, 3);
         }
         bestMoves = new List<Move>();
         //MinMax(chess, searchDepth);

@@ -249,8 +249,7 @@ public class ChessUI : MonoBehaviour
             overlay[m.startRow * 8 + m.startCol].GetComponent<Image>().sprite = indicators[4];
         }
         yield return new WaitForSeconds(extraDelay);
-        chess.playWhiteRandom();
-        //chess.playWhiteMove(m);
+        chess.playWhiteMove(m);
         if (chess.isStale())
         {
             Debug.Log("STALEMATE");
@@ -276,7 +275,7 @@ public class ChessUI : MonoBehaviour
 
     private void setMove()
     {
-        AIMove = AI.GetBestMove(chess);
+        AIMove = AI.GetBestMove(chess, whiteClock.getTime(), blackClock.getTime());
         moveDone = true;
     }
 
