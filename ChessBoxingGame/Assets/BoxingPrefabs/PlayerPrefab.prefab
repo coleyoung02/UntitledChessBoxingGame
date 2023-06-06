@@ -49,19 +49,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   opponent: {fileID: 0}
   round: {fileID: 0}
+  bText: {fileID: 0}
   healthBar: {fileID: 0}
   stateName: 
-  sprites:
-  - {fileID: 21300000, guid: 91986bd572e3b13489b9950941fda0c9, type: 3}
-  - {fileID: 21300000, guid: 7299c8a1e7261be42acc650f55aa46a1, type: 3}
-  - {fileID: 21300000, guid: 328e18043f0927b43ac399862f6581f6, type: 3}
-  - {fileID: 21300000, guid: 4943302c7ec95f541b3686923b486399, type: 3}
-  - {fileID: 21300000, guid: 065c91efc728b414887fdfa0c18296f1, type: 3}
-  - {fileID: 21300000, guid: a0bed0df3a190cf48a2c0decc6cdf167, type: 3}
   glove: {fileID: 0}
   audioSource: {fileID: -6213480772804061452}
-  damageNoise: {fileID: 8300000, guid: 7a501a655d5844a4faa83304bb9748d7, type: 3}
-  hurtNoise: {fileID: 8300000, guid: 7a501a655d5844a4faa83304bb9748d7, type: 3}
+  damageNoise: {fileID: 8300000, guid: 240df3df833fdf340a0e2c41b186948f, type: 3}
+  hurtNoise: {fileID: 8300000, guid: 86567c6c81e3aa444b84741c1d921444, type: 3}
   KONoise: {fileID: 8300000, guid: 7a501a655d5844a4faa83304bb9748d7, type: 3}
 --- !u!212 &200947595
 SpriteRenderer:
@@ -127,7 +121,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 24300002, guid: 955be12ba2a330f4d87219936314d67d, type: 2}
   m_audioClip: {fileID: 8300000, guid: 7a501a655d5844a4faa83304bb9748d7, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.506
   m_Pitch: 1
   Loop: 0
   Mute: 0

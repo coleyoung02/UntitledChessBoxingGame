@@ -41,6 +41,18 @@ public class PlayerDodging2 : State
         stage = EVENT.EXIT;
     }
 
+    public void goHeavyPunching()
+    {
+        if (coroutine != null)
+        {
+            fighter.StopCoroutine(coroutine);
+            coroutine = null;
+        }
+        nextState = new PlayerHeavyPunch(anim, player, (PlayerFighter)fighter);
+        anim.SetTrigger("HeavyPunch");
+        stage = EVENT.EXIT;
+    }
+
     public override void goKO()
     {
         if (coroutine != null)

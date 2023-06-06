@@ -22,6 +22,13 @@ public class PlayerBlocking : State
         stage = EVENT.EXIT;
     }
 
+    public void goHeavyPunching()
+    {
+        nextState = new PlayerHeavyPunch(anim, player, (PlayerFighter)fighter);
+        anim.SetTrigger("HeavyPunch");
+        stage = EVENT.EXIT;
+    }
+
     public void goIdle()
     {
         nextState = new PlayerIdle(anim, player, (PlayerFighter)fighter);

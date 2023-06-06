@@ -1,15 +1,36 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManagerClass : MonoBehaviour
 {
+    public enum Winner
+    {
+        PLAYER,
+        ENEMY,
+        DRAW
+    }
+
     public static GameManagerClass Instance { get; private set; }
     [SerializeField] private float playerHealth;
     [SerializeField] private float enemyHealth;
     [SerializeField] private ChessState chessState;
     [SerializeField] private float playerChessTime;
     [SerializeField] private float enemyChessTime;
+    private ChessAI chessAI;
+    private Winner winner;
+    private int round;
+
+    public int getRound()
+    {
+        return round;
+    }
+
+    public void incrementRound()
+    {
+        round++;
+    }
 
     public void setPlayerHealth(float health)
     {
@@ -55,10 +76,26 @@ public class GameManagerClass : MonoBehaviour
     {
         return chessState;
     }
+
+    public ChessAI GetChessAI()
+    {
+        return chessAI;
+    }
     
-    public void setChessState(ChessState state)
+    public void setChessStateAndAI(ChessState state, ChessAI chessAI)
     {
         chessState = state;
+        this.chessAI = chessAI;
+    }
+
+    public void setWinner(Winner winner)
+    {
+        this.winner = winner;
+    }
+
+    public Winner getWinner()
+    {
+        return winner;
     }
 
 
@@ -92,5 +129,7 @@ public class GameManagerClass : MonoBehaviour
         Debug.Log(chessState);
         playerChessTime = Constants.chessTime;
         enemyChessTime = Constants.chessTime;
+        chessAI = new ChessAI(chessState);
+        round = 1;
     }
 }

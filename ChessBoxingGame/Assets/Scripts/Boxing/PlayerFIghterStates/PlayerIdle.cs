@@ -23,6 +23,13 @@ public class PlayerIdle : State
         stage = EVENT.EXIT;
     }
 
+    public void goHeavyPunching()
+    {
+        nextState = new PlayerHeavyPunch(anim, player, (PlayerFighter)fighter);
+        anim.SetTrigger("HeavyPunch");
+        stage = EVENT.EXIT;
+    }
+
     public void goBlocking()
     {
         nextState = new PlayerBlocking(anim, player, (PlayerFighter)fighter);

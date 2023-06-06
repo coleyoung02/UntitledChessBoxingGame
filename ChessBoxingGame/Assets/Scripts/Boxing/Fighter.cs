@@ -26,6 +26,7 @@ public abstract class Fighter : MonoBehaviour
     protected Attack lightPunch;
     [SerializeField] protected Fighter opponent;
     [SerializeField] protected BoxingRound round;
+    [SerializeField] protected BoxingText bText;
     [SerializeField] private Slider healthBar;
     protected float blockingReduction; // if blockingReduction is 0.1, the fighter takes only 90% damage when blocking.
     public State currentState;
@@ -73,7 +74,6 @@ public abstract class Fighter : MonoBehaviour
     private int healthToInt()
     {
         float value = (currentHealth / healthMax) * 82;
-        Debug.Log("TO INTING " + value);
         if (value < 1  && value > 0)
         {
             return 1;

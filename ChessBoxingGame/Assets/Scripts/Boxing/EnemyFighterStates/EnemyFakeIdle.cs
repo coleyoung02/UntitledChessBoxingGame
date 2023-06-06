@@ -4,14 +4,16 @@ using UnityEngine;
 
 public class EnemyFakeIdle : State
 {
+    private Coroutine coroutine;
     public EnemyFakeIdle(Animator _anim, Transform _player, EnemyFighter _fighter) : base(_anim, _player, _fighter)
     {
         name = STATE.E_FAKEIDLE;
+        coroutine = null;
     }
 
     public override void enter()
     {
-        fighter.StartCoroutine(startFakeIdle());
+        coroutine = fighter.StartCoroutine(startFakeIdle());
         base.enter();
     }
 
@@ -34,7 +36,17 @@ public class EnemyFakeIdle : State
             stage = EVENT.EXIT;
         }
     }
-    
+    public void goStunned()
+    {
+        if (coroutine != null)
+        {
+            fighter.StopCoroutine(coroutine);
+            coroutine = null;
+        }
+        nextState = new EnemyStunned(anim, player, (EnemyFighter)fighter);
+        stage = EVENT.EXIT;
+    }
+
     public override void goKO()
     {
         nextState = new EnemyKO(anim, player, (EnemyFighter)fighter);

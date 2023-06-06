@@ -10,6 +10,7 @@ public class BoxingTimer : RoundCountdown
     [SerializeField] public BoxingRound round;
     protected override void endTimer()
     {
-        round.endRound();
+        StartCoroutine(bellWait(round.endRound));
+        round.Disable();
     }
 }
