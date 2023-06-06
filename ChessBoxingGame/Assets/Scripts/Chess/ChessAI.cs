@@ -194,27 +194,43 @@ public class ChessAI
         {
             if (row == 7 || row == 0)
             {
-                edgeness += 2;
+                edgeness += 3;
             }
             else if (row == 6 || row == 1)
+            {
+                edgeness += 2;
+            }
+            else if (row == 5 || row == 2)
             {
                 edgeness += 1;
             }
             if (col == 7 || col == 0)
             {
-                edgeness += 2;
+                edgeness += 3;
             }
             else if (col == 6 || col == 1)
+            {
+                edgeness += 2;
+            }
+            else if (col == 5 || col == 2)
             {
                 edgeness += 1;
             }
             return -edgeness * edgenessMuliplier;
         }
-        if (row == 7 && col == 1)
+        else if (row == 7 && col == 1)
         {
             return .3f;
         }
-        if (row == 7 && col == 5)
+        else if (row == 0 && col == 1)
+        {
+            return .3f;
+        }
+        else if (row == 7 && col == 1)
+        {
+            return .3f;
+        }
+        else if (row == 0 && col == 5)
         {
             return .3f;
         }
@@ -278,7 +294,15 @@ public class ChessAI
         }
         if (chess.getHalfMoves() < 6)
         {
-            searchDepth -= 1;
+            searchDepth = Math.Min(searchDepth, 2);
+        }
+        else if (chess.getHalfMoves() < 20)
+        {
+            searchDepth = Math.Min(searchDepth, 3);
+        }
+        else if (chess.getHalfMoves() < 40)
+        {
+            searchDepth = Math.Min(searchDepth, 4);
         }
         bestMoves = new List<Move>();
         //MinMax(chess, searchDepth);
@@ -293,7 +317,7 @@ public class ChessAI
     }
     
 
-    private float negaMaxAB(ChessState state, int depth, int multiplier, float a, float b)
+    private float negaMaxAB(ChessState state, int depth, int multiplier, float a, float b, bool q=false)
     {
         count++;
         List<Move> possible = state.getLegalMoves();
@@ -317,33 +341,33 @@ public class ChessAI
         bestMaxScore = -mateScore;
         List<Move> first = new List<Move>();
         List<Move> second = new List<Move>();
+        List<Move> third = new List<Move>();
         for (int i = 0; i < possible.Count; ++i)
         {
-            if (possible[i].endRow >= 0 && possible[i].endCol >= 0 && state.getBoard()[possible[i].endRow][possible[i].endCol] >= 0)
+            if (possible[i].endRow >= 0 && possible[i].endCol >= 0 && state.getBoard()[possible[i].endRow][possible[i].endCol] >= 2)
             {
                 first.Add(possible[i]);
             }
-            else
+            else if (possible[i].endRow >= 0 && possible[i].endCol >= 0 && state.getBoard()[possible[i].endRow][possible[i].endCol] >= 0)
             {
                 second.Add(possible[i]);
             }
+            else
+            {
+                third.Add(possible[i]);
+            }
         }
-        if (depth == searchDepth)
+        if (!q)
         {
-            Shuffle(first);
-            Shuffle(second);
+            first.AddRange(second);
+            first.AddRange(third);
         }
-        first.AddRange(second);
+        if (q && first.Count <=0)
+        {
+            return multiplier * getMaterialScore(state);
+        }
         for (int i = 0; i < first.Count; ++i)
         { 
-            if (depth == searchDepth && count >= 50000)
-            {
-                break;
-            }
-            else if (depth == searchDepth - 1 && count >= 70000)
-            {
-                break;
-            }
             if (first[i].startRow >= 0 && first[i].startCol >=0)
             {
                 piece = state.getBoard()[first[i].startRow][first[i].startCol];
@@ -372,6 +396,10 @@ public class ChessAI
             }
             result = new ChessState(state);
             result.playMove(first[i]);
+            if (searchDepth < 4 && depth == 1)
+            {
+                maxScore = -negaMaxAB(result, 1, -multiplier, -b, -a, true);
+            }
             maxScore = -negaMaxAB(result, depth - 1, -multiplier, -b, -a);
             maxScore += adjustment;
             if (maxScore > bestMaxScore)

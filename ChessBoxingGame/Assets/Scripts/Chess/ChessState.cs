@@ -1227,11 +1227,11 @@ public class ChessState
     {
         int[][] boardCopy = getBoardCopy();
         board[m.endRow][m.endCol] = boardCopy[m.startRow][m.startCol];
-        board[m.startRow][m.startCol] = -1;
+        board[m.startRow][m.startCol] = ee;
         bool validity;
         if (m.isEP)
         {
-            board[m.startRow + (2 * color - 1)][epCol] = ee;
+            board[m.startRow][epCol] = ee;
         }
         if (color == white)
         {

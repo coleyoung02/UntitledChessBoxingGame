@@ -16,6 +16,8 @@ public class PlayerFighter : Fighter
     private bool waiting;
     private bool canDodge;
     private Coroutine lastPunch;
+    private bool punchNext;
+    private bool nextHeavy;
     [SerializeField] Image glove; 
     [SerializeField] Image dodge; 
 
@@ -30,6 +32,8 @@ public class PlayerFighter : Fighter
     {
         gameWon = false;
         lastPunch = null;
+        punchNext = false;
+        nextHeavy = false;
         canPunch = true;
         numPunches = 0;
         waiting = false;
@@ -41,8 +45,7 @@ public class PlayerFighter : Fighter
         blockingReduction = Constants.Player.BLOCKING_REDUC;
         currentState = new PlayerIdle(anim, transform, this);
         lightPunch = new Attack(Constants.Player.LIGHT_PUNCH_DAMAGE, Constants.Player.LIGHT_PUNCH_TELE_TIME, true);
-        heavyPunch = new Attack(Constants.Player.HEAVY_PUNCH_DAMAGE,
-            Constants.Enemy.HEAVY_PUNCH_FST_TELE_TIME + Constants.Enemy.HEAVY_PUNCH_SND_TELE_TIME, false);
+        heavyPunch = new Attack(Constants.Player.HEAVY_PUNCH_DAMAGE, Constants.Player.HEAVY_PUNCH_TELE_TIME, true);
     }
 
     private void Update()
@@ -64,70 +67,114 @@ public class PlayerFighter : Fighter
             gameManager.setWinner(GameManagerClass.Winner.PLAYER);
             bText.onKO();
         }
-        if (Input.GetKeyDown("f"))
+        else if (currentState.name == State.STATE.P_IDLE && punchNext)
         {
-            Punch();
-        }
-        else if (Input.GetKeyDown("j"))
-        {
-            Dodge();
-        }
-        else if (Input.GetKey("space"))
-        {
-            Block();
+            punchNext = false;
+            Punch(nextHeavy);
         }
         else
         {
-            EndBlock();
+            if (Input.GetKeyDown("f"))
+            {
+                Punch(false);
+            }
+            else if (Input.GetKeyDown("d"))
+            {
+                Punch(true);
+            }
+            else if (Input.GetKeyDown("j"))
+            {
+                Dodge();
+            }
+            else if (Input.GetKey("space"))
+            {
+                Block();
+            }
+            else
+            {
+                EndBlock();
+            }
         }
         currentState = currentState.process();
     }
 
-    void Punch()
+    void Punch(bool isHeavy)
     {
-        if (currentState.name == State.STATE.P_IDLE || currentState.name == State.STATE.P_DODGING1 || currentState.name == State.STATE.P_DODGING2)
+        if (currentState.name == State.STATE.P_IDLE || currentState.name == State.STATE.P_DODGING1 || currentState.name == State.STATE.P_DODGING2 || currentState.name == State.STATE.P_BLOCKING)
         {
-            //Debug.Log("punch " + numPunches);
-            if (canPunch)
+            if (isHeavy)
             {
-                playAudioClip(damageNoise);
-                if (currentState.name == State.STATE.P_IDLE)
+                //Debug.Log("punch " + numPunches);
+                if (canPunch)
                 {
-                    ((PlayerIdle)currentState).goPunching();
+                    playAudioClip(damageNoise);
+                    if (currentState.name == State.STATE.P_IDLE)
+                    {
+                        ((PlayerIdle)currentState).goHeavyPunching();
+                    }
+                    else if (currentState.name == State.STATE.P_BLOCKING)
+                    {
+                        ((PlayerBlocking)currentState).goHeavyPunching();
+                    }
+                    else if (currentState.name == State.STATE.P_DODGING1)
+                    {
+                        ((PlayerDodging1)currentState).goHeavyPunching();
+                    }
+                    else
+                    {
+                        ((PlayerDodging2)currentState).goHeavyPunching();
+                    }
                 }
-                else if (currentState.name == State.STATE.P_DODGING1)
+                else if (!waiting)
                 {
-                    ((PlayerDodging1)currentState).goPunching();
-                }
-                else
-                {
-                    ((PlayerDodging2)currentState).goPunching();
+                    waiting = true;
+                    StartCoroutine(waitBeforePunching());
                 }
             }
-            else if (!waiting)
+            else
             {
-                waiting = true;
-                StartCoroutine(waitBeforePunching());
+                //Debug.Log("punch " + numPunches);
+                if (canPunch)
+                {
+                    playAudioClip(damageNoise);
+                    if (currentState.name == State.STATE.P_IDLE)
+                    {
+                        ((PlayerIdle)currentState).goPunching();
+                    }
+                    else if (currentState.name == State.STATE.P_BLOCKING)
+                    {
+                        ((PlayerBlocking)currentState).goPunching();
+                    }
+                    else if (currentState.name == State.STATE.P_DODGING1)
+                    {
+                        ((PlayerDodging1)currentState).goPunching();
+                    }
+                    else
+                    {
+                        ((PlayerDodging2)currentState).goPunching();
+                    }
+                }
+                else if (!waiting)
+                {
+                    waiting = true;
+                    StartCoroutine(waitBeforePunching());
+                }
             }
+           
         }
-        else if (currentState.name == State.STATE.P_BLOCKING)
+        else if (currentState.name == State.STATE.P_PUNCHING || currentState.name == State.STATE.P_HEAVYPUNCHING)
         {
-            if (canPunch)
+            if (numPunches < Constants.Player.COMBO_MAX)
             {
-                playAudioClip(damageNoise);
-                ((PlayerBlocking)currentState).goPunching();
-            }
-            else if (!waiting)
-            {
-                waiting = true;
-                StartCoroutine(waitBeforePunching());
+                punchNext = true;
+                nextHeavy = isHeavy;
             }
         }
     }
 
     public IEnumerator waitBeforePunching()
     {
-        yield return new WaitForSeconds(3f); //this should not be hard coded
+        yield return new WaitForSeconds(Constants.Player.PUNCH_WAIT); //this should not be hard coded
         numPunches = 0;
         canPunch = true;
         waiting = false;
@@ -135,7 +182,7 @@ public class PlayerFighter : Fighter
 
     public IEnumerator incompleteCombo()
     {
-        yield return new WaitForSeconds(1.5f); //this should not be hard coded
+        yield return new WaitForSeconds(Constants.Player.PUNCH_WAIT_SHORT); //this should not be hard coded
         numPunches = 0;
         canPunch = true;
     }
@@ -186,7 +233,7 @@ public class PlayerFighter : Fighter
         if (opponent.takeAttack(attack))
         {
             numPunches++;
-            if (numPunches >= 3)
+            if (numPunches >= Constants.Player.COMBO_MAX)
             {
                 if (lastPunch != null)
                 {
@@ -196,14 +243,9 @@ public class PlayerFighter : Fighter
                 waiting = true;
                 StartCoroutine(waitBeforePunching());
             }
-            else if (lastPunch != null)
-            {
-                StopCoroutine(lastPunch);
-                lastPunch = StartCoroutine(incompleteCombo());
-            }
             else
             {
-                lastPunch = StartCoroutine(incompleteCombo());
+                shortDelay();
             }
             return true;
         }
@@ -215,13 +257,53 @@ public class PlayerFighter : Fighter
         return false;
     }
 
+    private void shortDelay()
+    {
+        if (lastPunch != null)
+        {
+            StopCoroutine(lastPunch);
+            lastPunch = StartCoroutine(incompleteCombo());
+        }
+        else
+        {
+            lastPunch = StartCoroutine(incompleteCombo());
+        }
+    }
+
     public override bool takeAttack(Attack attack)
     {
-        gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
-        Debug.Log(gameManager.getPlayerHealth());
+        Debug.Log("got punched " + currentState.name);
         if (currentState.name == State.STATE.P_DODGING1)
         {
             return false;
+        }
+        if (currentState.name == State.STATE.P_PUNCHING)
+        {
+            ((PlayerPunching)currentState).goIdle();
+            canPunch = false;
+            if (!waiting)
+            {
+                StartCoroutine(waitBeforePunching());
+            }
+        }
+        else if (currentState.name == State.STATE.P_HEAVYPUNCHING)
+        {
+            ((PlayerHeavyPunch)currentState).goIdle();
+            canPunch = false;
+            if (!waiting)
+            {
+                StartCoroutine(waitBeforePunching());
+            }
+        }
+        else if (currentState.name == State.STATE.P_IDLE)
+        {
+            canPunch = false;
+            shortDelay();
+        }
+        else if (currentState.name == State.STATE.P_DODGING2)
+        {
+            canPunch = false;
+            shortDelay();
         }
 
         float damage = attack.damage;

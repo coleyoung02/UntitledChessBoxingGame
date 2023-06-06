@@ -60,6 +60,7 @@ public class EnemyFighter : Fighter
 
     public override bool takeAttack(Attack attack)
     {
+        Debug.Log("enemy got punched " + currentState.name);
         float damage = attack.damage;
         bool unblocked = true;
         if (currentState.name == State.STATE.E_BLOCKING)
@@ -88,6 +89,10 @@ public class EnemyFighter : Fighter
             else if (currentState.name == State.STATE.E_HEAVYPUNCHINGFST)
             {
                 ((EnemyHeavyPunchingFst)currentState).goStunned();
+            }
+            else if (currentState.name == State.STATE.E_FAKEIDLE)
+            {
+                ((EnemyFakeIdle)currentState).goStunned();
             }
         }
         return unblocked;

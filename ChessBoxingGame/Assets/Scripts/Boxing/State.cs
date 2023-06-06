@@ -24,7 +24,8 @@ public abstract class State {
         P_DODGING1          = 10,
         P_DODGING2          = 11,
         P_BLOCKING          = 12,
-        P_KO                = 13
+        P_KO                = 13,
+        P_HEAVYPUNCHING     = 14
     };
 
     public enum EVENT {
