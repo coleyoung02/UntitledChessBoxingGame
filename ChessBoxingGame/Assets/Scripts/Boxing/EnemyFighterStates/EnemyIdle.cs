@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class EnemyIdle : State
 {
+    private static readonly int GoIdle = Animator.StringToHash("GoIdle");
+
     public EnemyIdle(Animator _anim, Transform _player, EnemyFighter _fighter) : base(_anim, _player, _fighter)
     {
         name = STATE.E_IDLE;
@@ -12,12 +14,14 @@ public class EnemyIdle : State
     {
         //Debug.Log("EnemyIdle.enter()");
         base.enter();
+        anim.SetBool(GoIdle, true);
     }
 
     public override void exit()
     {
         //Debug.Log("EnemyIdle.exit()");
         base.exit();
+        anim.SetBool(GoIdle, false);
     }
 
     public void goBlocking()

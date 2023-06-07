@@ -5,6 +5,8 @@ using UnityEngine;
 public class EnemyHeavyPunchingSnd : State
 {
     private Coroutine coroutine;
+    private static readonly int GoHeavyPunchingSnd = Animator.StringToHash("GoHeavyPunchingSnd");
+
     public EnemyHeavyPunchingSnd(Animator _anim, Transform _player, EnemyFighter _fighter) : base(_anim, _player,
         _fighter)
     {
@@ -16,6 +18,7 @@ public class EnemyHeavyPunchingSnd : State
     {
         fighter.StartCoroutine(startHeavyPunchingSnd());
         base.enter();
+        anim.SetBool(GoHeavyPunchingSnd, true);
     }
 
     public override void update()
@@ -26,6 +29,7 @@ public class EnemyHeavyPunchingSnd : State
     public override void exit()
     {
         base.exit();
+        anim.SetBool(GoHeavyPunchingSnd, false);
     }
 
     public IEnumerator startHeavyPunchingSnd()

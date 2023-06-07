@@ -6,6 +6,7 @@ public class EnemyHeavyPunchingFst : State
 {
 
     private Coroutine coroutine;
+    private static readonly int GoHeavyPunchingFst = Animator.StringToHash("GoHeavyPunchingFst");
 
     public EnemyHeavyPunchingFst(Animator _anim, Transform _player, EnemyFighter _fighter) : base(_anim, _player, _fighter)
     {
@@ -18,6 +19,7 @@ public class EnemyHeavyPunchingFst : State
         //Debug.Log("EnemyHeavyPunchingFst.enter()");
         coroutine = fighter.StartCoroutine(startHeavyPunchingFst());
         base.enter();
+        anim.SetBool(GoHeavyPunchingFst, true);
     }
 
     public override void update()
@@ -27,8 +29,8 @@ public class EnemyHeavyPunchingFst : State
 
     public override void exit()
     {
-        //Debug.Log("EnemyHeavyPunchingFst.exit()");
         base.exit();
+        anim.SetBool(GoHeavyPunchingFst, false);
     }
     
     public IEnumerator startHeavyPunchingFst()
