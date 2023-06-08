@@ -156,11 +156,11 @@ public class EnemyFighter : Fighter
     {
         if (currentState.name == State.STATE.E_IDLE)
         {
-            ((EnemyIdle)currentState).goHeavyPunching(3);
+            ((EnemyIdle)currentState).goPreCombo();
         }
         else if (currentState.name == State.STATE.E_BLOCKING)
         {
-            ((EnemyBlocking)currentState).goHeavyPunching(3);
+            ((EnemyBlocking)currentState).goPreCombo();
         }
     }
 

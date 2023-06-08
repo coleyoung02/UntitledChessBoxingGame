@@ -47,6 +47,11 @@ public class EnemyBlocking : State
         stage = EVENT.EXIT;
     }
 
+    public void goPreCombo()
+    {
+        nextState = new EnemyPreCombo(anim, player, (EnemyFighter)fighter);
+        stage = EVENT.EXIT;
+    }
     public void goHeavyPunching(int numPunches = 1)
     {
         nextState = new EnemyHeavyPunchingFst(anim, player, (EnemyFighter)fighter, numPunches);

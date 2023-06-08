@@ -883,6 +883,7 @@ GameObject:
   - component: {fileID: 430738729}
   - component: {fileID: 430738728}
   - component: {fileID: 430738732}
+  - component: {fileID: 430738733}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -985,6 +986,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c978a4b2f0b0e9c4392a104f622f39a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  myMixer: {fileID: 24100000, guid: 955be12ba2a330f4d87219936314d67d, type: 2}
+--- !u!114 &430738733
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 430738727}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d572fcbf2822f054594e7de6dee267cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &501237692
@@ -2163,7 +2177,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4142182348028717455}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 430738733}
+        m_TargetAssemblyTypeName: ResolutionDoer, Assembly-CSharp
+        m_MethodName: changeRes
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 1
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &4142182348028717455
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2388,7 +2414,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -4, y: 4.0000076}
+  m_AnchoredPosition: {x: -4, y: 4}
   m_SizeDelta: {x: 80, y: 40}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &4142182348386523265
@@ -2810,7 +2836,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4142182348982002619}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 430738733}
+        m_TargetAssemblyTypeName: ResolutionDoer, Assembly-CSharp
+        m_MethodName: changeRes
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: -1
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &4142182348982002619
 MonoBehaviour:
   m_ObjectHideFlags: 0

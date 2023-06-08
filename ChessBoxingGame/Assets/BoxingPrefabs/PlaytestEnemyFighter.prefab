@@ -62,6 +62,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: af0e90abf7db2b549bc79e039a3fab5e, type: 3}
   - {fileID: 21300000, guid: a0bed0df3a190cf48a2c0decc6cdf167, type: 3}
   - {fileID: 21300000, guid: ac3bc52c47034a548a43cba5e8407d33, type: 3}
+  - {fileID: 21300000, guid: bea98346c01aedc4dbab3568d03b6fac, type: 3}
   blockedNoise: {fileID: 8300000, guid: 52148c9088d30334592a93c916428ae9, type: 3}
   heavyDamageNoise: {fileID: 8300000, guid: 240df3df833fdf340a0e2c41b186948f, type: 3}
   mediumDamageNoise: {fileID: 8300000, guid: 66fdabe475d82504b9ae1ff93a78feff, type: 3}

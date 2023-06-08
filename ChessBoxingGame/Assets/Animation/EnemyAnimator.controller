@@ -358,10 +358,10 @@ AnimatorStateMachine:
     m_Position: {x: 800, y: 350, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1238705226017771983}
-    m_Position: {x: 840, y: 680, z: 0}
+    m_Position: {x: 780, y: 690, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -1444823271654837644}
-    m_Position: {x: 1070, y: 350, z: 0}
+    m_Position: {x: 1180, y: 300, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -1410527377103459086}
     m_Position: {x: 1180, y: 570, z: 0}
@@ -428,6 +428,12 @@ AnimatorController:
     m_DefaultBool: 0
     m_Controller: {fileID: 0}
   - m_Name: GoKO
+    m_Type: 4
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 0}
+  - m_Name: GoPreCombo
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0

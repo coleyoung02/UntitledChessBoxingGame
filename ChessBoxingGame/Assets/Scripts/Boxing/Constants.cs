@@ -16,10 +16,11 @@ public static class Constants
         public const float BLOCKING_REDUC = 0.95f;
         public const float HEALTH_MAX = 82;
         public const float POSS_BLOCKING = 0.07f;
-        public const float POSS_LIGHT_PUNCH = 0.1f;
-        public const float POSS_HEAVY_PUNCH = 0.1f;
+        public const float POSS_LIGHT_PUNCH = 0.4f;
+        public const float POSS_HEAVY_PUNCH = 0.3f;
         public const float POSS_IDLE = 0.1f;
-        public const float POSS_COMBO = 0.7f;
+        public const float POSS_COMBO = 0.2f;
+        public const float COMBO_TELE_TIME = 0.3f;
     }
 
     public static class Player

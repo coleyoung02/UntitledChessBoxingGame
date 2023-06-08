@@ -19,13 +19,14 @@ public abstract class State {
         E_STUNNED           = 5,
         E_KO                = 6,
         E_FAKEIDLE          = 7,
-        P_IDLE              = 8,
-        P_PUNCHING          = 9,
-        P_DODGING1          = 10,
-        P_DODGING2          = 11,
-        P_BLOCKING          = 12,
-        P_KO                = 13,
-        P_HEAVYPUNCHING     = 14
+        E_PRECOMBO          = 8,
+        P_IDLE              = 9,
+        P_PUNCHING          = 10,
+        P_DODGING1          = 11,
+        P_DODGING2          = 12,
+        P_BLOCKING          = 13,
+        P_KO                = 14,
+        P_HEAVYPUNCHING     = 15
     };
 
     public enum EVENT {

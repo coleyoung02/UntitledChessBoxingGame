@@ -10,7 +10,7 @@ public class ResolutionDoer : MonoBehaviour
     static int gridSize = 24;
     private int width = 16;
     private int height = 9;
-    [SerializeField] private TextMeshProUGUI text;
+    private bool isFullScreen = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -36,10 +36,17 @@ public class ResolutionDoer : MonoBehaviour
     }
     public void changeRes(int increment)
     {
-        if (resolutionScale + increment > 1)
+        int nRes = resolutionScale + increment;
+        if (nRes > 1 && width * nRes * gridSize < Display.main.systemWidth && height * nRes * gridSize < Display.main.systemHeight)
         {
             resolutionScale += increment;
+            Screen.SetResolution(width * resolutionScale * gridSize, height * resolutionScale * gridSize, false);
         }
-        Screen.SetResolution(width * resolutionScale * gridSize, height * resolutionScale * gridSize, false);
+        else if (width * nRes * gridSize == Display.main.systemWidth && height * nRes * gridSize == Display.main.systemHeight)
+        {
+            resolutionScale += increment;
+            Screen.SetResolution(width * resolutionScale * gridSize, height * resolutionScale * gridSize, true);
+        }
+        
     }
 }
