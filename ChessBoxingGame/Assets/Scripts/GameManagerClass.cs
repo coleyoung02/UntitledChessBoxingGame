@@ -101,6 +101,8 @@ public class GameManagerClass : MonoBehaviour
 
 
     [SerializeField] private AudioSource music;
+    [SerializeField] private AudioClip chessClip;
+    [SerializeField] private AudioClip boxingClip;
 
     protected void Awake()
     {
@@ -117,8 +119,8 @@ public class GameManagerClass : MonoBehaviour
             DontDestroyOnLoad(gameObject);
             initFields();
         }
-        //Instance.music.volume = .1f;
-        //Instance.music.Play();
+        Instance.music.clip = chessClip;
+        Instance.music.Play();
     }
 
     private void initFields()

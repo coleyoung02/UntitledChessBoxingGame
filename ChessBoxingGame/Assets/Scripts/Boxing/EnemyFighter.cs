@@ -8,6 +8,9 @@ public class EnemyFighter : Fighter
     public string stateName; // Debug only
     [SerializeField] Sprite[] sprites; // Delete after testing
     private SpriteRenderer spriteRenderer; // Delete after testing
+    [SerializeField] private AudioClip blockedNoise;
+    [SerializeField] private AudioClip heavyDamageNoise;
+    [SerializeField] private AudioClip mediumDamageNoise;
     private GameManagerClass gameManager;
     private float time;
 
@@ -49,6 +52,10 @@ public class EnemyFighter : Fighter
             {
                 goIdle();
             }
+            else if (rand < Constants.Enemy.POSS_LIGHT_PUNCH + Constants.Enemy.POSS_HEAVY_PUNCH + Constants.Enemy.POSS_IDLE + Constants.Enemy.POSS_COMBO)
+            {
+                doCombo();
+            }
         }
         else if (currentState.name == State.STATE.E_BLOCKING || currentState.name == State.STATE.E_IDLE)
         {
@@ -70,7 +77,8 @@ public class EnemyFighter : Fighter
         }
         if (currentState.name == State.STATE.E_LIGHTPUNCHING)
         {
-            return false;
+            damage *= (1 - blockingReduction);
+            unblocked = false;
         }
 
 
@@ -94,6 +102,21 @@ public class EnemyFighter : Fighter
             {
                 ((EnemyFakeIdle)currentState).goStunned();
             }
+        }
+        if (unblocked)
+        {
+            if (damage > Constants.Player.LIGHT_PUNCH_DAMAGE + .1)
+            {
+                playAudioClip(heavyDamageNoise);
+            }
+            else
+            {
+                playAudioClip(mediumDamageNoise);
+            }
+        }
+        else
+        {
+            playAudioClip(blockedNoise);
         }
         return unblocked;
     }
@@ -129,6 +152,18 @@ public class EnemyFighter : Fighter
         }
     }
 
+    public void doCombo()
+    {
+        if (currentState.name == State.STATE.E_IDLE)
+        {
+            ((EnemyIdle)currentState).goHeavyPunching(3);
+        }
+        else if (currentState.name == State.STATE.E_BLOCKING)
+        {
+            ((EnemyBlocking)currentState).goHeavyPunching(3);
+        }
+    }
+
     public void goIdle()
     {
         if (currentState.name == State.STATE.E_BLOCKING)
@@ -146,5 +181,11 @@ public class EnemyFighter : Fighter
     protected override void onKO()
     {
         this.round.Win();
+    }
+
+    private void playAudioClip(AudioClip clip)
+    {
+        this.audioSource.clip = clip;
+        audioSource.Play();
     }
 }

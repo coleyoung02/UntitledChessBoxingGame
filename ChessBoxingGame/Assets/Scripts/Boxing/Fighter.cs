@@ -28,6 +28,7 @@ public abstract class Fighter : MonoBehaviour
     [SerializeField] protected BoxingRound round;
     [SerializeField] protected BoxingText bText;
     [SerializeField] private Slider healthBar;
+    [SerializeField] protected AudioSource audioSource;
     protected float blockingReduction; // if blockingReduction is 0.1, the fighter takes only 90% damage when blocking.
     public State currentState;
 

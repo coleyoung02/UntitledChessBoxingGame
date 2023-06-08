@@ -5,12 +5,14 @@ using UnityEngine;
 public class EnemyHeavyPunchingSnd : State
 {
     private Coroutine coroutine;
+    private int numPunches;
     private static readonly int GoHeavyPunchingSnd = Animator.StringToHash("GoHeavyPunchingSnd");
 
-    public EnemyHeavyPunchingSnd(Animator _anim, Transform _player, EnemyFighter _fighter) : base(_anim, _player,
+    public EnemyHeavyPunchingSnd(Animator _anim, Transform _player, EnemyFighter _fighter, int numPunches) : base(_anim, _player,
         _fighter)
     {
         name = STATE.E_HEAVYPUNCHINGSND;
+        this.numPunches = numPunches;
         coroutine = null;
     }
 
@@ -38,7 +40,14 @@ public class EnemyHeavyPunchingSnd : State
         if (fighter.currentState == this)
         {
             fighter.doAttack(fighter.HeavyPunch);
-            nextState = new EnemyFakeIdle(anim, player, (EnemyFighter)fighter);
+            if (this.numPunches <= 1)
+            {
+                nextState = new EnemyFakeIdle(anim, player, (EnemyFighter)fighter);
+            }
+            else
+            {
+                nextState = new EnemyHeavyPunchingFst(anim, player, (EnemyFighter)fighter, numPunches - 1);
+            }
             stage = EVENT.EXIT;
         }
         coroutine = null;

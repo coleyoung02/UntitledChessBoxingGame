@@ -21,10 +21,8 @@ public class PlayerFighter : Fighter
     [SerializeField] Image glove; 
     [SerializeField] Image dodge; 
 
-    [SerializeField] private AudioSource audioSource;
-    [SerializeField] private AudioClip damageNoise;
     [SerializeField] private AudioClip hurtNoise;
-    [SerializeField] private AudioClip KONoise;
+    [SerializeField] private AudioClip flames;
     private GameManagerClass gameManager;
     private bool gameWon;
 
@@ -107,7 +105,7 @@ public class PlayerFighter : Fighter
                 //Debug.Log("punch " + numPunches);
                 if (canPunch)
                 {
-                    playAudioClip(damageNoise);
+                    playAudioClip(flames);
                     if (currentState.name == State.STATE.P_IDLE)
                     {
                         ((PlayerIdle)currentState).goHeavyPunching();
@@ -136,7 +134,6 @@ public class PlayerFighter : Fighter
                 //Debug.Log("punch " + numPunches);
                 if (canPunch)
                 {
-                    playAudioClip(damageNoise);
                     if (currentState.name == State.STATE.P_IDLE)
                     {
                         ((PlayerIdle)currentState).goPunching();
@@ -315,7 +312,6 @@ public class PlayerFighter : Fighter
         }
         if (currentHealth - damage <= 0)
         {
-            playAudioClip(KONoise);
             setHealth(0);
             currentState.goKO();
         }

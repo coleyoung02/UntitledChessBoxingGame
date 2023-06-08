@@ -36,9 +36,9 @@ public class EnemyIdle : State
         stage = EVENT.EXIT;
     }
 
-    public void goHeavyPunching()
+    public void goHeavyPunching(int numPunches=1)
     {
-        nextState = new EnemyHeavyPunchingFst(anim, player, (EnemyFighter)fighter);
+        nextState = new EnemyHeavyPunchingFst(anim, player, (EnemyFighter)fighter, numPunches);
         stage = EVENT.EXIT;
     }
 

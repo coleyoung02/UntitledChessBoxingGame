@@ -6,11 +6,13 @@ public class EnemyHeavyPunchingFst : State
 {
 
     private Coroutine coroutine;
+    private int numPunches;
     private static readonly int GoHeavyPunchingFst = Animator.StringToHash("GoHeavyPunchingFst");
 
-    public EnemyHeavyPunchingFst(Animator _anim, Transform _player, EnemyFighter _fighter) : base(_anim, _player, _fighter)
+    public EnemyHeavyPunchingFst(Animator _anim, Transform _player, EnemyFighter _fighter, int numPunches=1) : base(_anim, _player, _fighter)
     {
         name = STATE.E_HEAVYPUNCHINGFST;
+        this.numPunches = numPunches;
         coroutine = null;
     }
 
@@ -38,7 +40,7 @@ public class EnemyHeavyPunchingFst : State
         yield return new WaitForSeconds(Constants.Enemy.HEAVY_PUNCH_FST_TELE_TIME);
         if (fighter.currentState == this)
         {
-            nextState = new EnemyHeavyPunchingSnd(anim, player, (EnemyFighter)fighter); 
+            nextState = new EnemyHeavyPunchingSnd(anim, player, (EnemyFighter)fighter, numPunches); 
             stage = EVENT.EXIT;
         }
         coroutine = null;

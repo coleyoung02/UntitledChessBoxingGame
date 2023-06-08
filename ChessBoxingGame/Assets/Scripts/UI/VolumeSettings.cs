@@ -21,23 +21,36 @@ public class VolumeSettings : MonoBehaviour
 
     public void SetMusicVolume()
     {
-        float volume = musicSlider.value;
-        //commented out for now because there is no dedicated music mixer
-        //myMixer.SetFloat("music", Mathf.Log10(volume)*20);
+        float volume = musicSlider.value / 82;
+        if (volume == 0)
+        {
+            myMixer.SetFloat("Music", -90f);
+        }
+        else
+        {
+            myMixer.SetFloat("Music", Mathf.Log10(volume) * 20);
+        }
         PlayerPrefs.SetFloat("musicVolume", volume);
     }
 
     public void SetSFXVolume()
     {
-        float volume = SFXSlider.value;
-        myMixer.SetFloat("SFX", Mathf.Log10(volume)*20);
+        float volume = SFXSlider.value / 82;
+        if (volume == 0)
+        {
+            myMixer.SetFloat("SFX", -90f);
+        }
+        else
+        {
+            myMixer.SetFloat("SFX", Mathf.Log10(volume)*20);
+        }
         PlayerPrefs.SetFloat("SFXVolume", volume);
     }
 
     private void LoadVolume()
     {
-        musicSlider.value = PlayerPrefs.GetFloat("musicVolume");
-        SFXSlider.value = PlayerPrefs.GetFloat("SFXVolume");
+        musicSlider.value = PlayerPrefs.GetFloat("musicVolume") * 82;
+        SFXSlider.value = PlayerPrefs.GetFloat("SFXVolume") * 82;
 
         SetMusicVolume();
         SetSFXVolume();

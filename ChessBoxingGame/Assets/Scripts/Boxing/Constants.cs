@@ -8,7 +8,7 @@ public static class Constants
         public const float BLOCKING_TIME_MAX = 3f;
         public const float LIGHT_PUNCH_TELE_TIME = 0.4f;
         public const float LIGHT_PUNCH_DAMAGE = 5.0f; //for single round, use 10.0f
-        public const float HEAVY_PUNCH_FST_TELE_TIME = 0.65f;
+        public const float HEAVY_PUNCH_FST_TELE_TIME = 0.55f;
         public const float HEAVY_PUNCH_SND_TELE_TIME = .35f;
         public const float HEAVY_PUNCH_DAMAGE = 9.0f; //for single round, use 15.0f
         public const float STUN_TIME = 1.5f;
@@ -16,9 +16,10 @@ public static class Constants
         public const float BLOCKING_REDUC = 0.95f;
         public const float HEALTH_MAX = 82;
         public const float POSS_BLOCKING = 0.07f;
-        public const float POSS_LIGHT_PUNCH = 0.4f;
-        public const float POSS_HEAVY_PUNCH = 0.5f;
+        public const float POSS_LIGHT_PUNCH = 0.1f;
+        public const float POSS_HEAVY_PUNCH = 0.1f;
         public const float POSS_IDLE = 0.1f;
+        public const float POSS_COMBO = 0.7f;
     }
 
     public static class Player
