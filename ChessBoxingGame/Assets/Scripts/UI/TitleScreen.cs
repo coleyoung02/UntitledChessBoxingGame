@@ -28,7 +28,9 @@ public class TitleScreen : MonoBehaviour
 
     public void onStart()
     {
-        SceneManager.LoadScene("BoxingScene");
+        GameManagerClass gameManager = Resources.FindObjectsOfTypeAll<GameManagerClass>()[0];
+        gameManager.ResetGame();
+        SceneManager.LoadScene("ChessScene");
     }
 
 

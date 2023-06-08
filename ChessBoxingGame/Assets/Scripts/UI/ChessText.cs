@@ -8,6 +8,7 @@ public class ChessText : MonoBehaviour
 {
     [SerializeField] Image check;
     [SerializeField] Image mate;
+    [SerializeField] Image stale;
     [SerializeField] AudioClip checkSound;
     [SerializeField] AudioClip mateSound;
     [SerializeField] AudioSource source;
@@ -26,8 +27,17 @@ public class ChessText : MonoBehaviour
         source.clip = mateSound;
         source.Play();
         check.gameObject.SetActive(true);
-        StartCoroutine(waitForMate());
+        StartCoroutine(waitForMate("EndScreen"));
 
+    }
+
+    public void onStale(GameManagerClass gameManager)
+    {
+        source.clip = mateSound;
+        source.Play();
+        stale.gameObject.SetActive(true);
+        gameManager.setRound(Constants.MAX_ROUNDS);
+        StartCoroutine(waitForMate("BoxingScene"));
     }
 
     IEnumerator hideCheck()
@@ -36,11 +46,11 @@ public class ChessText : MonoBehaviour
         check.gameObject.SetActive(false);
     }
 
-    IEnumerator waitForMate()
+    IEnumerator waitForMate(string sceneName)
     {
         yield return new WaitForSeconds(.65f);
         mate.gameObject.SetActive(true);
         yield return new WaitForSeconds(2f);
-        SceneManager.LoadScene("EndScreen");
+        SceneManager.LoadScene(sceneName);
     }
 }

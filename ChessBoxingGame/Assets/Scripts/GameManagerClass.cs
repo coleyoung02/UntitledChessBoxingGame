@@ -32,6 +32,11 @@ public class GameManagerClass : MonoBehaviour
         round++;
     }
 
+    public void setRound(int r)
+    {
+        round = r;
+    }
+
     public void setPlayerHealth(float health)
     {
         playerHealth = health;
@@ -123,8 +128,15 @@ public class GameManagerClass : MonoBehaviour
         Instance.music.Play();
     }
 
+    public void ResetGame()
+    {
+        Debug.Log("resetting here 1");
+        initFields();
+    }
+
     private void initFields()
     {
+        Debug.Log("resetting here 2");
         playerHealth = Constants.Player.HEALTH_MAX;
         enemyHealth = Constants.Enemy.HEALTH_MAX;
         chessState = new ChessState();

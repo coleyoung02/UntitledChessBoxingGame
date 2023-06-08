@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PlayerFighter : Fighter
@@ -48,6 +49,11 @@ public class PlayerFighter : Fighter
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            gameManager.ResetGame();
+            SceneManager.LoadScene("TitleScreen");
+        }
         glove.gameObject.SetActive(canPunch);
         dodge.gameObject.SetActive(canDodge);
         stateName = currentState.name.ToString();
@@ -72,15 +78,15 @@ public class PlayerFighter : Fighter
         }
         else
         {
-            if (Input.GetKeyDown("f"))
+            if (Input.GetKeyDown("c"))
             {
                 Punch(false);
             }
-            else if (Input.GetKeyDown("d"))
+            else if (Input.GetKeyDown("x"))
             {
                 Punch(true);
             }
-            else if (Input.GetKeyDown("j"))
+            else if (Input.GetKeyDown("z"))
             {
                 Dodge();
             }

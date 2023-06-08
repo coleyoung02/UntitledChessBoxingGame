@@ -455,11 +455,11 @@ public class ChessAI
         int isMate = state.isMate();
         if (isMate == ChessState.white)
         {
-            return ChessAI.mateScore;
+            return -ChessAI.mateScore;
         } 
         else if (isMate == ChessState.black)
         {
-            return -ChessAI.mateScore;
+            return ChessAI.mateScore;
         }
         else if (state.isStale())
         {

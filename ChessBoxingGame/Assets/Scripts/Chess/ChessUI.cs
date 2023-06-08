@@ -64,6 +64,11 @@ public class ChessUI : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            gameManager.ResetGame();
+            SceneManager.LoadScene("TitleScreen");
+        }
         if(moveDone && doStuff)
         {
             moveDone = false;
@@ -121,6 +126,7 @@ public class ChessUI : MonoBehaviour
                 if (chess.isStale())
                 {
                     Debug.Log("STALEMATE");
+                    chessText.onStale(gameManager);
                 }
                 else if (chess.isMate() < 0)
                 {

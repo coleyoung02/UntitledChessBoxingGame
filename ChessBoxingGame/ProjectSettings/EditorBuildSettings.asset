@@ -5,15 +5,6 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/Scenes/ResolutionTesting.unity
-    guid: 9ee280ac48aaf9846be8cc263d317a57
-  - enabled: 0
-    path: 
-    guid: 00000000000000000000000000000000
-  - enabled: 0
-    path: Assets/Scenes/PlaytestingScene.unity
-    guid: 4fa90520e70732041a66c3a0524087dc
   - enabled: 1
     path: Assets/Scenes/FinalScenes/TitleScreen.unity
     guid: 262b67eb71305454086adb14a29035db
@@ -25,5 +16,5 @@ EditorBuildSettings:
     guid: 6692f3a2e47b2f540978b015dfa550ab
   - enabled: 1
     path: Assets/Scenes/FinalScenes/EndScreen.unity
-    guid: 711ea822d3369174cb3af0c04e151ade
+    guid: fa75a715f2d10234291a720ddb220d78
   m_configObjects: {}

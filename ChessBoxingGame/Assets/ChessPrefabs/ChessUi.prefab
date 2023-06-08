@@ -14185,6 +14185,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TextDisplay
       objectReference: {fileID: 0}
+    - target: {fileID: 6786491224828723313, guid: 37dcaa4cbfc1c1943b72a49ce5537024, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 9059398138657198630, guid: 37dcaa4cbfc1c1943b72a49ce5537024, type: 3}
       propertyPath: m_RootOrder
       value: 4
