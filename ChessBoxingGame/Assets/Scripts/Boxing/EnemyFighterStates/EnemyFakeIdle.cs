@@ -5,6 +5,8 @@ using UnityEngine;
 public class EnemyFakeIdle : State
 {
     private Coroutine coroutine;
+    private static readonly int GoIdle = Animator.StringToHash("GoIdle");
+
     public EnemyFakeIdle(Animator _anim, Transform _player, EnemyFighter _fighter) : base(_anim, _player, _fighter)
     {
         name = STATE.E_FAKEIDLE;
@@ -15,6 +17,7 @@ public class EnemyFakeIdle : State
     {
         coroutine = fighter.StartCoroutine(startFakeIdle());
         base.enter();
+        anim.SetBool(GoIdle, true);
     }
 
     public override void update()
@@ -25,6 +28,7 @@ public class EnemyFakeIdle : State
     public override void exit()
     {
         base.exit();
+        anim.SetBool(GoIdle, false);
     }
 
     public IEnumerator startFakeIdle()

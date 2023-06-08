@@ -5,6 +5,8 @@ using UnityEngine;
 public class EnemyLightPunching : State
 {
     private Coroutine coroutine;
+    private static readonly int GoLightPunching = Animator.StringToHash("GoLightPunching");
+
     public EnemyLightPunching(Animator _anim, Transform _player, EnemyFighter _fighter) : base(_anim, _player, _fighter)
     {
         name = STATE.E_LIGHTPUNCHING;
@@ -15,6 +17,7 @@ public class EnemyLightPunching : State
     {
         coroutine = fighter.StartCoroutine(startLightPunching());
         base.enter();
+        anim.SetBool(GoLightPunching, true);
     }
 
     public override void update()
@@ -25,6 +28,7 @@ public class EnemyLightPunching : State
     public override void exit()
     {
         base.exit();
+        anim.SetBool(GoLightPunching, false);
     }
 
     public IEnumerator startLightPunching()

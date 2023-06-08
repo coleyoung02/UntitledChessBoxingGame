@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class EnemyBlocking : State
 {
+    private static readonly int GoBlocking = Animator.StringToHash("GoBlocking");
+
     public EnemyBlocking(Animator _anim, Transform _player, EnemyFighter _fighter) : base(_anim, _player, _fighter)
     {
         name = STATE.E_BLOCKING;
@@ -13,6 +15,7 @@ public class EnemyBlocking : State
     {
         //fighter.StartCoroutine(startBlocking());
         base.enter();
+        anim.SetBool(GoBlocking, true);
     }
 
     public override void update()
@@ -23,6 +26,7 @@ public class EnemyBlocking : State
     public override void exit()
     {
         base.exit();
+        anim.SetBool(GoBlocking, false);
     }
 
     public IEnumerator startBlocking()
