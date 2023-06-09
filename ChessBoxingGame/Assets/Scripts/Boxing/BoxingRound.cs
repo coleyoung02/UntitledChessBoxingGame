@@ -66,6 +66,7 @@ public class BoxingRound : MonoBehaviour
             {
                 gameManager.setWinner(GameManagerClass.Winner.DRAW);
             }
+            SceneManager.LoadScene("EndScreen");
 
         }
     }
