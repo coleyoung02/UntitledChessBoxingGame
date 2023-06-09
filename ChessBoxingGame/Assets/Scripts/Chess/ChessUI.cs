@@ -30,7 +30,7 @@ public class ChessUI : MonoBehaviour
     private Move AIMove;
     private AudioSource source;
     private bool moveDone;
-    private float extraDelay = .5f;
+    private float extraDelay = .7f;
 
     //for testing only, can (and should) be deleted once ai is implemented - or leave it so i can test again
     private int color;
@@ -254,7 +254,7 @@ public class ChessUI : MonoBehaviour
         {
             overlay[m.startRow * 8 + m.startCol].GetComponent<Image>().sprite = indicators[4];
         }
-        yield return new WaitForSeconds(extraDelay);
+        yield return new WaitForSeconds(extraDelay + UnityEngine.Random.Range(0f, .7f));
         chess.playWhiteMove(m);
         if (chess.isStale())
         {
