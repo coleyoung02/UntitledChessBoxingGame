@@ -4,8 +4,8 @@ public static class Constants
 {
     public static class Enemy
     {
-        public const float BLOCKING_TIME_MIN = 1.5f;
-        public const float BLOCKING_TIME_MAX = 2.5f;
+        public const float BLOCKING_TIME_MIN = 1f;
+        public const float BLOCKING_TIME_MAX = 2f;
         public const float LIGHT_PUNCH_TELE_TIME = 0.4f;
         public const float LIGHT_PUNCH_DAMAGE = 3f; //for single round, use 10.0f
         public const float HEAVY_PUNCH_FST_TELE_TIME = 0.55f;
@@ -39,7 +39,7 @@ public static class Constants
         public const int COMBO_MAX = 3;
     }
 
-    public const float chessTime = 60 * 2;
+    public const float chessTime = 60 * 2 + 30;
     public const int MAX_ROUNDS = 4;
 
 }

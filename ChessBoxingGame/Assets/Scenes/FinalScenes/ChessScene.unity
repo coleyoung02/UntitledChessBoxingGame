@@ -4402,7 +4402,7 @@ PrefabInstance:
       objectReference: {fileID: 526656259}
     - target: {fileID: 7186219233466246154, guid: 93e8f4933d2066c46bcf98a4b21bc913, type: 3}
       propertyPath: timeValue
-      value: 60
+      value: 75
       objectReference: {fileID: 0}
     - target: {fileID: 7608508836967570015, guid: 93e8f4933d2066c46bcf98a4b21bc913, type: 3}
       propertyPath: m_Pivot.x
