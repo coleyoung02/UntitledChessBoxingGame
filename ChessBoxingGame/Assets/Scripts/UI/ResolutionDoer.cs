@@ -18,9 +18,23 @@ public class ResolutionDoer : MonoBehaviour
         Debug.Log("Width " + w);
         int h = Display.main.systemHeight / (height * gridSize + 1);
         Debug.Log("Height " + h);
-        resolutionScale = Math.Min(w, h);
-        if (resolutionScale <= 2) resolutionScale = 2;
-        Screen.SetResolution(width * resolutionScale * gridSize, height * resolutionScale * gridSize, false);
+        if (PlayerPrefs.HasKey("resScale"))
+        {
+            resolutionScale = PlayerPrefs.GetInt("resScale");
+        }
+        else
+        {
+            resolutionScale = Math.Min(w, h);
+        }
+        if (width * resolutionScale * gridSize == Display.main.systemWidth && height * resolutionScale * gridSize == Display.main.systemHeight)
+        {
+            Screen.SetResolution(width * resolutionScale * gridSize, height * resolutionScale * gridSize, true);
+        }
+        else
+        {
+            if (resolutionScale <= 2) resolutionScale = 2;
+            Screen.SetResolution(width * resolutionScale * gridSize, height * resolutionScale * gridSize, false);
+        }
         //text.text = w.ToString() + ", " + h.ToString();
     }
 
@@ -40,11 +54,13 @@ public class ResolutionDoer : MonoBehaviour
         if (nRes > 1 && width * nRes * gridSize < Display.main.systemWidth && height * nRes * gridSize < Display.main.systemHeight)
         {
             resolutionScale += increment;
+            PlayerPrefs.SetInt("resScale", resolutionScale);
             Screen.SetResolution(width * resolutionScale * gridSize, height * resolutionScale * gridSize, false);
         }
         else if (width * nRes * gridSize == Display.main.systemWidth && height * nRes * gridSize == Display.main.systemHeight)
         {
             resolutionScale += increment;
+            PlayerPrefs.SetInt("resScale", resolutionScale);
             Screen.SetResolution(width * resolutionScale * gridSize, height * resolutionScale * gridSize, true);
         }
         

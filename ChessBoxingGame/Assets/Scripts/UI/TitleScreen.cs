@@ -25,6 +25,11 @@ public class TitleScreen : MonoBehaviour
         return Mathf.Log10(volume) * 20;
     }
 
+    public void Quit()
+    {
+        Application.Quit();
+    }
+
 
     public void onStart()
     {
